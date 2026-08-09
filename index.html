@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Name — Industrial Design &amp; Prototyping</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="nav nav--transparent">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__mark">Studio Name</a>
+    <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuOverlay">
+      <span class="menu-btn__label">Menu</span>
+      <span class="menu-btn__icon"><span></span><span></span><span></span></span>
+    </button>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <button class="menu-overlay__close" id="menuClose" aria-label="Menü schließen">×</button>
+  <nav class="menu-overlay__nav">
+    <a href="index.html#work" class="menu-overlay__link" data-menu-link>Work</a>
+    <a href="services.html" class="menu-overlay__link" data-menu-link>Services</a>
+    <a href="about.html" class="menu-overlay__link" data-menu-link>About</a>
+    <a href="contact.html" class="menu-overlay__link" data-menu-link>Contact</a>
+  </nav>
+  <p class="menu-overlay__foot">Based in Germany — available worldwide</p>
+</div>
+
+<section class="hero">
+  <div class="hero__bg">
+    <div class="ph" style="height:100%;"><span class="ph__label">Hero-Foto — dein bestes Portrait oder Werkstattbild</span></div>
+  </div>
+  <div class="hero__scrim"></div>
+  <div class="hero__content">
+    <p class="hero__role">Industrial designer &amp; maker</p>
+    <h1 class="hero__name">Name Surname</h1>
+    <a href="about.html" class="btn">About Name Surname</a>
+  </div>
+</section>
+
+<section class="tiles" id="work">
+  <a href="furniture.html" class="tile tile--furniture">
+    <div class="tile__stage"><div class="tile__image"><div class="ph"><span class="ph__label">Cutout-Bild Möbelstück</span></div></div></div>
+    <h2 class="tile__title">Furniture</h2>
+  </a>
+  <a href="product.html" class="tile tile--product">
+    <div class="tile__stage"><div class="tile__image"><div class="ph"><span class="ph__label">Cutout-Bild Produkt</span></div></div></div>
+    <h2 class="tile__title">Product</h2>
+  </a>
+  <a href="lighting.html" class="tile tile--lighting">
+    <div class="tile__stage"><div class="tile__image"><div class="ph"><span class="ph__label">Cutout-Bild Leuchte</span></div></div></div>
+    <h2 class="tile__title">Lighting</h2>
+  </a>
+  <a href="mobility.html" class="tile tile--mobility">
+    <div class="tile__stage"><div class="tile__image"><div class="ph"><span class="ph__label">Cutout-Bild Mobility</span></div></div></div>
+    <h2 class="tile__title">Mobility</h2>
+  </a>
+  <a href="interior.html" class="tile tile--interior tile--full">
+    <div class="tile__stage"><div class="tile__image"><div class="ph"><span class="ph__label">Cutout-Bild Interior</span></div></div></div>
+    <h2 class="tile__title">Interior</h2>
+  </a>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <span>© <span data-year></span> Studio Name — Germany</span>
+    <div class="site-footer__links">
+      <a href="index.html#work">Work</a>
+      <a href="services.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="impressum.html" class="site-footer__impressum">Impressum</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
