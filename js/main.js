@@ -117,8 +117,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // same format tolerance, applied to a static <img data-photo="path/without/extension">.
   document.querySelectorAll('img[data-photo]').forEach(function (img) {
     probePhoto(img.getAttribute('data-photo')).then(function (url) {
-      if (url) img.src = url;
-      else img.style.display = 'none';
+      if (url) {
+        img.src = url;
+        var ph = img.previousElementSibling;
+        if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+      }
     });
   });
 

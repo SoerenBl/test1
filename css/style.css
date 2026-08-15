@@ -470,14 +470,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   opacity: 0.85;
 }
 
-/* Cutout product image inside a tile — will-change transform is set by
-   the scroll parallax script once real photos replace the .ph placeholder. */
-.tile__object {
-  position: absolute;
+/* Cutout product image inside a category tile — sits centered over the
+   coloured background, never cropped (object-fit: contain), and drifts
+   slightly with scroll (see updateParallax). Size is a variable so a
+   single category can be tuned via style="--object-size: 60%" without
+   touching this rule. */
+.tile__media > img.tile__object {
+  inset: auto;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 72%;
+  width: var(--object-size, 72%);
+  height: auto;
   max-height: 130%;
   object-fit: contain;
   pointer-events: none;
