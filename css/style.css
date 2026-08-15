@@ -5,6 +5,18 @@
    auf Bildunterschriften. Referenz: karimrashid.com
 --------------------------------------------------- */
 
+/* Self-hosted rather than loaded from Google's CDN — the Google Fonts
+   API sends every visitor's IP address to Google on page load, which
+   German courts have repeatedly held to be a GDPR violation without
+   explicit consent (e.g. LG München I, 20.01.2022 – 3 O 17493/20). */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-latin.woff2') format('woff2');
+}
+
 :root {
   --color-bg: #faf8f5;
   --color-bg-alt: #f1ede6;

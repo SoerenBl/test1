@@ -237,7 +237,14 @@ document.addEventListener('DOMContentLoaded', function () {
         var rect = el.parentElement.getBoundingClientRect();
         var center = rect.top + rect.height / 2;
         var offset = (center - vh / 2) / vh;
-        var px = Math.max(-45, Math.min(45, offset * 65));
+        // Range scales with the tile's own height, so a tall tile (e.g.
+        // tile--tall) drifts proportionally more than a normal one instead
+        // of the same fixed pixel range looking smaller inside it. The
+        // 1.45 multiplier keeps the same saturation point as before
+        // (full range only near the edges of the tile's transit) so the
+        // motion still reads as continuous rather than snapping to max.
+        var range = rect.height * 0.16;
+        var px = Math.max(-range, Math.min(range, offset * range * 1.45));
         el.style.transform = 'translate(-50%, calc(-50% + ' + px.toFixed(1) + 'px))';
       });
       if (heroContent && heroTile) {
