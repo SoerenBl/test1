@@ -61,6 +61,69 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // --- Project photo lightbox: click to enlarge, click again to zoom + follow mouse ---
+  var galleryMedia = document.querySelectorAll('.tile-grid--projects[data-fixed-layout] .tile__media');
+  if (galleryMedia.length) {
+    var lightbox = document.createElement('div');
+    lightbox.className = 'lightbox';
+    lightbox.innerHTML =
+      '<div class="lightbox__backdrop"></div>' +
+      '<div class="lightbox__stage">' +
+        '<button class="lightbox__close" aria-label="Schließen"></button>' +
+        '<div class="lightbox__media"></div>' +
+      '</div>';
+    document.body.appendChild(lightbox);
+
+    var lbBackdrop = lightbox.querySelector('.lightbox__backdrop');
+    var lbStage = lightbox.querySelector('.lightbox__stage');
+    var lbMedia = lightbox.querySelector('.lightbox__media');
+    var lbClose = lightbox.querySelector('.lightbox__close');
+    var lbZoomed = false;
+
+    function openLightbox(media) {
+      lbMedia.innerHTML = '';
+      lbMedia.appendChild(media.cloneNode(true));
+      lightbox.classList.add('is-open');
+      document.body.classList.add('lightbox-open');
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('is-open');
+      lbStage.classList.remove('is-zoomed');
+      lbZoomed = false;
+      document.body.classList.remove('lightbox-open');
+    }
+    function setZoomOrigin(e) {
+      var rect = lbStage.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width) * 100;
+      var y = ((e.clientY - rect.top) / rect.height) * 100;
+      lbMedia.style.transformOrigin = x + '% ' + y + '%';
+    }
+
+    galleryMedia.forEach(function (media) {
+      media.addEventListener('click', function () { openLightbox(media); });
+    });
+    lbBackdrop.addEventListener('click', closeLightbox);
+    lbClose.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+    lbStage.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (e.target === lbClose) return;
+      lbZoomed = !lbZoomed;
+      if (lbZoomed) setZoomOrigin(e);
+      lbStage.classList.toggle('is-zoomed', lbZoomed);
+    });
+    lbStage.addEventListener('mousemove', function (e) {
+      if (lbZoomed) setZoomOrigin(e);
+    });
+    lbStage.addEventListener('mouseleave', function () {
+      if (!lbZoomed) return;
+      lbZoomed = false;
+      lbStage.classList.remove('is-zoomed');
+    });
+  }
+
   // --- Scroll parallax: tile captions, hero zoom, cutout product images ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
