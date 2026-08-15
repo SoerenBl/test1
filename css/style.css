@@ -356,7 +356,8 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .tile-grid--fill {
   grid-auto-rows: unset;
   grid-template-rows: repeat(var(--rows, 1), 1fr);
-  min-height: calc(100vh - var(--nav-h));
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .tile { position: relative; display: block; grid-column: span 1; }
@@ -377,6 +378,20 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   height: 100%;
   background-color: var(--color-bg-alt);
   transition: background-color 0.4s ease;
+}
+
+/* Real photos sit on top of the placeholder pattern and cover it once
+   loaded. Until a file exists at that path the <img>'s onerror attribute
+   hides it, so the .ph placeholder shows through underneath —
+   drop a numbered photo in and the page picks it up with no code change. */
+.tile__media > img,
+.hero-tile > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* Homepage category tiles: hover reveals one colour per category */
