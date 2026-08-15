@@ -19,8 +19,12 @@ furniture-lighting/c-shape-nightstand/2.jpg        → 2. Foto
 furniture-lighting/c-shape-nightstand/3.jpg        → 3. Foto
 ```
 
-**Foto ändern/hinzufügen:** Datei am passenden Pfad ersetzen bzw. ablegen (gleicher Dateiname wie vorgesehen, z. B. `2.jpg`), mit GitHub Desktop committen und pushen — die Seite zeigt sie automatisch, kein Code muss angepasst werden. Solange an einem Pfad noch kein Foto liegt, zeigt die Seite dort weiterhin den Platzhalter.
+**Foto ändern/hinzufügen:** Datei am passenden Pfad ablegen bzw. ersetzen, mit GitHub Desktop committen und pushen — die Seite zeigt sie automatisch, kein Code muss angepasst werden.
 
-Jedes Projekt hat aktuell 3 Foto-Plätze (`1.jpg`–`3.jpg`). Braucht ein einzelnes Projekt mehr, kurz Bescheid geben — dafür muss die jeweilige `index.html` einmalig um einen weiteren Foto-Slot ergänzt werden.
+Auf einer **Projektseite** ist die Foto-Galerie komplett dynamisch: beliebig viele `1.jpg`, `2.jpg`, `3.jpg`, … — wie viele Dateien du ablegst, so viele Kacheln entstehen automatisch (max. 24). Lücken in der Nummerierung werden einfach übersprungen. Liegt noch gar kein Foto vor, zeigt die Seite einen Platzhalter ("Fotos folgen in Kürze").
+
+`cover.jpg` (Kategorie) und `hero.jpg` (Startseite) sind jeweils ein festes einzelnes Bild.
+
+**Neues Projekt** (nicht nur neue Fotos zu einem bestehenden): dafür kurz Bescheid geben — Titel, Kategorie, Land, Jahr — dann lege ich die Seite und den Eintrag in der Kategorie-Liste an.
 
 Bildformat: `.jpg`, quer oder hochkant funktioniert (die Seite schneidet automatisch passend zu).

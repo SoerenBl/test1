@@ -61,9 +61,47 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // --- Project photo galleries: fully dynamic. Probes numbered files
+  // (1.jpg, 2.jpg, ...) up to a sane cap and builds one tile per photo
+  // that actually exists — add or remove a numbered file and the grid
+  // grows/shrinks with it, no HTML edit needed. Gaps are just skipped.
+  var MAX_GALLERY_PHOTOS = 24;
+  var galleryGrids = document.querySelectorAll('.tile-grid--projects[data-fixed-layout]');
+  galleryGrids.forEach(function (grid) {
+    var checks = [];
+    for (var i = 1; i <= MAX_GALLERY_PHOTOS; i++) {
+      checks.push(new Promise(function (resolve) {
+        var n = i;
+        var probe = new Image();
+        probe.onload = function () { resolve(n); };
+        probe.onerror = function () { resolve(null); };
+        probe.src = n + '.jpg';
+      }));
+    }
+    Promise.all(checks).then(function (results) {
+      var found = results.filter(function (n) { return n !== null; }).sort(function (a, b) { return a - b; });
+      if (!found.length) {
+        grid.innerHTML =
+          '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
+          '<span data-lang="de">Fotos folgen in Kürze</span><span data-lang="en">Photos coming soon</span>' +
+          '</div></div></div>';
+        grid.style.setProperty('--rows', 1);
+        return;
+      }
+      var normalCount = found.length - 1;
+      var html = '';
+      found.forEach(function (n, idx) {
+        var isLastOdd = idx > 0 && idx === found.length - 1 && normalCount % 2 === 1;
+        var full = (idx === 0 || isLastOdd) ? ' tile--full' : '';
+        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + n + '.jpg" alt=""></div></div>';
+      });
+      grid.innerHTML = html;
+      grid.style.setProperty('--rows', 1 + Math.ceil(normalCount / 2));
+    });
+  });
+
   // --- Project photo lightbox: click to enlarge, click again to zoom + follow mouse ---
-  var galleryMedia = document.querySelectorAll('.tile-grid--projects[data-fixed-layout] .tile__media');
-  if (galleryMedia.length) {
+  if (galleryGrids.length) {
     var lightbox = document.createElement('div');
     lightbox.className = 'lightbox';
     lightbox.innerHTML =
@@ -99,8 +137,14 @@ document.addEventListener('DOMContentLoaded', function () {
       lbMedia.style.transformOrigin = x + '% ' + y + '%';
     }
 
-    galleryMedia.forEach(function (media) {
-      media.addEventListener('click', function () { openLightbox(media); });
+    // Delegated: gallery tiles are inserted asynchronously once the photo
+    // probes above resolve, so listeners must be bound on the (present at
+    // load time) grid container rather than on the tiles themselves.
+    galleryGrids.forEach(function (grid) {
+      grid.addEventListener('click', function (e) {
+        var media = e.target.closest('.tile__media');
+        if (media && media.querySelector('img')) openLightbox(media);
+      });
     });
     lbBackdrop.addEventListener('click', closeLightbox);
     lbClose.addEventListener('click', closeLightbox);
