@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Photo formats: try these extensions in order for any photo slot,
   // so it doesn't matter whether a file was exported as .jpg, .png, etc. ---
-  var PHOTO_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
+  var PHOTO_EXTS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
   function probePhoto(baseNoExt) {
     var exts = PHOTO_EXTS.slice();
     function tryNext() {
