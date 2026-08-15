@@ -8,10 +8,10 @@
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="has-hero">
 
 <header class="nav">
   <div class="nav__inner">
@@ -33,7 +33,7 @@
 
 <div class="menu-scrim" id="menuScrim"></div>
 <div class="menu-panel" id="menuPanel">
-  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen"></button>
   <nav class="menu-panel__nav">
     <a href="index.html" aria-current="page"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
     <a href="#categories"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
@@ -82,43 +82,63 @@
 
 <section id="categories" class="section--flush">
     <div class="tile-grid">
-      <a class="tile tile--tall" href="work.html">
+      <a class="tile tile--tall" href="mobility/">
         <div class="tile__media">
-          <div class="ph"><span data-lang="de">Kategoriefoto — Möbel</span><span data-lang="en" hidden>Category photo — furniture</span></div>
+          <div class="ph"><span data-lang="de">Kategoriefoto — Mobility &amp; Automotive</span><span data-lang="en" hidden>Category photo — mobility &amp; automotive</span></div>
           <div class="tile__scrim"></div>
           <div class="tile__caption">
-            <span class="tile__cat"><span data-lang="de">6 Projekte</span><span data-lang="en" hidden>6 projects</span></span>
-            <h3 class="tile__title display"><span data-lang="de">Möbel</span><span data-lang="en" hidden>Furniture</span></h3>
+            <span class="tile__cat"><span data-lang="de">2 Projekte</span><span data-lang="en" hidden>2 projects</span></span>
+            <h3 class="tile__title display">Mobility &amp; Automotive</h3>
           </div>
         </div>
       </a>
-      <a class="tile" href="work.html">
+      <a class="tile" href="furniture-lighting/">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Kategoriefoto — Möbel &amp; Beleuchtung</span><span data-lang="en" hidden>Category photo — furniture &amp; lighting</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__cat"><span data-lang="de">10 Projekte</span><span data-lang="en" hidden>10 projects</span></span>
+            <h3 class="tile__title display"><span data-lang="de">Möbel &amp; Beleuchtung</span><span data-lang="en" hidden>Furniture &amp; Lighting</span></h3>
+          </div>
+        </div>
+      </a>
+      <a class="tile" href="product-design/">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Kategoriefoto — Produktdesign</span><span data-lang="en" hidden>Category photo — product design</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__cat"><span data-lang="de">5 Projekte</span><span data-lang="en" hidden>5 projects</span></span>
+            <h3 class="tile__title display"><span data-lang="de">Produktdesign</span><span data-lang="en" hidden>Product Design</span></h3>
+          </div>
+        </div>
+      </a>
+      <a class="tile tile--full" href="interior-design/">
         <div class="tile__media">
           <div class="ph"><span data-lang="de">Kategoriefoto — Interieur</span><span data-lang="en" hidden>Category photo — interior</span></div>
           <div class="tile__scrim"></div>
           <div class="tile__caption">
-            <span class="tile__cat"><span data-lang="de">4 Projekte</span><span data-lang="en" hidden>4 projects</span></span>
+            <span class="tile__cat"><span data-lang="de">2 Projekte</span><span data-lang="en" hidden>2 projects</span></span>
             <h3 class="tile__title display"><span data-lang="de">Interieur</span><span data-lang="en" hidden>Interior</span></h3>
           </div>
         </div>
       </a>
-      <a class="tile" href="work.html">
+      <a class="tile" href="editorial/">
         <div class="tile__media">
-          <div class="ph"><span data-lang="de">Kategoriefoto — Auftragsarbeiten</span><span data-lang="en" hidden>Category photo — commissions</span></div>
+          <div class="ph"><span data-lang="de">Kategoriefoto — Editorial Design</span><span data-lang="en" hidden>Category photo — editorial design</span></div>
           <div class="tile__scrim"></div>
           <div class="tile__caption">
-            <span class="tile__cat"><span data-lang="de">8 Projekte</span><span data-lang="en" hidden>8 projects</span></span>
-            <h3 class="tile__title display"><span data-lang="de">Auftragsarbeiten</span><span data-lang="en" hidden>Commissions</span></h3>
+            <span class="tile__cat"><span data-lang="de">1 Projekt</span><span data-lang="en" hidden>1 project</span></span>
+            <h3 class="tile__title display">Editorial Design</h3>
           </div>
         </div>
       </a>
-      <a class="tile tile--full" href="work.html">
+      <a class="tile" href="craft-restoration/">
         <div class="tile__media">
-          <div class="ph"><span data-lang="de">Kategoriefoto — Produkte</span><span data-lang="en" hidden>Category photo — products</span></div>
+          <div class="ph"><span data-lang="de">Kategoriefoto — Handwerk &amp; Restaurierung</span><span data-lang="en" hidden>Category photo — craft &amp; restoration</span></div>
           <div class="tile__scrim"></div>
           <div class="tile__caption">
-            <span class="tile__cat"><span data-lang="de">5 Projekte</span><span data-lang="en" hidden>5 projects</span></span>
-            <h3 class="tile__title display"><span data-lang="de">Produkte</span><span data-lang="en" hidden>Products</span></h3>
+            <span class="tile__cat"><span data-lang="de">1 Projekt</span><span data-lang="en" hidden>1 project</span></span>
+            <h3 class="tile__title display"><span data-lang="de">Handwerk &amp; Restaurierung</span><span data-lang="en" hidden>Craft &amp; Restoration</span></h3>
           </div>
         </div>
       </a>

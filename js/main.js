@@ -49,11 +49,24 @@ document.addEventListener('DOMContentLoaded', function () {
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // --- Scroll parallax on tile captions ---
+  // --- Scroll parallax on tile captions + hero zoom + nav overlay->solid ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
+  var navEl = document.querySelector('.nav');
+
+  function updateNav() {
+    if (!navEl || !heroTile) return;
+    var heroHeight = heroTile.offsetHeight || window.innerHeight;
+    navEl.classList.toggle('nav--solid', window.scrollY > heroHeight - (navEl.offsetHeight || 0));
+  }
+
+  if (heroTile) {
+    updateNav();
+    window.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav);
+  }
 
   if (!reduceMotion && (parallaxEls.length || heroContent)) {
     var ticking = false;
