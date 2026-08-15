@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3">
+<link rel="stylesheet" href="../css/style.css?v=4">
 </head>
 <body>
 
-<header class="nav nav--scrim">
+<header class="nav">
   <div class="nav__inner">
     <a href="../index.html" class="nav__mark">Sören Bläcker</a>
     <a href="../index.html#categories" class="nav__center"><span data-lang="de">Produktdesign</span><span data-lang="en">Product Design</span></a>
@@ -22,8 +22,13 @@
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
-        <span data-lang="de">Menü</span><span data-lang="en">Menu</span>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel" aria-label="Menü">
+        <span class="menu-btn__cutout" data-lang="de">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskDe"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENÜ</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskDe)"/></svg>
+        </span>
+        <span class="menu-btn__cutout" data-lang="en">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskEn"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENU</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskEn)"/></svg>
+        </span>
       </button>
     </div>
   </div>
@@ -51,53 +56,48 @@
 
 <section class="section--flush">
   <div class="tile-grid tile-grid--projects">
-    <a class="tile tile--tall" href="#">
+    <a class="tile" href="remissus/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Remissus</span><span data-lang="en">Project photo — Remissus</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Design-Stuhl</span><span data-lang="en">Design chair</span></span>
           <h3 class="tile__title display">Remissus</h3>
+          <span class="tile__meta">DE · 2025</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="cerachron/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Cerachron</span><span data-lang="en">Project photo — Cerachron</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Uhr</span><span data-lang="en">Watch</span></span>
           <h3 class="tile__title display">Cerachron</h3>
+          <span class="tile__meta">DE · 2024</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="axe-saw-tool-concept/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Axe &amp; Saw Tool Concept</span><span data-lang="en">Project photo — Axe &amp; Saw Tool Concept</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Multifunktionales Werkzeug — Axt mit Säge</span><span data-lang="en">Multi-function tool — axe with saw</span></span>
           <h3 class="tile__title display">Axe &amp; Saw Tool Concept</h3>
+          <span class="tile__meta">DE · 2024</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="concept-audio-speaker/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Concept Audio Speaker</span><span data-lang="en">Project photo — Concept Audio Speaker</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">3D-Audio-Konzept</span><span data-lang="en">3D audio concept</span></span>
           <h3 class="tile__title display">Concept Audio Speaker</h3>
+          <span class="tile__meta">DE · 2023</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="unfinished-concepts-studies/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Unfinished Concepts &amp; Studies</span><span data-lang="en">Project photo — Unfinished Concepts &amp; Studies</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Sammlung freier Formstudien &amp; Prototypen</span><span data-lang="en">Collection of free form studies &amp; prototypes</span></span>
           <h3 class="tile__title display">Unfinished Concepts &amp; Studies</h3>
+          <span class="tile__meta">DE · 2022</span>
         </div>
       </div>
     </a>

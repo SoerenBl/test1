@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3">
+<link rel="stylesheet" href="../css/style.css?v=4">
 </head>
 <body>
 
-<header class="nav nav--scrim">
+<header class="nav">
   <div class="nav__inner">
     <a href="../index.html" class="nav__mark">Sören Bläcker</a>
     <a href="../index.html#categories" class="nav__center">Editorial Design</a>
@@ -22,8 +22,13 @@
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
-        <span data-lang="de">Menü</span><span data-lang="en">Menu</span>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel" aria-label="Menü">
+        <span class="menu-btn__cutout" data-lang="de">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskDe"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENÜ</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskDe)"/></svg>
+        </span>
+        <span class="menu-btn__cutout" data-lang="en">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskEn"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENU</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskEn)"/></svg>
+        </span>
       </button>
     </div>
   </div>
@@ -51,13 +56,21 @@
 
 <section class="section--flush">
   <div class="tile-grid tile-grid--projects tile-grid--fill" style="--rows:1;">
-    <a class="tile tile--full" href="#">
+    <a class="tile" href="editorial-print-works/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Editorial &amp; Print Works</span><span data-lang="en">Project photo — Editorial &amp; Print Works</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Editorial &amp; Print</span><span data-lang="en">Editorial &amp; print</span></span>
           <h3 class="tile__title display">Editorial &amp; Print Works</h3>
+          <span class="tile__meta">DE · 2023</span>
+        </div>
+      </div>
+    </a>
+    <a class="tile" href="design-journal-feature/">
+      <div class="tile__media">
+        <div class="ph"><span data-lang="de">Projektfoto — Design Journal Feature</span><span data-lang="en">Project photo — Design Journal Feature</span></div>
+        <div class="tile__caption">
+          <h3 class="tile__title display">Design Journal Feature</h3>
+          <span class="tile__meta">DE · 2022</span>
         </div>
       </div>
     </a>
