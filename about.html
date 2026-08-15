@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Über mich — Sören Blaecker</title>
+<meta name="description" content="Über Sören Blaecker — Produktdesigner und Tischler.">
+<script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__mark">Sören Blaecker
+      <span data-lang="de">Produktdesign &amp; Tischlerei</span>
+      <span data-lang="en" hidden>Product Design &amp; Carpentry</span>
+    </a>
+    <div class="nav__right">
+      <div class="lang-toggle">
+        <button type="button" data-set-lang="de">DE</button>
+        <button type="button" data-set-lang="en">EN</button>
+      </div>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
+        <span class="menu-btn__bars"><span></span><span></span><span></span></span>
+        <span data-lang="de">Menü</span><span data-lang="en" hidden>Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menu-panel" id="menuPanel">
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <nav class="menu-panel__nav">
+    <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
+    <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
+    <a href="about.html" aria-current="page"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
+    <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+  </nav>
+  <div class="menu-panel__foot">
+    <span data-lang="de">Deutschland — weltweit verfügbar</span>
+    <span data-lang="en" hidden>Germany — available worldwide</span>
+    <div class="menu-panel__social">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:0;">
+  <div class="wrap">
+    <span class="eyebrow"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></span>
+    <h1 class="display page-title--sm">Sören Blaecker</h1>
+  </div>
+</section>
+
+<section>
+  <div class="wrap about-grid">
+    <div class="ph">
+      <span data-lang="de">Portraitfoto (hochkant)</span>
+      <span data-lang="en" hidden>Portrait photo (portrait orientation)</span>
+    </div>
+    <div>
+      <p>
+        <span data-lang="de">Platzhaltertext — hier folgt später ein kurzer Steckbrief: Ausbildung/Studium, Werdegang, Arbeitsweise, was dich als Produktdesigner und Tischler ausmacht.</span>
+        <span data-lang="en" hidden>Placeholder text — a short bio will go here: education, background, way of working, what defines you as a product designer and carpenter.</span>
+      </p>
+      <p>
+        <span data-lang="de">Zweiter Absatz — z. B. Materialverständnis, Philosophie, was Kund:innen von einer Zusammenarbeit erwarten können.</span>
+        <span data-lang="en" hidden>Second paragraph — e.g. material knowledge, philosophy, what clients can expect from working together.</span>
+      </p>
+
+      <div class="timeline">
+        <div class="timeline__row">
+          <time>2026</time>
+          <span data-lang="de">Platzhalter — Station/Ereignis</span>
+          <span data-lang="en" hidden>Placeholder — milestone/event</span>
+        </div>
+        <div class="timeline__row">
+          <time>20XX</time>
+          <span data-lang="de">Platzhalter — Station/Ereignis</span>
+          <span data-lang="en" hidden>Placeholder — milestone/event</span>
+        </div>
+        <div class="timeline__row">
+          <time>20XX</time>
+          <span data-lang="de">Platzhalter — Station/Ereignis</span>
+          <span data-lang="en" hidden>Placeholder — milestone/event</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer__inner">
+    <span>&copy; <span id="year">2026</span> Sören Blaecker</span>
+    <div class="footer__social">
+      <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

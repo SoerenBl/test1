@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — Sören Blaecker</title>
+<meta name="description" content="Kontakt — Sören Blaecker, Produktdesigner und Tischler.">
+<script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__mark">Sören Blaecker
+      <span data-lang="de">Produktdesign &amp; Tischlerei</span>
+      <span data-lang="en" hidden>Product Design &amp; Carpentry</span>
+    </a>
+    <div class="nav__right">
+      <div class="lang-toggle">
+        <button type="button" data-set-lang="de">DE</button>
+        <button type="button" data-set-lang="en">EN</button>
+      </div>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
+        <span class="menu-btn__bars"><span></span><span></span><span></span></span>
+        <span data-lang="de">Menü</span><span data-lang="en" hidden>Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menu-panel" id="menuPanel">
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <nav class="menu-panel__nav">
+    <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
+    <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
+    <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
+    <a href="contact.html" aria-current="page"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+  </nav>
+  <div class="menu-panel__foot">
+    <span data-lang="de">Deutschland — weltweit verfügbar</span>
+    <span data-lang="en" hidden>Germany — available worldwide</span>
+    <div class="menu-panel__social">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:0;">
+  <div class="wrap">
+    <span class="eyebrow"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></span>
+    <h1 class="display page-title--sm">
+      <span data-lang="de">Lass uns reden.</span><span data-lang="en" hidden>Let's talk.</span>
+    </h1>
+    <p class="lede">
+      <span data-lang="de">Für Anfragen, Auftragsarbeiten oder einfach nur Fragen — melde dich gerne.</span>
+      <span data-lang="en" hidden>For inquiries, commissions, or just questions — feel free to reach out.</span>
+    </p>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap contact-grid">
+    <div>
+      <ul class="contact-list">
+        <li><span data-lang="de">E-Mail</span><span data-lang="en" hidden>Email</span> <span>hallo@soerenblaecker.com</span></li>
+        <li>Telefon <span>+49 000 000000</span></li>
+        <li><span data-lang="de">Standort</span><span data-lang="en" hidden>Location</span> <span>Deutschland</span></li>
+      </ul>
+    </div>
+    <form action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
+      <div class="field">
+        <label for="name"><span data-lang="de">Name</span><span data-lang="en" hidden>Name</span></label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="field">
+        <label for="email"><span data-lang="de">E-Mail</span><span data-lang="en" hidden>Email</span></label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="field">
+        <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en" hidden>Message</span></label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+      </div>
+      <button type="submit" class="btn btn--accent">
+        <span data-lang="de">Nachricht senden</span><span data-lang="en" hidden>Send message</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer__inner">
+    <span>&copy; <span id="year">2026</span> Sören Blaecker</span>
+    <div class="footer__social">
+      <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
