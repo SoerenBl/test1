@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var MAX_GALLERY_PHOTOS = 24;
   var galleryGrids = document.querySelectorAll('.tile-grid--projects[data-fixed-layout]');
   galleryGrids.forEach(function (grid) {
+    var base = grid.getAttribute('data-photo-path') || '';
     var checks = [];
     for (var i = 1; i <= MAX_GALLERY_PHOTOS; i++) {
       checks.push(new Promise(function (resolve) {
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var probe = new Image();
         probe.onload = function () { resolve(n); };
         probe.onerror = function () { resolve(null); };
-        probe.src = n + '.jpg';
+        probe.src = base + n + '.jpg';
       }));
     }
     Promise.all(checks).then(function (results) {
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
       found.forEach(function (n, idx) {
         var isLastOdd = idx > 0 && idx === found.length - 1 && normalCount % 2 === 1;
         var full = (idx === 0 || isLastOdd) ? ' tile--full' : '';
-        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + n + '.jpg" alt=""></div></div>';
+        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + base + n + '.jpg" alt=""></div></div>';
       });
       grid.innerHTML = html;
       grid.style.setProperty('--rows', 1 + Math.ceil(normalCount / 2));
