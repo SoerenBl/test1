@@ -49,11 +49,13 @@ document.addEventListener('DOMContentLoaded', function () {
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // --- Scroll parallax on tile / hero captions ---
+  // --- Scroll parallax on tile captions ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var parallaxEls = document.querySelectorAll('.tile__caption, .hero-tile__content');
+  var parallaxEls = document.querySelectorAll('.tile__caption');
+  var heroContent = document.querySelector('.hero-tile__content');
+  var heroTile = document.querySelector('.hero-tile');
 
-  if (!reduceMotion && parallaxEls.length) {
+  if (!reduceMotion && (parallaxEls.length || heroContent)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -64,6 +66,12 @@ document.addEventListener('DOMContentLoaded', function () {
         var px = Math.max(-16, Math.min(16, offset * 26));
         el.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
       });
+      if (heroContent && heroTile) {
+        var heroHeight = heroTile.offsetHeight || vh;
+        var progress = Math.max(0, Math.min(1, window.scrollY / heroHeight));
+        var scale = 1 - progress * 0.14;
+        heroContent.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      }
       ticking = false;
     }
     function onScroll() {
