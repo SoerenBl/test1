@@ -61,9 +61,27 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // --- Photo formats: try these extensions in order for any photo slot,
+  // so it doesn't matter whether a file was exported as .jpg, .png, etc. ---
+  var PHOTO_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
+  function probePhoto(baseNoExt) {
+    var exts = PHOTO_EXTS.slice();
+    function tryNext() {
+      if (!exts.length) return Promise.resolve(null);
+      var url = baseNoExt + '.' + exts.shift();
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () { resolve(url); };
+        img.onerror = function () { resolve(null); };
+        img.src = url;
+      }).then(function (ok) { return ok || tryNext(); });
+    }
+    return tryNext();
+  }
+
   // --- Project photo galleries: fully dynamic. Probes numbered files
-  // (1.jpg, 2.jpg, ...) up to a sane cap and builds one tile per photo
-  // that actually exists — add or remove a numbered file and the grid
+  // (1, 2, ...) up to a sane cap and builds one tile per photo that
+  // actually exists — add or remove a numbered file and the grid
   // grows/shrinks with it, no HTML edit needed. Gaps are just skipped.
   var MAX_GALLERY_PHOTOS = 24;
   var galleryGrids = document.querySelectorAll('.tile-grid--projects[data-fixed-layout]');
@@ -71,16 +89,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var base = grid.getAttribute('data-photo-path') || '';
     var checks = [];
     for (var i = 1; i <= MAX_GALLERY_PHOTOS; i++) {
-      checks.push(new Promise(function (resolve) {
-        var n = i;
-        var probe = new Image();
-        probe.onload = function () { resolve(n); };
-        probe.onerror = function () { resolve(null); };
-        probe.src = base + n + '.jpg';
-      }));
+      checks.push(probePhoto(base + i).then(function (url) { return url; }));
     }
     Promise.all(checks).then(function (results) {
-      var found = results.filter(function (n) { return n !== null; }).sort(function (a, b) { return a - b; });
+      var found = results.filter(function (url) { return url !== null; });
       if (!found.length) {
         grid.innerHTML =
           '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
@@ -91,13 +103,22 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       var normalCount = found.length - 1;
       var html = '';
-      found.forEach(function (n, idx) {
+      found.forEach(function (url, idx) {
         var isLastOdd = idx > 0 && idx === found.length - 1 && normalCount % 2 === 1;
         var full = (idx === 0 || isLastOdd) ? ' tile--full' : '';
-        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + base + n + '.jpg" alt=""></div></div>';
+        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + url + '" alt=""></div></div>';
       });
       grid.innerHTML = html;
       grid.style.setProperty('--rows', 1 + Math.ceil(normalCount / 2));
+    });
+  });
+
+  // --- Fixed single photo slots (hero, category covers, listing thumbnails):
+  // same format tolerance, applied to a static <img data-photo="path/without/extension">.
+  document.querySelectorAll('img[data-photo]').forEach(function (img) {
+    probePhoto(img.getAttribute('data-photo')).then(function (url) {
+      if (url) img.src = url;
+      else img.style.display = 'none';
     });
   });
 
