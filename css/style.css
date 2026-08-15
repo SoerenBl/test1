@@ -304,6 +304,7 @@ p { margin: 0 0 1em; }
   overflow: hidden;
   height: 100vh;
   height: 100dvh;
+  padding: 0;
   background: var(--color-bg-alt);
 }
 .hero-tile .ph { border: none; min-height: 100%; margin: 0; }
