@@ -261,10 +261,11 @@ p { margin: 0 0 1em; }
 .hero-tile {
   position: relative;
   overflow: hidden;
-  min-height: clamp(320px, 62vh, 640px);
+  height: 100vh;
+  height: 100dvh;
   background: var(--color-bg-alt);
 }
-.hero-tile .ph { border-radius: 0; border: none; min-height: 100%; margin: 0; }
+.hero-tile .ph { border: none; min-height: 100%; margin: 0; }
 .hero-tile__scrim {
   position: absolute;
   inset: 0;
@@ -276,6 +277,7 @@ p { margin: 0 0 1em; }
   left: 0; right: 0; bottom: 0;
   padding: clamp(24px, 5vw, 56px) var(--gutter);
   color: #fff;
+  transform-origin: bottom left;
   will-change: transform;
 }
 .hero-tile__content .eyebrow { color: #fff; opacity: 0.85; }
@@ -286,6 +288,7 @@ p { margin: 0 0 1em; }
 /* ---------- Sections ---------- */
 
 section { padding: clamp(50px, 9vh, 100px) 0; }
+.section--flush { padding: 0; scroll-margin-top: 70px; }
 
 .section-head {
   display: flex;
