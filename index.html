@@ -8,7 +8,7 @@
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -19,69 +19,64 @@
       <span data-lang="de">Produktdesign &amp; Tischlerei</span>
       <span data-lang="en" hidden>Product Design &amp; Carpentry</span>
     </a>
-    <nav class="nav__links">
-      <a href="index.html" aria-current="page">
-        <span data-lang="de">Start</span><span data-lang="en" hidden>Home</span>
-      </a>
-      <a href="work.html">
-        <span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span>
-      </a>
-      <a href="about.html">
-        <span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span>
-      </a>
-      <a href="contact.html">
-        <span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span>
-      </a>
+    <div class="nav__right">
       <div class="lang-toggle">
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-    </nav>
-    <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuOverlay" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
+        <span class="menu-btn__bars"><span></span><span></span><span></span></span>
+        <span data-lang="de">Menü</span><span data-lang="en" hidden>Menu</span>
+      </button>
+    </div>
   </div>
 </header>
 
-<div class="menu-overlay" id="menuOverlay">
-  <button class="menu-overlay__close" id="menuClose" aria-label="Menü schließen">&times;</button>
-  <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
-  <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
-  <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
-  <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
-  <div class="lang-toggle">
-    <button type="button" data-set-lang="de">DE</button>
-    <button type="button" data-set-lang="en">EN</button>
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menu-panel" id="menuPanel">
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <nav class="menu-panel__nav">
+    <a href="index.html" aria-current="page"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
+    <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
+    <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
+    <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+  </nav>
+  <div class="menu-panel__foot">
+    <span data-lang="de">Deutschland — weltweit verfügbar</span>
+    <span data-lang="en" hidden>Germany — available worldwide</span>
+    <div class="menu-panel__social">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
   </div>
 </div>
 
-<section class="hero">
-  <div class="wrap hero__grid">
-    <div>
-      <span class="eyebrow">
-        <span data-lang="de">Produktdesigner &amp; Tischler</span>
-        <span data-lang="en" hidden>Product Designer &amp; Carpenter</span>
-      </span>
-      <h1>
-        <span data-lang="de">Gestaltung, die man anfassen kann.</span>
-        <span data-lang="en" hidden>Design you can touch.</span>
-      </h1>
-      <p class="hero__lede">
-        <span data-lang="de">Ich entwerfe und fertige Möbel und Produkte — von der ersten Skizze bis zum fertigen Stück in der Werkstatt.</span>
-        <span data-lang="en" hidden>I design and build furniture and products — from the first sketch to the finished piece in the workshop.</span>
-      </p>
-      <div class="hero__actions">
-        <a href="work.html" class="btn btn--accent">
-          <span data-lang="de">Arbeiten ansehen</span><span data-lang="en" hidden>View work</span>
-        </a>
-        <a href="contact.html" class="btn">
-          <span data-lang="de">Kontakt aufnehmen</span><span data-lang="en" hidden>Get in touch</span>
-        </a>
-      </div>
-    </div>
-    <div class="hero__photo ph">
-      <span data-lang="de">Hero-Foto — Portrait oder Werkstattbild (quer, hohe Auflösung)</span>
-      <span data-lang="en" hidden>Hero photo — portrait or workshop shot (landscape, high-res)</span>
+<section class="hero-tile">
+  <div class="ph">
+    <span data-lang="de">Hero-Foto — Portrait oder Werkstattbild (quer, hohe Auflösung)</span>
+    <span data-lang="en" hidden>Hero photo — portrait or workshop shot (landscape, high-res)</span>
+  </div>
+  <div class="hero-tile__scrim"></div>
+  <div class="hero-tile__content">
+    <span class="eyebrow">
+      <span data-lang="de">Produktdesigner &amp; Tischler</span>
+      <span data-lang="en" hidden>Product Designer &amp; Carpenter</span>
+    </span>
+    <h1 class="display">
+      <span data-lang="de">Gestaltung, die man anfassen kann.</span>
+      <span data-lang="en" hidden>Design you can touch.</span>
+    </h1>
+    <p>
+      <span data-lang="de">Ich entwerfe und fertige Möbel und Produkte — von der ersten Skizze bis zum fertigen Stück in der Werkstatt.</span>
+      <span data-lang="en" hidden>I design and build furniture and products — from the first sketch to the finished piece in the workshop.</span>
+    </p>
+    <div class="hero-tile__actions">
+      <a href="work.html" class="btn btn--accent">
+        <span data-lang="de">Arbeiten ansehen</span><span data-lang="en" hidden>View work</span>
+      </a>
+      <a href="contact.html" class="btn">
+        <span data-lang="de">Kontakt aufnehmen</span><span data-lang="en" hidden>Get in touch</span>
+      </a>
     </div>
   </div>
 </section>
@@ -94,33 +89,39 @@
         <span data-lang="de">Alle Arbeiten</span><span data-lang="en" hidden>All work</span>
       </a>
     </div>
-    <div class="work-grid">
-      <a class="work-card" href="work.html">
-        <div class="ph">
-          <span data-lang="de">Projektfoto 1</span><span data-lang="en" hidden>Project photo 1</span>
+    <div class="tile-grid">
+      <a class="tile" href="work.html">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 1</span><span data-lang="en" hidden>Project photo 1</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2025</span>
+            <h3 class="tile__title display">Projekttitel 1</h3>
+            <span class="tile__cat"><span data-lang="de">Möbeldesign</span><span data-lang="en" hidden>Furniture design</span></span>
+          </div>
         </div>
-        <h3>Projekttitel 1</h3>
-        <p class="work-card__cat">
-          <span data-lang="de">Möbeldesign</span><span data-lang="en" hidden>Furniture design</span>
-        </p>
       </a>
-      <a class="work-card" href="work.html">
-        <div class="ph">
-          <span data-lang="de">Projektfoto 2</span><span data-lang="en" hidden>Project photo 2</span>
+      <a class="tile" href="work.html">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 2</span><span data-lang="en" hidden>Project photo 2</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2025</span>
+            <h3 class="tile__title display">Projekttitel 2</h3>
+            <span class="tile__cat"><span data-lang="de">Produktdesign</span><span data-lang="en" hidden>Product design</span></span>
+          </div>
         </div>
-        <h3>Projekttitel 2</h3>
-        <p class="work-card__cat">
-          <span data-lang="de">Produktdesign</span><span data-lang="en" hidden>Product design</span>
-        </p>
       </a>
-      <a class="work-card" href="work.html">
-        <div class="ph">
-          <span data-lang="de">Projektfoto 3</span><span data-lang="en" hidden>Project photo 3</span>
+      <a class="tile" href="work.html">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 3</span><span data-lang="en" hidden>Project photo 3</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2024</span>
+            <h3 class="tile__title display">Projekttitel 3</h3>
+            <span class="tile__cat"><span data-lang="de">Auftragsarbeit</span><span data-lang="en" hidden>Commission</span></span>
+          </div>
         </div>
-        <h3>Projekttitel 3</h3>
-        <p class="work-card__cat">
-          <span data-lang="de">Auftragsarbeit</span><span data-lang="en" hidden>Commission</span>
-        </p>
       </a>
     </div>
   </div>

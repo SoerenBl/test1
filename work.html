@@ -8,7 +8,7 @@
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -19,41 +19,45 @@
       <span data-lang="de">Produktdesign &amp; Tischlerei</span>
       <span data-lang="en" hidden>Product Design &amp; Carpentry</span>
     </a>
-    <nav class="nav__links">
-      <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
-      <a href="work.html" aria-current="page"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
-      <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
-      <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+    <div class="nav__right">
       <div class="lang-toggle">
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-    </nav>
-    <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuOverlay" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
+        <span class="menu-btn__bars"><span></span><span></span><span></span></span>
+        <span data-lang="de">Menü</span><span data-lang="en" hidden>Menu</span>
+      </button>
+    </div>
   </div>
 </header>
 
-<div class="menu-overlay" id="menuOverlay">
-  <button class="menu-overlay__close" id="menuClose" aria-label="Menü schließen">&times;</button>
-  <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
-  <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
-  <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
-  <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
-  <div class="lang-toggle">
-    <button type="button" data-set-lang="de">DE</button>
-    <button type="button" data-set-lang="en">EN</button>
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menu-panel" id="menuPanel">
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <nav class="menu-panel__nav">
+    <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
+    <a href="work.html" aria-current="page"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
+    <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
+    <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+  </nav>
+  <div class="menu-panel__foot">
+    <span data-lang="de">Deutschland — weltweit verfügbar</span>
+    <span data-lang="en" hidden>Germany — available worldwide</span>
+    <div class="menu-panel__social">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
   </div>
 </div>
 
-<section class="hero" style="padding-bottom:0;">
+<section style="padding-bottom:0;">
   <div class="wrap">
     <span class="eyebrow"><span data-lang="de">Portfolio</span><span data-lang="en" hidden>Portfolio</span></span>
-    <h1 style="font-size:clamp(2rem,4vw,3rem);">
+    <h1 class="display page-title">
       <span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span>
     </h1>
-    <p class="hero__lede">
+    <p class="lede">
       <span data-lang="de">Eine Auswahl an Möbel- und Produktdesign-Projekten, von Konzept bis Fertigung.</span>
       <span data-lang="en" hidden>A selection of furniture and product design projects, from concept to production.</span>
     </p>
@@ -62,37 +66,75 @@
 
 <section>
   <div class="wrap">
-    <div class="work-grid">
+    <div class="tile-grid">
 
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 1</span><span data-lang="en" hidden>Project photo 1</span></div>
-        <h3>Projekttitel 1</h3>
-        <p class="work-card__cat"><span data-lang="de">Möbeldesign, 2025</span><span data-lang="en" hidden>Furniture design, 2025</span></p>
+      <a class="tile tile--wide tile--tall" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 1 (breit)</span><span data-lang="en" hidden>Project photo 1 (wide)</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2025</span>
+            <h3 class="tile__title display">Projekttitel 1</h3>
+            <span class="tile__cat"><span data-lang="de">Möbeldesign</span><span data-lang="en" hidden>Furniture design</span></span>
+          </div>
+        </div>
       </a>
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 2</span><span data-lang="en" hidden>Project photo 2</span></div>
-        <h3>Projekttitel 2</h3>
-        <p class="work-card__cat"><span data-lang="de">Produktdesign, 2025</span><span data-lang="en" hidden>Product design, 2025</span></p>
+
+      <a class="tile span-3" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 2</span><span data-lang="en" hidden>Project photo 2</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2025</span>
+            <h3 class="tile__title display">Projekttitel 2</h3>
+            <span class="tile__cat"><span data-lang="de">Produktdesign</span><span data-lang="en" hidden>Product design</span></span>
+          </div>
+        </div>
       </a>
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 3</span><span data-lang="en" hidden>Project photo 3</span></div>
-        <h3>Projekttitel 3</h3>
-        <p class="work-card__cat"><span data-lang="de">Auftragsarbeit, 2024</span><span data-lang="en" hidden>Commission, 2024</span></p>
+      <a class="tile span-3" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 3</span><span data-lang="en" hidden>Project photo 3</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2024</span>
+            <h3 class="tile__title display">Projekttitel 3</h3>
+            <span class="tile__cat"><span data-lang="de">Auftragsarbeit</span><span data-lang="en" hidden>Commission</span></span>
+          </div>
+        </div>
       </a>
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 4</span><span data-lang="en" hidden>Project photo 4</span></div>
-        <h3>Projekttitel 4</h3>
-        <p class="work-card__cat"><span data-lang="de">Möbeldesign, 2024</span><span data-lang="en" hidden>Furniture design, 2024</span></p>
+
+      <a class="tile span-2" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 4</span><span data-lang="en" hidden>Project photo 4</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2024</span>
+            <h3 class="tile__title tile__title--sm display">Projekttitel 4</h3>
+            <span class="tile__cat"><span data-lang="de">Möbeldesign</span><span data-lang="en" hidden>Furniture design</span></span>
+          </div>
+        </div>
       </a>
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 5</span><span data-lang="en" hidden>Project photo 5</span></div>
-        <h3>Projekttitel 5</h3>
-        <p class="work-card__cat"><span data-lang="de">Prototyping, 2024</span><span data-lang="en" hidden>Prototyping, 2024</span></p>
+      <a class="tile span-2" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 5</span><span data-lang="en" hidden>Project photo 5</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2024</span>
+            <h3 class="tile__title tile__title--sm display">Projekttitel 5</h3>
+            <span class="tile__cat"><span data-lang="de">Prototyping</span><span data-lang="en" hidden>Prototyping</span></span>
+          </div>
+        </div>
       </a>
-      <a class="work-card" href="#">
-        <div class="ph"><span data-lang="de">Projektfoto 6</span><span data-lang="en" hidden>Project photo 6</span></div>
-        <h3>Projekttitel 6</h3>
-        <p class="work-card__cat"><span data-lang="de">Auftragsarbeit, 2023</span><span data-lang="en" hidden>Commission, 2023</span></p>
+      <a class="tile span-2" href="#">
+        <div class="tile__media">
+          <div class="ph"><span data-lang="de">Projektfoto 6</span><span data-lang="en" hidden>Project photo 6</span></div>
+          <div class="tile__scrim"></div>
+          <div class="tile__caption">
+            <span class="tile__year">2023</span>
+            <h3 class="tile__title tile__title--sm display">Projekttitel 6</h3>
+            <span class="tile__cat"><span data-lang="de">Auftragsarbeit</span><span data-lang="en" hidden>Commission</span></span>
+          </div>
+        </div>
       </a>
 
     </div>

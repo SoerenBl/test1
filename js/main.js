@@ -1,22 +1,29 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // --- Mobile menu ---
+  // --- Slide menu panel ---
   var menuBtn = document.getElementById('menuBtn');
-  var menuOverlay = document.getElementById('menuOverlay');
+  var menuPanel = document.getElementById('menuPanel');
   var menuClose = document.getElementById('menuClose');
+  var menuScrim = document.getElementById('menuScrim');
 
   function openMenu() {
-    menuOverlay.classList.add('is-open');
+    menuPanel.classList.add('is-open');
+    menuScrim.classList.add('is-open');
     menuBtn.setAttribute('aria-expanded', 'true');
   }
   function closeMenu() {
-    menuOverlay.classList.remove('is-open');
+    menuPanel.classList.remove('is-open');
+    menuScrim.classList.remove('is-open');
     menuBtn.setAttribute('aria-expanded', 'false');
   }
 
   if (menuBtn) menuBtn.addEventListener('click', openMenu);
   if (menuClose) menuClose.addEventListener('click', closeMenu);
-  if (menuOverlay) {
-    menuOverlay.querySelectorAll('a').forEach(function (a) {
+  if (menuScrim) menuScrim.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMenu();
+  });
+  if (menuPanel) {
+    menuPanel.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', closeMenu);
     });
   }
@@ -41,4 +48,32 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Footer year ---
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // --- Scroll parallax on tile / hero captions ---
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var parallaxEls = document.querySelectorAll('.tile__caption, .hero-tile__content');
+
+  if (!reduceMotion && parallaxEls.length) {
+    var ticking = false;
+    function updateParallax() {
+      var vh = window.innerHeight;
+      parallaxEls.forEach(function (el) {
+        var rect = el.parentElement.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
+        var px = Math.max(-16, Math.min(16, offset * 26));
+        el.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
+      });
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    updateParallax();
+  }
 });

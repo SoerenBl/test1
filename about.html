@@ -8,7 +8,7 @@
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -19,40 +19,42 @@
       <span data-lang="de">Produktdesign &amp; Tischlerei</span>
       <span data-lang="en" hidden>Product Design &amp; Carpentry</span>
     </a>
-    <nav class="nav__links">
-      <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
-      <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
-      <a href="about.html" aria-current="page"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
-      <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+    <div class="nav__right">
       <div class="lang-toggle">
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-    </nav>
-    <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuOverlay" aria-label="Menü öffnen">
-      <span></span><span></span><span></span>
-    </button>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
+        <span class="menu-btn__bars"><span></span><span></span><span></span></span>
+        <span data-lang="de">Menü</span><span data-lang="en" hidden>Menu</span>
+      </button>
+    </div>
   </div>
 </header>
 
-<div class="menu-overlay" id="menuOverlay">
-  <button class="menu-overlay__close" id="menuClose" aria-label="Menü schließen">&times;</button>
-  <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
-  <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
-  <a href="about.html"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
-  <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
-  <div class="lang-toggle">
-    <button type="button" data-set-lang="de">DE</button>
-    <button type="button" data-set-lang="en">EN</button>
+<div class="menu-scrim" id="menuScrim"></div>
+<div class="menu-panel" id="menuPanel">
+  <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+  <nav class="menu-panel__nav">
+    <a href="index.html"><span data-lang="de">Start</span><span data-lang="en" hidden>Home</span></a>
+    <a href="work.html"><span data-lang="de">Arbeiten</span><span data-lang="en" hidden>Work</span></a>
+    <a href="about.html" aria-current="page"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></a>
+    <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en" hidden>Contact</span></a>
+  </nav>
+  <div class="menu-panel__foot">
+    <span data-lang="de">Deutschland — weltweit verfügbar</span>
+    <span data-lang="en" hidden>Germany — available worldwide</span>
+    <div class="menu-panel__social">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
   </div>
 </div>
 
-<section class="hero" style="padding-bottom:0;">
+<section style="padding-bottom:0;">
   <div class="wrap">
     <span class="eyebrow"><span data-lang="de">Über mich</span><span data-lang="en" hidden>About</span></span>
-    <h1 style="font-size:clamp(2rem,4vw,3rem);">
-      <span data-lang="de">Sören Blaecker</span><span data-lang="en" hidden>Sören Blaecker</span>
-    </h1>
+    <h1 class="display page-title--sm">Sören Blaecker</h1>
   </div>
 </section>
 
