@@ -427,11 +427,14 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   z-index: 1;
 }
 .tile__year { font-family: var(--font-heading); font-size: 0.72rem; letter-spacing: 0.06em; opacity: 0.85; }
-.tile__title { font-size: clamp(2.2rem, 5vw, 3.8rem); color: #fff; margin: 10px 0 0; transform-origin: bottom left; transition: transform 0.35s cubic-bezier(.2,.8,.3,1); }
+.tile__title { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 0.96; color: #fff; margin: 10px 0 0; transform-origin: bottom left; transition: transform 0.35s cubic-bezier(.2,.8,.3,1); }
 .tile__cat { font-family: var(--font-heading); font-size: 0.8rem; opacity: 0.85; display: block; margin-top: 2px; transition: opacity 0.25s ease; }
 
-/* Category tiles: title grows on hover and overtakes the project count */
-#categories .tile__title { margin-top: 6px; }
+/* Category tiles: title grows on hover and overtakes the project count.
+   Shrink-wrap the box (instead of the full tile width) so the scale-up
+   can't push it past the tile edge — long headlines wrap to a second
+   line instead of being clipped by the tile's overflow:hidden. */
+#categories .tile__title { margin-top: 6px; display: inline-block; max-width: 75%; }
 #categories .tile:hover .tile__title { transform: scale(1.32); }
 #categories .tile:hover .tile__cat { opacity: 0; }
 
