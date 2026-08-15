@@ -381,6 +381,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   transition: background-color 0.4s ease;
 }
 
+/* Category tiles: idle background is a plain near-white, not the warm
+   beige placeholder tone — the coloured --tile-hover only shows on hover. */
+#categories .tile:nth-of-type(odd) .tile__media { background-color: #ffffff; }
+#categories .tile:nth-of-type(even) .tile__media { background-color: #f5f5f4; }
+
 /* Real photos sit on top of the placeholder pattern and cover it once
    loaded. Until a file exists at that path the <img>'s onerror attribute
    hides it, so the .ph placeholder shows through underneath —
@@ -485,6 +490,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   max-height: 130%;
   object-fit: contain;
   pointer-events: none;
+  opacity: 0;
+  filter: blur(18px);
+  transition: opacity 0.9s ease, filter 0.9s ease;
+}
+.tile__media > img.tile__object.is-revealed {
+  opacity: 1;
+  filter: blur(0);
 }
 
 /* ---------- Services / skills strip ---------- */

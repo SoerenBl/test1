@@ -195,6 +195,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // --- Cutout objects: fade in like a soft cloud once ~1/3 of their
+  // tile has scrolled into view, instead of being visible immediately. ---
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var obj = entry.target.querySelector('.tile__object');
+        if (obj) obj.classList.add('is-revealed');
+        revealObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.33 });
+    document.querySelectorAll('#categories .tile__media').forEach(function (el) {
+      revealObserver.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.tile__object').forEach(function (el) {
+      el.classList.add('is-revealed');
+    });
+  }
+
   // --- Scroll parallax: tile captions, hero zoom, cutout product images ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
@@ -217,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var rect = el.parentElement.getBoundingClientRect();
         var center = rect.top + rect.height / 2;
         var offset = (center - vh / 2) / vh;
-        var px = Math.max(-18, Math.min(18, offset * 30));
+        var px = Math.max(-45, Math.min(45, offset * 65));
         el.style.transform = 'translate(-50%, calc(-50% + ' + px.toFixed(1) + 'px))';
       });
       if (heroContent && heroTile) {
