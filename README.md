@@ -4,40 +4,26 @@ Statische HTML/CSS/JS-Seite, kein Build-Schritt. GitHub → Vercel deployt autom
 
 ## Fotos einpflegen
 
-Alle Fotos liegen in einem eigenen Ordner `Fotos/` im Hauptverzeichnis, getrennt vom Code. Die Struktur:
+Alle Fotos liegen in einem eigenen Ordner `photos/` im Hauptverzeichnis, getrennt vom Code. Die Struktur folgt genau den Kategorie-/Projektordnern, die es im Repository ohnehin schon gibt:
 
 ```
-Fotos/
-├── Titelbilder/
-│   ├── Mainpage_Titelbild/hero.jpg          → Hero-Foto der Startseite
-│   ├── MOBILITY_AUTOMOTIVE/cover.jpg        → Kachel-Foto dieser Kategorie auf der Startseite
-│   ├── FURNITURE_LIGHTING/cover.jpg
-│   ├── PRODUCT_INDUSTRIAL_DESIGN/cover.jpg
-│   ├── INTERIOR_SPATIAL_DESIGN/cover.jpg
-│   ├── CRAFT_RESTORATION/cover.jpg
-│   └── EDITORIAL_DESIGN/cover.jpg
-│
-├── MOBILITY_AUTOMOTIVE/
-│   ├── BMW_K100_Aero/1.jpg, 2.jpg, ...
-│   └── Legno_Veloce/1.jpg, 2.jpg, ...
-│
-├── FURNITURE_LIGHTING/
-│   ├── Nightstands/{C-Shape_Floating, Scandinavian_Tech, Solid_Oak, Anthracite_Oak_Craft, Walnut_Anthracite, White_MPX_Bedroom_Series}/1.jpg, ...
-│   ├── HiFi_Sideboards/{Yamaha_Compact_HiFi, Retro_Modern_HiFi_Gesellenstueck}/1.jpg, ...
-│   ├── Tables/{Tisch_Eiche, Tisch_Kirsche}/1.jpg, ...
-│   └── Lighting/Lamp_Concept/1.jpg, ...
-│
-├── PRODUCT_INDUSTRIAL_DESIGN/{Remissus, Cerachron, Axe_and_Saw_Tool, Concept_Audio_Speaker, Unfinished_Concepts}/1.jpg, ...
-├── INTERIOR_SPATIAL_DESIGN/{Minimalist_Oak_Bathroom, Mobile_Spatial_Bookshelf}/1.jpg, ...
-├── CRAFT_RESTORATION/Vintage_Bicycle_Restorations/1.jpg, ...
-└── EDITORIAL_DESIGN/Editorial_and_Print_Works/1.jpg, ...
+photos/hero.jpg                                  → Hero-Foto der Startseite
+photos/{kategorie}/cover.jpg                      → Kachel-Foto dieser Kategorie auf der Startseite
+photos/{kategorie}/{projekt}/1.jpg, 2.jpg, ...     → Fotos eines Projekts
+
+Beispiel:
+photos/furniture-lighting/cover.jpg
+photos/furniture-lighting/c-shape-nightstand/1.jpg
+photos/furniture-lighting/c-shape-nightstand/2.jpg
 ```
 
-Alle Ordner sind bereits angelegt (leer, mit `.gitkeep`) — einfach Fotos reinziehen, mit GitHub Desktop committen und pushen. Die Seite zeigt sie automatisch, kein Code muss angepasst werden.
+Die Kategorie- und Projektnamen sind identisch mit den Ordnernamen, die im Repository für die jeweiligen Seiten stehen (z. B. `furniture-lighting`, `c-shape-nightstand`) — einfach in der Seitenleiste von GitHub Desktop nachschauen, wie eine Seite heißt, und den gleichen Namen unter `photos/` verwenden.
+
+Alle Ordner sind bereits leer angelegt (mit `.gitkeep`) und direkt in Finder/GitHub Desktop sichtbar — einfach Fotos reinziehen, committen, pushen. Die Seite zeigt sie automatisch, kein Code muss angepasst werden.
 
 **Projektordner** (`1.jpg`, `2.jpg`, …): komplett dynamisch. Wie viele nummerierte Fotos dort liegen, so viele Kacheln entstehen automatisch auf der Projektseite (max. 24). `1.jpg` ist gleichzeitig das Vorschaubild in der jeweiligen Kategorie-Liste. Lücken in der Nummerierung werden übersprungen. Liegt noch kein Foto vor, zeigt die Seite einen Platzhalter ("Fotos folgen in Kürze").
 
-**`cover.jpg`** (unter Titelbilder, pro Kategorie) und **`hero.jpg`** (Mainpage_Titelbild) sind je ein festes einzelnes Bild.
+**`cover.jpg`** (pro Kategorie) und **`hero.jpg`** sind je ein festes einzelnes Bild.
 
 **Neues Projekt** (nicht nur neue Fotos zu einem bestehenden): dafür kurz Bescheid geben — Titel, Kategorie, Land, Jahr — dann lege ich die Seite, den Eintrag in der Kategorie-Liste und den passenden Foto-Ordner an.
 
