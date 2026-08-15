@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interieur — Sören Bläcker</title>
-<meta name="description" content="Interieur- und Raumgestaltungsprojekte von Sören Bläcker.">
+<title>Legno Veloce — Sören Bläcker</title>
+<meta name="description" content="Legno Veloce — Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=4">
+<link rel="stylesheet" href="../../css/style.css?v=4">
 </head>
 <body>
 
 <header class="nav">
   <div class="nav__inner">
-    <a href="../index.html" class="nav__mark">Sören Bläcker</a>
-    <a href="../index.html#categories" class="nav__center"><span data-lang="de">Interieur</span><span data-lang="en">Interior</span></a>
+    <a href="../../index.html" class="nav__mark">Sören Bläcker</a>
+    <a href="../" class="nav__center">Legno Veloce</a>
     <div class="nav__right">
       <div class="lang-toggle">
         <button type="button" data-set-lang="de">DE</button>
@@ -38,11 +38,11 @@
 <div class="menu-panel" id="menuPanel">
   <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen"></button>
   <nav class="menu-panel__nav">
-    <a href="../index.html"><span data-lang="de">Start</span><span data-lang="en">Home</span></a>
-    <a href="../index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
-    <a href="../index.html#services"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
-    <a href="../about.html"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
-    <a href="../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
+    <a href="../../index.html"><span data-lang="de">Start</span><span data-lang="en">Home</span></a>
+    <a href="../../index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
+    <a href="../../index.html#services"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
+    <a href="../../about.html"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
+    <a href="../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
   </nav>
   <div class="menu-panel__foot">
     <span data-lang="de">Deutschland — weltweit verfügbar</span>
@@ -55,25 +55,39 @@
 </div>
 
 <section class="section--flush">
-  <div class="tile-grid tile-grid--projects tile-grid--fill" style="--rows:1;">
-    <a class="tile" href="minimalist-oak-bathroom-interior/">
+  <div class="tile-grid tile-grid--projects" data-fixed-layout>
+    <div class="tile tile--full">
       <div class="tile__media">
-        <div class="ph"><span data-lang="de">Projektfoto — Minimalist Oak Bathroom Interior</span><span data-lang="en">Project photo — Minimalist Oak Bathroom Interior</span></div>
-        <div class="tile__caption">
-          <h3 class="tile__title display">Minimalist Oak Bathroom Interior</h3>
-          <span class="tile__meta">DE · 2024</span>
-        </div>
+        <div class="ph"><span data-lang="de">Foto — freigestellt, Hauptansicht</span><span data-lang="en">Photo — isolated shot, main view</span></div>
       </div>
-    </a>
-    <a class="tile" href="mobile-spatial-bookshelf/">
+    </div>
+    <div class="tile">
       <div class="tile__media">
-        <div class="ph"><span data-lang="de">Projektfoto — Mobile Spatial Bookshelf</span><span data-lang="en">Project photo — Mobile Spatial Bookshelf</span></div>
-        <div class="tile__caption">
-          <h3 class="tile__title display">Mobile Spatial Bookshelf</h3>
-          <span class="tile__meta">DE · 2023</span>
-        </div>
+        <div class="ph"><span data-lang="de">Foto — Detailansicht</span><span data-lang="en">Photo — detail view</span></div>
       </div>
-    </a>
+    </div>
+    <div class="tile">
+      <div class="tile__media">
+        <div class="ph"><span data-lang="de">Foto — im Einsatz</span><span data-lang="en">Photo — in use</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap about-grid">
+    <div>
+      <h2><span data-lang="de">Über das Projekt</span><span data-lang="en">About the project</span></h2>
+      <p>
+        <span data-lang="de">Platzhaltertext — hier folgt später eine ausführlichere Beschreibung: Entwurfsidee, Materialwahl, Fertigungsschritte, Maße.</span>
+        <span data-lang="en">Placeholder text — a more detailed description will go here: design concept, material choice, production steps, dimensions.</span>
+      </p>
+    </div>
+    <ul class="contact-list">
+      <li><span data-lang="de">Kategorie</span><span data-lang="en">Category</span> <span>Mobility &amp; Automotive</span></li>
+      <li><span data-lang="de">Land</span><span data-lang="en">Country</span> <span>IT</span></li>
+      <li><span data-lang="de">Jahr</span><span data-lang="en">Year</span> <span>2023</span></li>
+    </ul>
   </div>
 </section>
 
@@ -81,15 +95,15 @@
   <div class="wrap footer__inner">
     <span>&copy; <span id="year">2026</span> Sören Bläcker</span>
     <div class="footer__social">
-      <a href="../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
-      <a href="../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
-      <a href="../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
+      <a href="../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
+      <a href="../../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
+      <a href="../../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
       <a href="#">Instagram</a>
       <a href="#">LinkedIn</a>
     </div>
   </div>
 </footer>
 
-<script src="../js/main.js"></script>
+<script src="../../js/main.js"></script>
 </body>
 </html>

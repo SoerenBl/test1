@@ -49,26 +49,26 @@ document.addEventListener('DOMContentLoaded', function () {
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // --- Scroll parallax on tile captions + hero zoom + nav overlay->solid ---
+  // --- Randomize project tile sizes (1x1 / 1x2) on each load ---
+  // Order of projects always stays as written in the HTML — only which
+  // tiles render tall is randomized, and only once there are 3+ of them.
+  document.querySelectorAll('.tile-grid--projects:not([data-fixed-layout])').forEach(function (grid) {
+    var tiles = grid.querySelectorAll(':scope > .tile');
+    if (tiles.length < 3) return;
+    tiles.forEach(function (tile) {
+      tile.classList.remove('tile--tall', 'tile--full');
+      if (Math.random() < 0.32) tile.classList.add('tile--tall');
+    });
+  });
+
+  // --- Scroll parallax: tile captions, hero zoom, cutout product images ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
+  var objectEls = document.querySelectorAll('.tile__object');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
-  var navEl = document.querySelector('.nav');
 
-  function updateNav() {
-    if (!navEl || !heroTile) return;
-    var heroHeight = heroTile.offsetHeight || window.innerHeight;
-    navEl.classList.toggle('nav--solid', window.scrollY > heroHeight - (navEl.offsetHeight || 0));
-  }
-
-  if (heroTile) {
-    updateNav();
-    window.addEventListener('scroll', updateNav, { passive: true });
-    window.addEventListener('resize', updateNav);
-  }
-
-  if (!reduceMotion && (parallaxEls.length || heroContent)) {
+  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -78,6 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
         var px = Math.max(-16, Math.min(16, offset * 26));
         el.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
+      });
+      objectEls.forEach(function (el) {
+        var rect = el.parentElement.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - vh / 2) / vh;
+        var px = Math.max(-18, Math.min(18, offset * 30));
+        el.style.transform = 'translate(-50%, calc(-50% + ' + px.toFixed(1) + 'px))';
       });
       if (heroContent && heroTile) {
         var heroHeight = heroTile.offsetHeight || vh;

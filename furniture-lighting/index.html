@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3">
+<link rel="stylesheet" href="../css/style.css?v=4">
 </head>
 <body>
 
-<header class="nav nav--scrim">
+<header class="nav">
   <div class="nav__inner">
     <a href="../index.html" class="nav__mark">Sören Bläcker</a>
     <a href="../index.html#categories" class="nav__center"><span data-lang="de">Möbel &amp; Beleuchtung</span><span data-lang="en">Furniture &amp; Lighting</span></a>
@@ -22,8 +22,13 @@
         <button type="button" data-set-lang="de">DE</button>
         <button type="button" data-set-lang="en">EN</button>
       </div>
-      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">
-        <span data-lang="de">Menü</span><span data-lang="en">Menu</span>
+      <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel" aria-label="Menü">
+        <span class="menu-btn__cutout" data-lang="de">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskDe"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENÜ</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskDe)"/></svg>
+        </span>
+        <span class="menu-btn__cutout" data-lang="en">
+          <svg viewBox="0 0 104 36" width="104" height="36" aria-hidden="true"><mask id="menuMaskEn"><rect width="104" height="36" fill="#fff"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#000">MENU</text></mask><rect width="104" height="36" fill="#fff" mask="url(#menuMaskEn)"/></svg>
+        </span>
       </button>
     </div>
   </div>
@@ -49,130 +54,95 @@
   </div>
 </div>
 
-<section style="padding-bottom:0;">
-  <div class="wrap">
-    <h2>Nightstand Collection</h2>
-  </div>
-</section>
 <section class="section--flush">
   <div class="tile-grid tile-grid--projects">
-    <a class="tile" href="c-shape-nightstand/">
+    <a class="tile tile--tall" href="c-shape-nightstand/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — C-Shape Floating Nightstand</span><span data-lang="en">Project photo — C-Shape Floating Nightstand</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Multiplex weiß lackiert, LED-Unterbeleuchtung</span><span data-lang="en">White-lacquered plywood, LED underlighting</span></span>
           <h3 class="tile__title display">C-Shape Floating Nightstand</h3>
+          <span class="tile__meta">DE · 2025</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="scandinavian-tech-nightstand/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Scandinavian Tech Nightstand</span><span data-lang="en">Project photo — Scandinavian Tech Nightstand</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Weiß/Eiche, integrierte Speaker, LED-Unterbeleuchtung</span><span data-lang="en">White/oak, built-in speakers, LED underlighting</span></span>
           <h3 class="tile__title display">Scandinavian Tech Nightstand</h3>
+          <span class="tile__meta">DE · 2025</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="solid-oak-nightstand/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Solid Oak Nightstand</span><span data-lang="en">Project photo — Solid Oak Nightstand</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">100% Eiche massiv, skandinavischer 4-Beiner</span><span data-lang="en">Solid oak, Scandinavian four-leg base</span></span>
           <h3 class="tile__title display">Solid Oak Nightstand</h3>
+          <span class="tile__meta">DE · 2024</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile tile--tall" href="anthracite-oak-craft-nightstand/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Anthracite &amp; Oak Craft Nightstand</span><span data-lang="en">Project photo — Anthracite &amp; Oak Craft Nightstand</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Handgezinkte Eichen-Schubkästen, LED, USB &amp; Touch-Dimmer</span><span data-lang="en">Hand-dovetailed oak drawers, LED, USB &amp; touch dimmer</span></span>
           <h3 class="tile__title display">Anthracite &amp; Oak Craft Nightstand</h3>
+          <span class="tile__meta">DE · 2024</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="walnut-anthracite-nightstand/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Walnut &amp; Anthracite Nightstand</span><span data-lang="en">Project photo — Walnut &amp; Anthracite Nightstand</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Nussbaum massiv, Fingerzinken, Innengehrung 45°</span><span data-lang="en">Solid walnut, finger joints, 45° mitred corners</span></span>
           <h3 class="tile__title display">Walnut &amp; Anthracite Nightstand</h3>
+          <span class="tile__meta">DE · 2024</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="white-mpx-oak-bedroom-series/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — White MPX &amp; Oak Bedroom Series</span><span data-lang="en">Project photo — White MPX &amp; Oak Bedroom Series</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Induktions-Ladefeld, mit Bett, Schreibtisch &amp; Kommoden</span><span data-lang="en">Induction charging, with bed, desk &amp; chests of drawers</span></span>
           <h3 class="tile__title display">White MPX &amp; Oak Bedroom Series</h3>
+          <span class="tile__meta">DE · 2023</span>
         </div>
       </div>
     </a>
-  </div>
-</section>
-
-<section style="padding-bottom:0;">
-  <div class="wrap">
-    <h2>Audio &amp; Storage Furniture</h2>
-  </div>
-</section>
-<section class="section--flush">
-  <div class="tile-grid tile-grid--projects">
-    <a class="tile tile--tall" href="#">
+    <a class="tile tile--tall" href="yamaha-hifi-sideboard/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Yamaha Compact HiFi Sideboard</span><span data-lang="en">Project photo — Yamaha Compact HiFi Sideboard</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Weißer Korpus, Hairpin Legs, symmetrisches Layout</span><span data-lang="en">White carcass, hairpin legs, symmetrical layout</span></span>
           <h3 class="tile__title display">Yamaha Compact HiFi Sideboard</h3>
+          <span class="tile__meta">DE · 2023</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="retro-modern-hifi-sideboard/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Retro-Modern HiFi Sideboard</span><span data-lang="en">Project photo — Retro-Modern HiFi Sideboard</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Gesellenstück Nussbaum, integrierte Speaker, Tambour-Rolladen</span><span data-lang="en">Journeyman piece in walnut, built-in speakers, tambour door</span></span>
           <h3 class="tile__title display">Retro-Modern HiFi Sideboard</h3>
+          <span class="tile__meta">DE · 2022</span>
         </div>
       </div>
     </a>
-    <a class="tile" href="#">
+    <a class="tile" href="solid-oak-tables/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Solid Oak Tables</span><span data-lang="en">Project photo — Solid Oak Tables</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Tisch Eiche &amp; Tisch Kirsche</span><span data-lang="en">Oak table &amp; cherry table</span></span>
           <h3 class="tile__title display">Solid Oak Tables</h3>
+          <span class="tile__meta">DE · 2022</span>
         </div>
       </div>
     </a>
-  </div>
-</section>
-
-<section style="padding-bottom:0;">
-  <div class="wrap">
-    <h2>Lighting</h2>
-  </div>
-</section>
-<section class="section--flush">
-  <div class="tile-grid tile-grid--projects">
-    <a class="tile tile--full" href="#">
+    <a class="tile tile--full" href="custom-lamp-concept/">
       <div class="tile__media">
         <div class="ph"><span data-lang="de">Projektfoto — Custom Lamp Concept</span><span data-lang="en">Project photo — Custom Lamp Concept</span></div>
-        <div class="tile__scrim"></div>
         <div class="tile__caption">
-          <span class="tile__cat"><span data-lang="de">Eigenentwurf</span><span data-lang="en">Original concept</span></span>
           <h3 class="tile__title display">Custom Lamp Concept</h3>
+          <span class="tile__meta">DE · 2022</span>
         </div>
       </div>
     </a>
