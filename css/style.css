@@ -1305,7 +1305,16 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__book-wrap {
   position: relative;
   z-index: 5;
+  transition: transform 0.5s ease;
 }
+/* The book's frame always stays sized for a full two-page spread (see
+   sizeBook in main.js) so nothing resizes as the cover is turned past —
+   but a single page (cover or back cover) then only occupies one half of
+   that frame. These shift the whole frame so that occupied half lands
+   centered on screen, exactly like the spread that follows/precedes it,
+   instead of sitting off to one side. */
+.pdfv__book-wrap.is-single-recto { transform: translateX(-25%); }
+.pdfv__book-wrap.is-single-verso { transform: translateX(25%); }
 .pdfv__book-wrap::after {
   content: '';
   position: absolute;
@@ -1329,7 +1338,7 @@ body.lightbox-open { overflow: hidden; }
 
 /* --- Vendored from StPageFlip's stPageFlip.css (page-flip npm package). --- */
 .pdfv__book.stf__parent { position: relative; display: block; box-sizing: border-box; touch-action: pan-y; }
-.pdfv__book .stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.pdfv__book .stf__wrapper { position: relative; width: 100%; height: 100%; box-sizing: border-box; }
 .pdfv__book.stf__parent canvas { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
 .pdfv__book .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2200px; }
 .pdfv__book .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
