@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
           img.src = url;
           var ph = img.previousElementSibling;
           if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
+          if (img.classList.contains('nav__mark-logo')) img.closest('.nav__mark').classList.add('has-logo');
         } else {
           img.style.display = 'none';
         }
@@ -225,6 +226,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
   resolveStaticPhotos();
+
+  // --- Favicon: "SB" by default, swapped automatically for logo2.* if
+  // that file exists (kept separate from logo.* so the nav mark and the
+  // favicon can be different crops/versions of a logo). ---
+  var faviconLink = document.getElementById('faviconLink');
+  if (faviconLink) {
+    var faviconFallback = faviconLink.getAttribute('data-favicon-fallback');
+    if (faviconFallback) {
+      probePhoto(faviconFallback).then(function (url) {
+        if (url) faviconLink.href = url;
+      });
+    }
+  }
 
   // --- Discover project folders automatically instead of hardcoding a
   // tile per project. A project folder is named "{slug}-{country}-{year}"
@@ -286,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function buildCategoryTiles(grid, projects) {
     if (!projects.length) {
+      grid.classList.add('tile-grid--single');
       grid.innerHTML =
         '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
         '<span data-lang="de">Projekte folgen in Kürze</span><span data-lang="en">Projects coming soon</span>' +
@@ -307,10 +322,8 @@ document.addEventListener('DOMContentLoaded', function () {
     applyLang(document.documentElement.getAttribute('data-lang') || 'de');
 
     var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
-    if (grid.classList.contains('tile-grid--fill')) {
-      grid.style.setProperty('--rows', Math.ceil(tiles.length / 2));
-      layoutTilesGapFree(tiles, {});
-    } else {
+    grid.classList.toggle('tile-grid--single', tiles.length === 1);
+    if (tiles.length !== 1) {
       layoutTilesGapFree(tiles, { randomTall: tiles.length >= 3, preserveFull: true });
     }
     resolveStaticPhotos(grid);
@@ -427,14 +440,45 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // --- Mobile: nav bar slides away on scroll-down, back on scroll-up ---
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var nav = document.querySelector('.nav');
+    if (!nav) return;
+    var lastY = window.scrollY;
+    var navTicking = false;
+    function updateNavVisibility() {
+      var isMobile = window.matchMedia('(max-width: 760px)').matches;
+      var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
+      var y = window.scrollY;
+      if (!isMobile || menuOpen) {
+        nav.classList.remove('is-hidden');
+      } else if (y > lastY && y > 80) {
+        nav.classList.add('is-hidden');
+      } else if (y < lastY) {
+        nav.classList.remove('is-hidden');
+      }
+      lastY = y;
+      navTicking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!navTicking) {
+        window.requestAnimationFrame(updateNavVisibility);
+        navTicking = true;
+      }
+    }, { passive: true });
+  })();
+
   // --- Scroll parallax: tile captions, hero zoom, cutout product images ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
   var objectEls = document.querySelectorAll('.tile__object');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
+  var exitPanel = document.querySelector('.stack__panel--exit');
+  var exitBg = exitPanel ? exitPanel.querySelector('.stack__bg') : null;
 
-  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent)) {
+  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent || exitBg)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -464,6 +508,28 @@ document.addEventListener('DOMContentLoaded', function () {
         var progress = Math.max(0, Math.min(1, window.scrollY / heroHeight));
         var scale = 1 - progress * 0.14;
         heroContent.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      }
+      if (exitBg) {
+        // A sticky element's "stuck" duration comes from how much normal-
+        // flow content follows it, not from its own height — so the exit
+        // window here is exactly the height of the invisible spacer that
+        // follows this panel (see .stack__exit-spacer), not the panel's
+        // own height. During that window only the background is nudged
+        // upward — the title/text sit in a separate sibling we never
+        // touch, so they stay exactly in place until the panel finally
+        // releases and the footer takes over.
+        var exitPanelTop = 0;
+        var sib = exitPanel.previousElementSibling;
+        while (sib) {
+          if (sib.classList.contains('stack__panel')) exitPanelTop += sib.offsetHeight;
+          sib = sib.previousElementSibling;
+        }
+        var spacer = exitPanel.nextElementSibling;
+        var exitRange = spacer ? spacer.offsetHeight : 0;
+        var exitProgress = exitRange > 0
+          ? Math.max(0, Math.min(1, (window.scrollY - exitPanelTop) / exitRange))
+          : 0;
+        exitBg.style.transform = 'translateY(' + (-exitProgress * 100).toFixed(2) + '%)';
       }
       ticking = false;
     }
