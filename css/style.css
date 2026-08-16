@@ -1265,17 +1265,20 @@ body.lightbox-open { overflow: hidden; }
 
 /* ---------- PDF page-flip viewer (Editorial Design projects only) ----------
    Injected by js/main.js as the last full-viewport section on a project
-   page, only when a .pdf file is found in that project's own folder.
-   Layout: a page floats centered over a dark stage. Clicking the page
-   itself zooms (loupe, same mechanic as the lightbox); clicking the empty
-   margin left/right of the page turns to the previous/next page instead —
-   the two click zones never overlap, so an accidental page-turn while
-   trying to zoom (or vice versa) isn't possible. */
+   page, only when a .pdf file is found in that project's own folder. Built
+   on the StPageFlip library (js/vendor/pageflip) for the realistic paper
+   page-turn/shadow rendering — .pdfv__book is StPageFlip's own mount
+   point, sized from the PDF's actual page pixel dimensions so the mockup's
+   proportions always match the uploaded format instead of a fixed ratio.
+   Clicking the page itself zooms (loupe, same mechanic as the lightbox);
+   clicking the empty margin left/right of the book turns the page instead
+   — StPageFlip's own click/drag handling is turned off (useMouseEvents:
+   false) specifically so those two click areas never overlap. */
 .pdfv-section {
   position: relative;
   height: 100vh;
   height: 100dvh;
-  background: var(--color-text);
+  background: radial-gradient(ellipse at 50% 42%, #3a3a3f 0%, #201f23 62%, #111013 100%);
   overflow: hidden;
 }
 .pdfv {
@@ -1284,7 +1287,6 @@ body.lightbox-open { overflow: hidden; }
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 2200px;
 }
 .pdfv__zone {
   position: absolute;
@@ -1298,47 +1300,43 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__zone--next { right: 0; }
 .pdfv__zone[data-disabled="true"] { cursor: default; }
 
-.pdfv__stage {
+/* Soft ground shadow the book appears to sit on — reads as a real
+   photographed mockup rather than a flat image pinned to the screen. */
+.pdfv__book-wrap {
   position: relative;
   z-index: 5;
-  max-width: 78vw;
-  max-height: 82vh;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
 }
-.pdfv__page {
+.pdfv__book-wrap::after {
+  content: '';
   position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  transition: transform 0.62s cubic-bezier(.4,.1,.3,1), opacity 0.62s ease;
-  cursor: zoom-in;
-  z-index: 2;
+  left: 6%;
+  right: 6%;
+  bottom: -34px;
+  height: 34px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 72%);
+  pointer-events: none;
 }
-.pdfv__page.is-zoomed { cursor: zoom-out; }
-/* A view is 1 canvas (cover/back cover) or 2 (an open spread) — the flex
-   row sizes each canvas by its own intrinsic aspect at a shared height, so
-   two canvases side by side naturally read as one continuous open page. */
-.pdfv__sheet {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.25s ease;
+/* .pdfv__book is the element StPageFlip mounts into — the library adds
+   its own "stf__parent" class straight onto it (not a wrapped child), so
+   the zoom transform and shadow live on this same element directly. */
+.pdfv__book {
+  cursor: zoom-in;
+  filter: drop-shadow(0 26px 46px rgba(0,0,0,0.55));
+  transition: transform 0.28s ease;
   transform-origin: 50% 50%;
 }
-.pdfv__sheet canvas {
-  display: block;
-  height: 100%;
-  width: auto;
-  background: #fff;
-}
-/* Subtle spine shadow where two pages meet in a spread. */
-.pdfv__sheet canvas:first-child:not(:last-child) { box-shadow: inset -10px 0 14px -10px rgba(0,0,0,0.4); }
-.pdfv__sheet canvas:last-child:not(:first-child) { box-shadow: inset 10px 0 14px -10px rgba(0,0,0,0.4); }
-.pdfv__page.is-zoomed .pdfv__sheet { transform: scale(2.2); }
-.pdfv__page--back { z-index: 1; transition: none; }
+.pdfv__book.is-zoomed { cursor: zoom-out; transform: scale(2.1); }
 
-.pdfv__page.is-turning-next { transform-origin: 100% 50%; transform: rotateY(-92deg); opacity: 0; }
-.pdfv__page.is-turning-prev { transform-origin: 0% 50%; transform: rotateY(92deg); opacity: 0; }
+/* --- Vendored from StPageFlip's stPageFlip.css (page-flip npm package). --- */
+.pdfv__book.stf__parent { position: relative; display: block; box-sizing: border-box; touch-action: pan-y; }
+.pdfv__book .stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.pdfv__book.stf__parent canvas { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
+.pdfv__book .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2200px; }
+.pdfv__book .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
+.pdfv__book .stf__outerShadow,
+.pdfv__book .stf__innerShadow,
+.pdfv__book .stf__hardShadow,
+.pdfv__book .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
 
 .pdfv__arrow {
   position: absolute;
@@ -1381,7 +1379,6 @@ body.lightbox-open { overflow: hidden; }
   pointer-events: none;
 }
 @media (max-width: 760px) {
-  .pdfv__stage { max-width: 88vw; max-height: 78vh; }
   .pdfv__arrow { width: 26px; height: 26px; }
 }
 
