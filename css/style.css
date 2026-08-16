@@ -197,9 +197,49 @@ p { margin: 0 0 1em; }
   text-transform: uppercase;
   color: var(--nav-fg);
   text-shadow: var(--nav-shadow);
+  /* Docked state of the project-page title (see .project-hero__title):
+     hidden until js/main.js fades it in once the big overlay title has
+     scrolled far enough to hand off. Opacity is set inline by JS, so only
+     the transition and pointer-events toggle live here. */
+  opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
+.nav__center.is-visible { pointer-events: auto; }
 .nav__center:hover { opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) {
+  .nav__center { opacity: 1; pointer-events: auto; }
+}
+
+/* ---------- Project page hero title (hovers over the first tiles, then
+   hands off to .nav__center as you scroll — see js/main.js) ---------- */
+.project-hero { position: relative; }
+.project-hero__overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 5;
+  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  pointer-events: none;
+  transform-origin: left top;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.project-hero__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.45);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-hero__overlay { display: none; }
+}
 
 .nav__right { display: flex; align-items: center; gap: 20px; }
 
