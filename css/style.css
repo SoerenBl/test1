@@ -690,25 +690,26 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    set statically here — see why below.
    Two different scroll feels are wanted back to back: About→Awards should
    auto-complete on a partial scroll (a crisp "cover" snap), but Awards→
-   footer needs to scroll naturally/proportionally, matching how the
-   exit-spacer + scroll-tied transform reveal the footer everywhere else.
-   A single static scroll-snap-type can't do both: with only two reachable
-   rest points on this page (Awards' own start, and the footer's — which
-   sits so close to the end of the document that its nominal snap
-   position is unreachable and gets coerced to max-scroll), any snap-type
-   active for the WHOLE page picks whichever of those two is nearest after
-   every scroll input — including the first tick off Awards' start, which
-   is already closer to the coerced footer point than back to Awards. That
-   teleports the view straight to the bottom in one jump, skipping the
-   gradual reveal entirely (confirmed in both engines). Dropping snapping
-   for the whole page fixes that jump but also kills the wanted
-   About→Awards auto-complete, and reintroduces the older problem in
-   reverse if a snap target is kept on the footer without one on Awards:
-   mandatory snapping with nowhere to go traps scrolling on Awards forever.
-   So js/main.js now arms scroll-snap-type:mandatory only while scrollY is
-   still short of Awards' start (where the About→Awards transition needs
-   the assist), and switches it off once Awards is reached (where natural,
-   unassisted scrolling is what's wanted for the rest of the page). */
+   footer needs to scroll naturally/proportionally — Awards has no trailing
+   spacer of its own any more (see .stack__panel below), so it releases
+   and flows straight into the footer with a normal, ordinary scroll.
+   A single static scroll-snap-type can't give both feels at once: with
+   only two reachable rest points on this page (Awards' own start, and the
+   footer's — which sits so close to the end of the document that its
+   nominal snap position is unreachable and gets coerced to max-scroll),
+   any snap-type active for the WHOLE page picks whichever of those two is
+   nearest after every scroll input — including the first tick off Awards'
+   start, which is already closer to the coerced footer point than back to
+   Awards. That teleports the view straight to the bottom in one jump
+   (confirmed in both engines). Dropping snapping for the whole page fixes
+   that jump but also kills the wanted About→Awards auto-complete, and
+   reintroduces the older problem in reverse if a snap target is kept on
+   the footer without one on Awards: mandatory snapping with nowhere to go
+   traps scrolling on Awards forever. So js/main.js now arms
+   scroll-snap-type:mandatory only while scrollY is still short of Awards'
+   start (where the About→Awards transition needs the assist), and
+   switches it off once Awards is reached (where natural, unassisted
+   scrolling is what's wanted for the rest of the page). */
 
 .stack { position: relative; }
 .stack__panel {
@@ -732,15 +733,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   height: 100dvh;
   will-change: transform;
 }
-/* A sticky element's "stuck" duration comes from how much normal-flow
-   content follows it, not from its own height — so to give the last
-   panel room to play the "background exits, text stays put" effect
-   (driven by js/main.js) before it finally releases to the footer, we
-   add an invisible spacer after it rather than making the panel itself
-   taller (which would have no effect, since nothing would follow it). */
-/* Matches the footer's own natural height (~83px) — the same distance
-   you'd scroll to reveal the footer on any other page, no more. */
-.stack__exit-spacer { height: 90px; }
 .stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
 .stack__panel img {
