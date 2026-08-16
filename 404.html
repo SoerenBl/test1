@@ -7,7 +7,7 @@
 <meta name="description" content="Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="/favicon.svg" id="faviconLink" data-favicon-fallback="/logo2">
-<link rel="stylesheet" href="/css/style.css?v=29">
+<link rel="stylesheet" href="/css/style.css?v=30">
 </head>
 <body>
 
@@ -55,9 +55,17 @@
 
 <div id="projectRoot">
   <section class="section--flush project-hero">
-    <div class="wrap project-hero__overlay"><h1 class="project-hero__title"><a href="#" id="heroTitleLink"></a></h1></div>
-    <div class="tile-grid tile-grid--projects tile-grid--fill" data-fixed-layout></div>
-  </section>
+  <div class="wrap project-hero__overlay"><h1 class="project-hero__title"><a href="#" id="heroTitleLink"></a></h1></div>
+  <div class="project-stack">
+    <div class="project-hero-panel">
+      <div class="tile__media">
+        <div class="ph"><span data-lang="de">Projektfoto — Hauptbild</span><span data-lang="en">Project photo — main image</span></div>
+        <img data-photo="1" alt="">
+      </div>
+    </div>
+    <div class="tile-grid tile-grid--projects" data-fixed-layout></div>
+  </div>
+</section>
 
   <section>
     <div class="wrap about-grid">
@@ -101,7 +109,7 @@
   </div>
 </footer>
 
-<script src="/js/main.js?v=29"></script>
-<script src="/js/project.js?v=29"></script>
+<script src="/js/main.js?v=30"></script>
+<script src="/js/project.js?v=30"></script>
 </body>
 </html>
