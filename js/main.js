@@ -84,6 +84,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // last (single-column) tile down — used both before a full-width tile
     // jumps in and once more at the very end, so no column is ever left
     // with an abandoned cell behind a tile that already moved past it.
+    function markSpan(tile, span) {
+      tile.classList.remove('tile--tall', 'tile--portrait');
+      if (span === 2) tile.classList.add('tile--tall');
+      else if (span >= 3) tile.classList.add('tile--portrait');
+    }
+
     function closeGap() {
       while (colTop[0] !== colTop[1]) {
         var shortCol = colTop[0] < colTop[1] ? 0 : 1;
@@ -94,15 +100,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!bottomTile) break;
         bottomTile.rowSpan += 1;
         bottomTile.tile.style.gridRow = bottomTile.row + ' / span ' + bottomTile.rowSpan;
-        bottomTile.tile.classList.add('tile--tall');
+        markSpan(bottomTile.tile, bottomTile.rowSpan);
         colTop[shortCol] += 1;
       }
     }
 
     tiles.forEach(function (tile, i) {
       var forceFull = opts.preserveFull && tile.classList.contains('tile--full');
+      // A tile can arrive with an explicit row-span request (1/2/3) via
+      // data-row-span — set from the photo's own orientation (landscape/
+      // square/portrait) so the tile's shape actually matches what's
+      // inside it, instead of every tile getting a random shape. Falls
+      // back to the old random/preserve behaviour when no orientation
+      // info is available (e.g. the hand-authored homepage grid).
+      var requestedSpan = tile.getAttribute('data-row-span');
       var forceTall = opts.preserveTall && tile.classList.contains('tile--tall');
-      tile.classList.remove('tile--tall', 'tile--full');
+      tile.classList.remove('tile--tall', 'tile--portrait', 'tile--full');
       tile.style.gridColumn = '';
       tile.style.gridRow = '';
       var isLast = i === tiles.length - 1;
@@ -119,12 +132,17 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       var col = colTop[0] <= colTop[1] ? 0 : 1;
-      var tall = forceTall || (opts.randomTall && !isLast && Math.random() < 0.32);
-      var span = tall ? 2 : 1;
+      var span;
+      if (requestedSpan) {
+        span = Math.max(1, Math.min(3, parseInt(requestedSpan, 10) || 1));
+      } else {
+        var tall = forceTall || (opts.randomTall && !isLast && Math.random() < 0.32);
+        span = tall ? 2 : 1;
+      }
       var row = colTop[col];
       tile.style.gridColumn = (col + 1) + ' / span 1';
       tile.style.gridRow = row + ' / span ' + span;
-      if (tall) tile.classList.add('tile--tall');
+      markSpan(tile, span);
       placed.push({ tile: tile, col: col, colSpan: 1, row: row, rowSpan: span });
       colTop[col] += span;
     });
@@ -151,20 +169,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Photo formats: try these extensions in order for any photo slot,
   // so it doesn't matter whether a file was exported as .jpg, .png, etc. ---
-  var PHOTO_EXTS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
-  // Tries every extension at once instead of one after another — a
-  // sequential chain means a file saved as e.g. .png pays for 4 failed
-  // round-trips (jpg/JPG/jpeg/JPEG) before it even starts loading the real
-  // file, which is exactly the multi-second placeholder-then-photo flash
-  // this was causing. In parallel, the real file wins as soon as it's
-  // done regardless of its position in the list, and the "no photo here"
-  // case is bounded by the single slowest request instead of the sum of
-  // all eight.
-  function probePhoto(baseNoExt) {
+  // Tiered: try the extensions people actually export in (lowercase
+  // jpg/png/webp) first, and only escalate to the uncommon-casing
+  // fallbacks if none of those exist. Tried within a tier at once instead
+  // of one after another — a fully sequential chain means a .png file
+  // pays for a failed jpg round-trip first — but NOT all 8 at once either:
+  // with up to 24 numbered gallery slots each firing a full set, that was
+  // 192 simultaneous image requests fighting over the browser's ~6
+  // concurrent-connections-per-host limit, which is what actually caused
+  // the multi-second placeholder flash (not the probing logic itself).
+  // Two small tiers keep the common case (tier 1 hits) fast while capping
+  // how many requests pile up when a slot genuinely has nothing in it.
+  var PHOTO_EXTS_PRIMARY = ['jpg', 'png', 'webp'];
+  var PHOTO_EXTS_FALLBACK = ['JPG', 'jpeg', 'JPEG', 'PNG', 'WEBP'];
+  function probeExtSet(baseNoExt, exts) {
     return new Promise(function (resolve) {
-      var remaining = PHOTO_EXTS.length;
+      var remaining = exts.length;
       var settled = false;
-      PHOTO_EXTS.forEach(function (ext) {
+      exts.forEach(function (ext) {
         var url = baseNoExt + '.' + ext;
         var img = new Image();
         img.onload = function () {
@@ -178,21 +200,61 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
+  function probePhoto(baseNoExt) {
+    return probeExtSet(baseNoExt, PHOTO_EXTS_PRIMARY).then(function (url) {
+      return url || probeExtSet(baseNoExt, PHOTO_EXTS_FALLBACK);
+    });
+  }
 
   // --- Project photo galleries: fully dynamic. Probes numbered files
   // (1, 2, ...) up to a sane cap and builds one tile per photo that
   // actually exists — add or remove a numbered file and the grid
   // grows/shrinks with it, no HTML edit needed. Gaps are just skipped.
   var MAX_GALLERY_PHOTOS = 24;
+  // Small sequential batches instead of firing all 24 slots (× up to 8
+  // extension guesses each) at once — that was up to ~190 simultaneous
+  // image requests for a single gallery, which is what actually caused
+  // the multi-second placeholder flash (browsers only run a handful of
+  // requests at once per origin; the rest just queue). Stopping once a
+  // batch comes back with several consecutive misses in a row also means
+  // a typical 5-10 photo gallery finishes after 2-3 small batches instead
+  // of always scanning the full range — still tolerant of the occasional
+  // gap (a single missing number within a batch doesn't stop the scan),
+  // just no longer willing to keep checking indefinitely once photos have
+  // clearly run out.
+  var GALLERY_BATCH_SIZE = 4;
+  var GALLERY_MAX_CONSECUTIVE_MISSES = 4;
+  function probeGallerySequence(base, maxSlots) {
+    var results = [];
+    var consecutiveMisses = 0;
+    var nextIndex = 1;
+    function nextBatch() {
+      if (nextIndex > maxSlots || consecutiveMisses >= GALLERY_MAX_CONSECUTIVE_MISSES) {
+        return Promise.resolve(results);
+      }
+      var batch = [];
+      for (var i = 0; i < GALLERY_BATCH_SIZE && nextIndex <= maxSlots; i++, nextIndex++) {
+        batch.push(nextIndex);
+      }
+      return Promise.all(batch.map(function (idx) {
+        return probePhoto(base + idx).then(function (url) { return { idx: idx, url: url }; });
+      })).then(function (batchResults) {
+        batchResults.sort(function (a, b) { return a.idx - b.idx; });
+        batchResults.forEach(function (r) {
+          results[r.idx] = r.url;
+          consecutiveMisses = r.url ? 0 : consecutiveMisses + 1;
+        });
+        return nextBatch();
+      });
+    }
+    return nextBatch();
+  }
+
   var galleryGrids = document.querySelectorAll('.tile-grid--projects[data-fixed-layout]');
   galleryGrids.forEach(function (grid) {
     var base = grid.getAttribute('data-photo-path') || '';
-    var checks = [];
-    for (var i = 1; i <= MAX_GALLERY_PHOTOS; i++) {
-      checks.push(probePhoto(base + i).then(function (url) { return url; }));
-    }
-    Promise.all(checks).then(function (results) {
-      var found = results.filter(function (url) { return url !== null; });
+    probeGallerySequence(base, MAX_GALLERY_PHOTOS).then(function (results) {
+      var found = results.filter(function (url) { return url; });
       if (!found.length) {
         grid.innerHTML =
           '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
@@ -310,6 +372,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Loads a resolved photo URL a second time purely to read its pixel
+  // dimensions (free — the browser already has it cached from the probe
+  // that found it) and maps the aspect ratio to a row-span: 1 (landscape,
+  // wide) / 2 (square) / 3 (portrait, upright). Used so a tile's shape
+  // actually matches the photo inside it instead of being random.
+  function getOrientationSpan(url) {
+    return new Promise(function (resolve) {
+      if (!url) { resolve(1); return; }
+      var img = new Image();
+      img.onload = function () {
+        var ratio = img.naturalWidth / (img.naturalHeight || 1);
+        resolve(ratio < 0.85 ? 3 : (ratio > 1.15 ? 1 : 2));
+      };
+      img.onerror = function () { resolve(1); };
+      img.src = url;
+    });
+  }
+
   function buildCategoryTiles(grid, projects) {
     if (!projects.length) {
       grid.classList.add('tile-grid--single');
@@ -320,26 +400,41 @@ document.addEventListener('DOMContentLoaded', function () {
       applyLang(document.documentElement.getAttribute('data-lang') || 'de');
       return;
     }
-    var html = projects.map(function (p) {
-      return '<a class="tile" href="' + p.slug + '/">' +
-        '<div class="tile__media">' +
-        '<div class="ph"><span data-lang="de">Projektfoto — ' + p.title + '</span><span data-lang="en">Project photo — ' + p.title + '</span></div>' +
-        '<img data-photo="' + p.slug + '/cover" data-photo-fallback="' + p.slug + '/1" alt="">' +
-        '<div class="tile__caption">' +
-        '<h3 class="tile__title display">' + p.title + '</h3>' +
-        '<span class="tile__meta">' + p.country + ' · ' + p.year + '</span>' +
-        '</div></div></a>';
-    }).join('');
-    grid.innerHTML = html;
-    applyLang(document.documentElement.getAttribute('data-lang') || 'de');
+    // Cover photo (with the usual photo-1 fallback) is resolved — and its
+    // orientation read — before any tile markup is built, so the tile
+    // grid renders once with the right shapes already in place instead of
+    // rendering square/random and reflowing after the fact.
+    Promise.all(projects.map(function (p) {
+      return probePhoto(p.slug + '/cover').then(function (url) {
+        return url || probePhoto(p.slug + '/1');
+      }).then(function (url) {
+        return getOrientationSpan(url).then(function (span) {
+          return { p: p, span: span };
+        });
+      });
+    })).then(function (resolved) {
+      var html = resolved.map(function (r) {
+        var p = r.p;
+        return '<a class="tile" href="' + p.slug + '/" data-row-span="' + r.span + '">' +
+          '<div class="tile__media">' +
+          '<div class="ph"><span data-lang="de">Projektfoto — ' + p.title + '</span><span data-lang="en">Project photo — ' + p.title + '</span></div>' +
+          '<img data-photo="' + p.slug + '/cover" data-photo-fallback="' + p.slug + '/1" alt="">' +
+          '<div class="tile__caption">' +
+          '<h3 class="tile__title display">' + p.title + '</h3>' +
+          '<span class="tile__meta">' + p.country + ' · ' + p.year + '</span>' +
+          '</div></div></a>';
+      }).join('');
+      grid.innerHTML = html;
+      applyLang(document.documentElement.getAttribute('data-lang') || 'de');
 
-    var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
-    grid.classList.toggle('tile-grid--single', tiles.length === 1);
-    grid.classList.toggle('tile-grid--duo', tiles.length === 2);
-    if (tiles.length >= 3) {
-      layoutTilesGapFree(tiles, { randomTall: true, preserveFull: true });
-    }
-    resolveStaticPhotos(grid);
+      var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
+      grid.classList.toggle('tile-grid--single', tiles.length === 1);
+      grid.classList.toggle('tile-grid--duo', tiles.length === 2);
+      if (tiles.length >= 3) {
+        layoutTilesGapFree(tiles, { preserveFull: true });
+      }
+      resolveStaticPhotos(grid);
+    });
   }
 
   document.querySelectorAll('[data-discover-category]').forEach(function (grid) {
@@ -619,6 +714,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
         var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
         projectHeroTitleEl.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+        // A title that wraps to two lines at full size has no room to
+        // stay wrapped once docked (the nav bar is one line tall). Forcing
+        // that switch early was tried and rejected: at low dockProgress
+        // the text is still close to full size, so collapsing it to one
+        // line there overflows way past the viewport edge. Waiting until
+        // fully docked (already shrunk to its smallest, nav-appropriate
+        // size) means the same switch happens at a size that was always
+        // going to fit on one line — it reads as the last, subtle step of
+        // the same shrink motion instead of a separate jump.
+        projectHeroTitleEl.classList.toggle('is-docking', dockProgress >= 1);
       }
       ticking = false;
     }

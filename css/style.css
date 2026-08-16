@@ -229,6 +229,12 @@ p { margin: 0 0 1em; }
   transition: opacity 0.2s ease;
 }
 .project-hero__title a:hover { opacity: 0.75; }
+/* A title that wraps to two lines at full size has no room to stay
+   wrapped once docked in the one-line-tall nav bar — js/main.js switches
+   it to a single line right as the shrink/slide starts, so by the time
+   it's small enough to matter it's already reading as one continuous
+   line, not a title that wraps then un-wraps mid-transition. */
+.project-hero__title.is-docking { white-space: nowrap; }
 @media (max-width: 760px) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease; }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
@@ -489,13 +495,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 
 .tile { position: relative; display: block; grid-column: span 1; }
 .tile--full { grid-column: span 2; }
+/* Row height is half the column width (grid-auto-rows: 25vw above), so a
+   1-row tile reads as landscape (2:1), a 2-row tile (tile--tall) is an
+   exact square, and a 3-row tile (tile--portrait) is a true upright
+   rectangle (2:3) — matched to the actual photo's orientation by
+   js/main.js rather than assigned at random. */
 .tile--tall { grid-row: span 2; }
+.tile--portrait { grid-row: span 3; }
 
 @media (max-width: 760px) {
   .tile-grid { grid-template-columns: 1fr; grid-auto-rows: 300px; }
   .tile-grid--fill { grid-template-rows: unset; grid-auto-rows: 60vh; min-height: 0; }
   .tile { grid-column: span 1 !important; }
-  .tile--tall { grid-row: span 1; }
+  .tile--tall, .tile--portrait { grid-row: span 1; }
 }
 
 .tile__media {
