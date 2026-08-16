@@ -1278,7 +1278,7 @@ body.lightbox-open { overflow: hidden; }
   position: relative;
   height: 100vh;
   height: 100dvh;
-  background: radial-gradient(ellipse at 50% 42%, #3a3a3f 0%, #201f23 62%, #111013 100%);
+  background: var(--color-bg);
   overflow: hidden;
 }
 .pdfv {
@@ -1300,11 +1300,23 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__zone--next { right: 0; }
 .pdfv__zone[data-disabled="true"] { cursor: default; }
 
-/* Soft ground shadow the book appears to sit on — reads as a real
-   photographed mockup rather than a flat image pinned to the screen. */
+/* .pdfv__book (StPageFlip's own mount point) always stays sized for a
+   full two-page spread — that's what StPageFlip's internal page-pairing
+   math needs — but a single page (cover/back cover) only actually draws
+   into one half of it. .pdfv__book-wrap is the visible window onto that:
+   overflow:hidden, and only as wide as what should actually show (half
+   width for a single page, full width for a spread) — main.js shrinks it
+   and shifts .pdfv__book left by the same amount so the occupied half
+   lands inside that window, and the empty other half is simply never
+   rendered rather than sitting there off to one side. Being a flex child
+   with justify-content:center on the parent, shrinking its own width is
+   what keeps every state — cover, spread, back cover — centered on
+   screen with no extra positioning math needed. */
 .pdfv__book-wrap {
   position: relative;
   z-index: 5;
+  overflow: hidden;
+  transition: width 0.5s ease;
 }
 .pdfv__book-wrap::after {
   content: '';
@@ -1313,23 +1325,26 @@ body.lightbox-open { overflow: hidden; }
   right: 6%;
   bottom: -34px;
   height: 34px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 72%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 72%);
   pointer-events: none;
 }
 /* .pdfv__book is the element StPageFlip mounts into — the library adds
    its own "stf__parent" class straight onto it (not a wrapped child), so
-   the zoom transform and shadow live on this same element directly. */
+   the shift/zoom transform and shadow live on this same element directly.
+   Shift (recto/verso) and zoom are two independent things that both need
+   to end up in the one "transform" property, hence the custom properties
+   instead of two classes fighting over the same declaration. */
 .pdfv__book {
   cursor: zoom-in;
-  filter: drop-shadow(0 26px 46px rgba(0,0,0,0.55));
-  transition: transform 0.28s ease;
+  filter: drop-shadow(0 26px 46px rgba(0,0,0,0.35));
+  transition: transform 0.5s ease;
   transform-origin: 50% 50%;
 }
-.pdfv__book.is-zoomed { cursor: zoom-out; transform: scale(2.1); }
+.pdfv__book.is-zoomed { cursor: zoom-out; }
 
 /* --- Vendored from StPageFlip's stPageFlip.css (page-flip npm package). --- */
 .pdfv__book.stf__parent { position: relative; display: block; box-sizing: border-box; touch-action: pan-y; }
-.pdfv__book .stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.pdfv__book .stf__wrapper { position: relative; width: 100%; height: 100%; box-sizing: border-box; }
 .pdfv__book.stf__parent canvas { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
 .pdfv__book .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2200px; }
 .pdfv__book .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
@@ -1356,8 +1371,8 @@ body.lightbox-open { overflow: hidden; }
   left: 50%;
   width: 16px;
   height: 16px;
-  border-right: 3px solid var(--color-panel-hover);
-  border-bottom: 3px solid var(--color-panel-hover);
+  border-right: 3px solid var(--color-accent);
+  border-bottom: 3px solid var(--color-accent);
 }
 .pdfv__arrow--prev { left: clamp(16px, 4vw, 56px); }
 .pdfv__arrow--prev::before { transform: translate(-30%, -50%) rotate(135deg); }
@@ -1372,7 +1387,7 @@ body.lightbox-open { overflow: hidden; }
   bottom: clamp(18px, 4vh, 36px);
   transform: translateX(-50%);
   z-index: 4;
-  color: rgba(255,255,255,0.6);
+  color: var(--color-text-muted);
   font-family: var(--font-heading);
   font-size: 0.78rem;
   letter-spacing: 0.06em;

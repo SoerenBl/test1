@@ -616,12 +616,14 @@ document.addEventListener('DOMContentLoaded', function () {
   // fixed numbered pattern like the photos), so finding one needs a real
   // folder listing rather than the relative-probe trick used elsewhere —
   // one GitHub API call against that project's own folder. If a .pdf turns
-  // up, pdf.js is loaded on demand and a full-viewport "last tile" section
-  // is appended right after the photo gallery, where it can be read page
-  // by page: click the page itself to zoom (loupe, same mechanic as the
-  // lightbox), click the empty margin left/right of it to turn instead —
-  // the two click areas never overlap, so zooming can't accidentally turn
-  // a page or vice versa. */
+  // up, pdf.js renders every page to an image and StPageFlip (vendored,
+  // js/vendor/pageflip) turns those into a realistic paper mockup — cover
+  // alone, spreads in the middle, back cover alone, its own aspect ratio
+  // taken straight from the PDF's real page size. StPageFlip's own click/
+  // drag handling is switched off (useMouseEvents:false); page-turning is
+  // driven entirely by our own margin click-zones, arrows and swipe
+  // handling so the book itself only ever responds to a click as "zoom in
+  // on this page" — the two interactions can never fire off the same click. */
   (function () {
     var heroSection = document.querySelector('section.project-hero');
     if (!heroSection || !document.querySelector('.project-hero-panel')) return;
@@ -638,57 +640,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }).then(function (entries) {
       var pdfEntry = entries.filter(function (e) { return e.type === 'file' && /\.pdf$/i.test(e.name); })[0];
       if (!pdfEntry) return;
-      return loadPdfJs().then(function (pdfjsLib) { initPdfViewer(pdfjsLib, pdfEntry.download_url); });
+      return Promise.all([loadPdfJs(), loadPageFlip()]).then(function (libs) {
+        initPdfViewer(libs[0], libs[1], pdfEntry.download_url);
+      });
     }).catch(function () { /* no PDF in this project's folder, or offline — leave the page as-is */ });
 
-    // pdf.js is vendored locally (js/vendor/pdfjs/) rather than pulled from a
-    // CDN — one dependency less for the live site to rely on at runtime.
-    // Resolved as an absolute URL from main.js's own <script> tag so it
-    // works the same regardless of how many folders deep the current page
-    // sits (project pages are two levels under the site root).
+    // Both libraries are vendored locally (js/vendor/) rather than pulled
+    // from a CDN — no runtime dependency on a third-party host. Resolved as
+    // absolute URLs from main.js's own <script> tag so they work the same
+    // regardless of how many folders deep the current page sits (project
+    // pages are two levels under the site root).
+    function vendorBase(sub) {
+      var mainScript = document.querySelector('script[src*="js/main.js"]');
+      return mainScript ? new URL('vendor/' + sub + '/', mainScript.src).href : 'js/vendor/' + sub + '/';
+    }
     var pdfJsPromise = null;
     function loadPdfJs() {
       if (pdfJsPromise) return pdfJsPromise;
-      var mainScript = document.querySelector('script[src*="js/main.js"]');
-      var base = mainScript ? new URL('vendor/pdfjs/', mainScript.src).href : 'js/vendor/pdfjs/';
+      var base = vendorBase('pdfjs');
       pdfJsPromise = import(base + 'pdf.min.mjs').then(function (pdfjsLib) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.mjs';
         return pdfjsLib;
       });
       return pdfJsPromise;
     }
-
-    // A project's PDFs are always built cover / spreads / back cover:
-    // page 1 alone, then every following pair of pages shown together as
-    // one open-book spread, with the very last page alone again (a 24-page
-    // booklet reads as [1], [2,3], [4,5] … [22,23], [24]). Works out to a
-    // plain single-page "view" whenever an odd page can't find a partner,
-    // so a differently-structured PDF still degrades sensibly instead of
-    // breaking.
-    function buildViews(numPages) {
-      var views = [];
-      if (numPages < 1) return views;
-      views.push([1]);
-      var i = 2, last = numPages;
-      while (i < last) {
-        if (i + 1 === last) { views.push([i]); i++; }
-        else { views.push([i, i + 1]); i += 2; }
-      }
-      if (last >= 2) views.push([last]);
-      return views;
+    var pageFlipPromise = null;
+    function loadPageFlip() {
+      if (pageFlipPromise) return pageFlipPromise;
+      pageFlipPromise = new Promise(function (resolve, reject) {
+        if (window.St && window.St.PageFlip) { resolve(window.St.PageFlip); return; }
+        var script = document.createElement('script');
+        script.src = vendorBase('pageflip') + 'page-flip.browser.js';
+        script.onload = function () { resolve(window.St.PageFlip); };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      return pageFlipPromise;
     }
 
-    function initPdfViewer(pdfjsLib, url) {
+    function initPdfViewer(pdfjsLib, PageFlip, url) {
       var section = document.createElement('section');
       section.className = 'section--flush pdfv-section';
       section.innerHTML =
         '<div class="pdfv">' +
           '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
           '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
-          '<div class="pdfv__stage">' +
-            '<div class="pdfv__page pdfv__page--back"><div class="pdfv__sheet"></div></div>' +
-            '<div class="pdfv__page pdfv__page--front"><div class="pdfv__sheet"></div></div>' +
-          '</div>' +
+          '<div class="pdfv__book-wrap"><div class="pdfv__book"></div></div>' +
           '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
           '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
           '<div class="pdfv__count"></div>' +
@@ -697,124 +694,151 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var zonePrev = section.querySelector('.pdfv__zone--prev');
       var zoneNext = section.querySelector('.pdfv__zone--next');
-      var stage = section.querySelector('.pdfv__stage');
-      var pageEls = [section.querySelector('.pdfv__page--back'), section.querySelector('.pdfv__page--front')];
-      var frontIndex = 1; // pageEls[frontIndex] is always the currently-visible page
+      var bookWrap = section.querySelector('.pdfv__book-wrap');
+      var bookEl = section.querySelector('.pdfv__book');
       var arrowPrev = section.querySelector('.pdfv__arrow--prev');
       var arrowNext = section.querySelector('.pdfv__arrow--next');
       var countEl = section.querySelector('.pdfv__count');
 
-      var pdfDoc = null, views = [], currentViewIndex = 0, isAnimating = false, isZoomed = false;
+      var pageFlip = null, numPages = 0, isZoomed = false, currentShift = 0;
+      function applyBookTransform() {
+        bookEl.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
+      }
 
       pdfjsLib.getDocument(url).promise.then(function (doc) {
-        pdfDoc = doc;
-        views = buildViews(doc.numPages);
-        return renderInto(pageEls[frontIndex].querySelector('.pdfv__sheet'), views[0]);
-      }).then(function () {
-        sizeStageToCanvas(pageEls[frontIndex].querySelector('.pdfv__sheet'));
+        numPages = doc.numPages;
+        // Render every page once, up front, to its own image — StPageFlip
+        // draws pages from plain image URLs, not from a PDF renderer of
+        // its own. A page's pixel size is read from the PDF's own first
+        // page, so the mockup's proportions always match the uploaded
+        // format instead of a fixed ratio.
+        var pages = [];
+        for (var i = 1; i <= doc.numPages; i++) pages.push(i);
+        return doc.getPage(1).then(function (firstPage) {
+          var baseViewport = firstPage.getViewport({ scale: 1 });
+          var pageAspect = baseViewport.width / baseViewport.height;
+          return Promise.all(pages.map(function (n) { return renderPageToImage(doc, n); })).then(function (images) {
+            return { images: images, pageAspect: pageAspect };
+          });
+        });
+      }).then(function (result) {
+        sizeBook(result.pageAspect);
+        pageFlip = new PageFlip(bookEl, {
+          width: 800,
+          height: Math.round(800 / result.pageAspect),
+          size: 'stretch',
+          minWidth: 260,
+          maxWidth: 900,
+          minHeight: 260,
+          maxHeight: 1200,
+          autoSize: false,
+          showCover: true,
+          useMouseEvents: false,
+          drawShadow: true,
+          maxShadowOpacity: 0.5,
+          flippingTime: 700,
+          mobileScrollSupport: true
+        });
+        pageFlip.loadFromImages(result.images);
+        pageFlip.on('flip', updateUi);
+        pageFlip.on('init', updateUi);
         updateUi();
+        window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
       }).catch(function () { section.remove(); }); // unreadable PDF — don't leave a broken tile
 
-      // Renders 1 or 2 PDF pages into fresh canvases inside sheetEl, all at
-      // the same target height, so a two-page view naturally comes out
-      // twice as wide as a single page — exactly like an open spread next
-      // to a lone cover — instead of needing separate sizing logic per case.
-      function renderInto(sheetEl, pageNums) {
-        sheetEl.innerHTML = '';
-        var targetHeight = Math.min(1100, window.innerHeight * 0.82) * (window.devicePixelRatio || 1);
-        return Promise.all(pageNums.map(function (n) {
-          return pdfDoc.getPage(n).then(function (page) {
-            var baseViewport = page.getViewport({ scale: 1 });
-            var viewport = page.getViewport({ scale: targetHeight / baseViewport.height });
-            var canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            sheetEl.appendChild(canvas);
-            return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function () {
-              return viewport.width / viewport.height;
-            });
+      function renderPageToImage(doc, n) {
+        return doc.getPage(n).then(function (page) {
+          var baseViewport = page.getViewport({ scale: 1 });
+          var targetWidth = 1100 * (window.devicePixelRatio || 1);
+          var viewport = page.getViewport({ scale: targetWidth / baseViewport.width });
+          var canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function () {
+            return canvas.toDataURL('image/jpeg', 0.88);
           });
-        })).then(function (aspects) {
-          var total = aspects.reduce(function (a, b) { return a + b; }, 0);
-          sheetEl.setAttribute('data-aspect', total.toFixed(4));
         });
       }
 
-      function sizeStageToCanvas(sheetEl) {
-        var aspect = parseFloat(sheetEl.getAttribute('data-aspect') || '0.77');
-        var maxW = window.innerWidth * 0.78, maxH = window.innerHeight * 0.82;
-        var w = Math.min(maxW, maxH * aspect);
-        stage.style.width = w + 'px';
-        stage.style.height = (w / aspect) + 'px';
+      // .pdfv__book (StPageFlip's own mount) always stays sized for a full
+      // two-page spread — that's what its internal page-pairing math
+      // needs — regardless of whether a single page or a spread is
+      // currently showing. frameW/frameH are kept around so updateUi can
+      // size the *visible* window onto it (.pdfv__book-wrap) separately.
+      var frameW = 0, frameH = 0;
+      function sizeBook(pageAspect) {
+        var maxW = window.innerWidth * 0.86, maxH = window.innerHeight * 0.82;
+        frameW = Math.min(maxW, maxH * 2 * pageAspect);
+        frameH = frameW / (2 * pageAspect);
+        bookEl.style.width = frameW + 'px';
+        bookEl.style.height = frameH + 'px';
       }
-      window.addEventListener('resize', function () {
-        if (pdfDoc) sizeStageToCanvas(pageEls[frontIndex].querySelector('.pdfv__sheet'));
-      });
 
       function updateUi() {
-        zonePrev.setAttribute('data-disabled', currentViewIndex <= 0 ? 'true' : 'false');
-        zoneNext.setAttribute('data-disabled', currentViewIndex >= views.length - 1 ? 'true' : 'false');
-        arrowPrev.style.display = currentViewIndex <= 0 ? 'none' : '';
-        arrowNext.style.display = currentViewIndex >= views.length - 1 ? 'none' : '';
-        var pages = views[currentViewIndex];
-        var label = pages.length === 2 ? (pages[0] + '–' + pages[1]) : String(pages[0]);
-        countEl.textContent = label + ' / ' + pdfDoc.numPages;
+        var current = pageFlip.getCurrentPageIndex();
+        var last = pageFlip.getPageCount() - 1;
+        zonePrev.setAttribute('data-disabled', current <= 0 ? 'true' : 'false');
+        zoneNext.setAttribute('data-disabled', current >= last ? 'true' : 'false');
+        arrowPrev.style.display = current <= 0 ? 'none' : '';
+        arrowNext.style.display = current >= last ? 'none' : '';
+        var orientation = pageFlip.getOrientation();
+        var label;
+        if (orientation === 'landscape' && current > 0 && current < last) {
+          // Two pages are on screen together in a spread — figure out
+          // which pair from the current (left-hand, even) page index.
+          var left = current % 2 === 1 ? current : current - 1;
+          label = (left + 1) + '–' + (left + 2);
+        } else {
+          label = String(current + 1);
+        }
+        countEl.textContent = label + ' / ' + numPages;
+
+        // A single page (cover or back cover) always renders into one
+        // specific half of the fixed spread-width frame — the cover into
+        // the right half, the back cover into the left half (StPageFlip's
+        // own convention: a lone recto page, then a lone verso page).
+        // Shrinking the visible window to that one half — instead of just
+        // repositioning the full frame — hides the empty other half
+        // completely rather than leaving it sitting there unused; shifting
+        // .pdfv__book by the same amount brings the occupied half inside
+        // that window. The window shrinking is itself what keeps it
+        // centered (flex parent), no separate centering math needed.
+        var isSingle = current === 0 || (current === last && current !== 0);
+        bookWrap.style.width = (isSingle ? frameW / 2 : frameW) + 'px';
+        bookWrap.style.height = frameH + 'px';
+        currentShift = current === 0 ? -50 : 0;
+        applyBookTransform();
       }
 
       function turn(dir) {
-        if (isAnimating || isZoomed) return;
-        var target = currentViewIndex + dir;
-        if (target < 0 || target >= views.length) return;
-        isAnimating = true;
-        var front = pageEls[frontIndex];
-        var back = pageEls[1 - frontIndex];
-        renderInto(back.querySelector('.pdfv__sheet'), views[target]).then(function () {
-          front.classList.add(dir > 0 ? 'is-turning-next' : 'is-turning-prev');
-          setTimeout(function () {
-            front.classList.remove('is-turning-next', 'is-turning-prev');
-            // The page that was hidden underneath becomes the new front —
-            // no re-render needed, just swap which element plays which role.
-            front.classList.remove('pdfv__page--front');
-            front.classList.add('pdfv__page--back');
-            back.classList.remove('pdfv__page--back');
-            back.classList.add('pdfv__page--front');
-            frontIndex = 1 - frontIndex;
-            currentViewIndex = target;
-            sizeStageToCanvas(back.querySelector('.pdfv__sheet'));
-            isAnimating = false;
-            updateUi();
-          }, 640);
-        });
+        if (!pageFlip || isZoomed) return;
+        if (dir > 0) pageFlip.flipNext(); else pageFlip.flipPrev();
       }
-
       zonePrev.addEventListener('click', function () { turn(-1); });
       zoneNext.addEventListener('click', function () { turn(1); });
 
-      function setZoomOrigin(e, sheetEl) {
-        var rect = sheetEl.getBoundingClientRect();
-        sheetEl.style.transformOrigin =
+      function setZoomOrigin(e) {
+        // Origin is computed against .pdfv__book-wrap (the visible,
+        // clipped window), not .pdfv__book itself — .pdfv__book keeps its
+        // full spread-width box even on a single page, so using its own
+        // rect would measure against width that's half off-screen.
+        var rect = bookWrap.getBoundingClientRect();
+        bookEl.style.transformOrigin =
           (((e.clientX - rect.left) / rect.width) * 100) + '% ' + (((e.clientY - rect.top) / rect.height) * 100) + '%';
       }
-      section.addEventListener('click', function (e) {
-        if (isAnimating) return;
-        var front = pageEls[frontIndex];
-        if (!front.contains(e.target)) return;
+      bookEl.addEventListener('click', function (e) {
         e.stopPropagation();
-        var sheetEl = front.querySelector('.pdfv__sheet');
         isZoomed = !isZoomed;
-        if (isZoomed) setZoomOrigin(e, sheetEl);
-        front.classList.toggle('is-zoomed', isZoomed);
+        if (isZoomed) setZoomOrigin(e);
+        bookEl.classList.toggle('is-zoomed', isZoomed);
+        applyBookTransform();
       });
-      section.addEventListener('mousemove', function (e) {
+      bookEl.addEventListener('mousemove', function (e) { if (isZoomed) setZoomOrigin(e); });
+      bookEl.addEventListener('mouseleave', function () {
         if (!isZoomed) return;
-        setZoomOrigin(e, pageEls[frontIndex].querySelector('.pdfv__sheet'));
-      });
-      pageEls.forEach(function (el) {
-        el.addEventListener('mouseleave', function () {
-          if (!isZoomed || el !== pageEls[frontIndex]) return;
-          isZoomed = false;
-          el.classList.remove('is-zoomed');
-        });
+        isZoomed = false;
+        bookEl.classList.remove('is-zoomed');
+        applyBookTransform();
       });
 
       // Trackpad / Magic Mouse horizontal swipe — one clear horizontal
