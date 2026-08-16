@@ -700,7 +700,10 @@ document.addEventListener('DOMContentLoaded', function () {
       var arrowNext = section.querySelector('.pdfv__arrow--next');
       var countEl = section.querySelector('.pdfv__count');
 
-      var pageFlip = null, numPages = 0, isZoomed = false;
+      var pageFlip = null, numPages = 0, isZoomed = false, currentShift = 0;
+      function applyBookTransform() {
+        bookEl.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
+      }
 
       pdfjsLib.getDocument(url).promise.then(function (doc) {
         numPages = doc.numPages;
@@ -738,8 +741,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         pageFlip.loadFromImages(result.images);
         pageFlip.on('flip', updateUi);
+        pageFlip.on('init', updateUi);
         updateUi();
-        window.addEventListener('resize', function () { sizeBook(result.pageAspect); });
+        window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
       }).catch(function () { section.remove(); }); // unreadable PDF — don't leave a broken tile
 
       function renderPageToImage(doc, n) {
@@ -756,19 +760,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
 
-      // The book's own footprint is always sized to comfortably fit a full
-      // two-page spread; a single page (cover/back cover) then renders
-      // centered within that same frame instead of a narrow box of its
-      // own, so nothing jumps or resizes as the cover is turned past into
-      // the first spread — one continuous, centered stage throughout.
+      // .pdfv__book (StPageFlip's own mount) always stays sized for a full
+      // two-page spread — that's what its internal page-pairing math
+      // needs — regardless of whether a single page or a spread is
+      // currently showing. frameW/frameH are kept around so updateUi can
+      // size the *visible* window onto it (.pdfv__book-wrap) separately.
+      var frameW = 0, frameH = 0;
       function sizeBook(pageAspect) {
         var maxW = window.innerWidth * 0.86, maxH = window.innerHeight * 0.82;
-        var w = Math.min(maxW, maxH * 2 * pageAspect);
-        var h = w / (2 * pageAspect);
-        bookWrap.style.width = w + 'px';
-        bookWrap.style.height = h + 'px';
-        bookEl.style.width = w + 'px';
-        bookEl.style.height = h + 'px';
+        frameW = Math.min(maxW, maxH * 2 * pageAspect);
+        frameH = frameW / (2 * pageAspect);
+        bookEl.style.width = frameW + 'px';
+        bookEl.style.height = frameH + 'px';
       }
 
       function updateUi() {
@@ -790,11 +793,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         countEl.textContent = label + ' / ' + numPages;
 
-        // Single pages (cover, back cover) render into the right/left half
-        // of the fixed spread-width frame respectively — recenter that
-        // occupied half instead of leaving it sitting off to one side.
-        bookWrap.classList.toggle('is-single-recto', current === 0);
-        bookWrap.classList.toggle('is-single-verso', current === last && current !== 0);
+        // A single page (cover or back cover) always renders into one
+        // specific half of the fixed spread-width frame — the cover into
+        // the right half, the back cover into the left half (StPageFlip's
+        // own convention: a lone recto page, then a lone verso page).
+        // Shrinking the visible window to that one half — instead of just
+        // repositioning the full frame — hides the empty other half
+        // completely rather than leaving it sitting there unused; shifting
+        // .pdfv__book by the same amount brings the occupied half inside
+        // that window. The window shrinking is itself what keeps it
+        // centered (flex parent), no separate centering math needed.
+        var isSingle = current === 0 || (current === last && current !== 0);
+        bookWrap.style.width = (isSingle ? frameW / 2 : frameW) + 'px';
+        bookWrap.style.height = frameH + 'px';
+        currentShift = current === 0 ? -50 : 0;
+        applyBookTransform();
       }
 
       function turn(dir) {
@@ -805,7 +818,11 @@ document.addEventListener('DOMContentLoaded', function () {
       zoneNext.addEventListener('click', function () { turn(1); });
 
       function setZoomOrigin(e) {
-        var rect = bookEl.getBoundingClientRect();
+        // Origin is computed against .pdfv__book-wrap (the visible,
+        // clipped window), not .pdfv__book itself — .pdfv__book keeps its
+        // full spread-width box even on a single page, so using its own
+        // rect would measure against width that's half off-screen.
+        var rect = bookWrap.getBoundingClientRect();
         bookEl.style.transformOrigin =
           (((e.clientX - rect.left) / rect.width) * 100) + '% ' + (((e.clientY - rect.top) / rect.height) * 100) + '%';
       }
@@ -814,12 +831,14 @@ document.addEventListener('DOMContentLoaded', function () {
         isZoomed = !isZoomed;
         if (isZoomed) setZoomOrigin(e);
         bookEl.classList.toggle('is-zoomed', isZoomed);
+        applyBookTransform();
       });
       bookEl.addEventListener('mousemove', function (e) { if (isZoomed) setZoomOrigin(e); });
       bookEl.addEventListener('mouseleave', function () {
         if (!isZoomed) return;
         isZoomed = false;
         bookEl.classList.remove('is-zoomed');
+        applyBookTransform();
       });
 
       // Trackpad / Magic Mouse horizontal swipe — one clear horizontal
