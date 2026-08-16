@@ -263,6 +263,10 @@ p { margin: 0 0 1em; }
   font-size: inherit;
   padding: 4px 6px;
   transition: background-color 0.2s ease;
+  /* Buttons don't inherit text-shadow from .lang-toggle in practice (form
+     controls opt out of most inherited typographic properties), so it
+     has to be set here directly — same soft blur as .nav__mark. */
+  text-shadow: var(--nav-shadow);
 }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
 /* Same soft blur nav__mark/menu-btn already have for legibility over any
@@ -621,20 +625,12 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   opacity: 0.85;
 }
 
-/* Cutout product image inside a category tile — sits centered over the
-   coloured background, never cropped (object-fit: contain), and drifts
-   slightly with scroll (see updateParallax). Size is a variable so a
-   single category can be tuned via style="--object-size: 60%" without
-   touching this rule. */
+/* Category tile cover photo — fills the tile edge-to-edge like any other
+   photo tile (cover, cropped to the tile's own shape), just with the same
+   fade/blur-in reveal as it loads. Used to be a centered, uncropped
+   "cutout" floating over a colour background (for isolated product shots
+   on transparent PNGs); real photography needs to fill the frame instead. */
 .tile__media > img.tile__object {
-  inset: auto;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--object-size, 72%);
-  height: auto;
-  max-height: 130%;
-  object-fit: contain;
   pointer-events: none;
   opacity: 0;
   filter: blur(18px);
@@ -690,17 +686,29 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    later panels sit at a higher stacking order, so as you scroll past one
    the next slides up from below and covers it, like turning a page. */
 
-/* Scroll-snap so nudging past a panel completes the transition on its
-   own, landing fully on the next full-viewport panel instead of
-   requiring a slow, precise scroll through its entire height. Scoped to
-   pages that actually contain a .stack so it never affects normal
-   scrolling elsewhere on the site. */
-html:has(.stack) { scroll-snap-type: y mandatory; }
-/* Without a snap target after the last panel, mandatory snapping has
-   nowhere further to go and traps scrolling on that panel forever — give
-   the footer a snap point too so continuing past Awards auto-completes
-   down to the footer instead of getting stuck. */
-html:has(.stack) footer { scroll-snap-align: start; }
+/* scroll-snap-type on <html> is toggled dynamically by js/main.js, not
+   set statically here — see why below.
+   Two different scroll feels are wanted back to back: About→Awards should
+   auto-complete on a partial scroll (a crisp "cover" snap), but Awards→
+   footer needs to scroll naturally/proportionally, matching how the
+   exit-spacer + scroll-tied transform reveal the footer everywhere else.
+   A single static scroll-snap-type can't do both: with only two reachable
+   rest points on this page (Awards' own start, and the footer's — which
+   sits so close to the end of the document that its nominal snap
+   position is unreachable and gets coerced to max-scroll), any snap-type
+   active for the WHOLE page picks whichever of those two is nearest after
+   every scroll input — including the first tick off Awards' start, which
+   is already closer to the coerced footer point than back to Awards. That
+   teleports the view straight to the bottom in one jump, skipping the
+   gradual reveal entirely (confirmed in both engines). Dropping snapping
+   for the whole page fixes that jump but also kills the wanted
+   About→Awards auto-complete, and reintroduces the older problem in
+   reverse if a snap target is kept on the footer without one on Awards:
+   mandatory snapping with nowhere to go traps scrolling on Awards forever.
+   So js/main.js now arms scroll-snap-type:mandatory only while scrollY is
+   still short of Awards' start (where the About→Awards transition needs
+   the assist), and switches it off once Awards is reached (where natural,
+   unassisted scrolling is what's wanted for the rest of the page). */
 
 .stack { position: relative; }
 .stack__panel {
@@ -731,9 +739,7 @@ html:has(.stack) footer { scroll-snap-align: start; }
    add an invisible spacer after it rather than making the panel itself
    taller (which would have no effect, since nothing would follow it). */
 /* Matches the footer's own natural height (~83px) — the same distance
-   you'd scroll to reveal the footer on any other page, no more. Also
-   short enough that, with mandatory scroll-snap, a single ordinary
-   scroll input clears it instead of repeatedly snapping back. */
+   you'd scroll to reveal the footer on any other page, no more. */
 .stack__exit-spacer { height: 90px; }
 .stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
@@ -866,9 +872,14 @@ html:has(.stack) footer { scroll-snap-align: start; }
   margin: 0 0 clamp(20px, 3vh, 36px);
   overflow-wrap: anywhere;
 }
+/* One long compound word (e.g. "Datenschutzerklärung") has no spaces to
+   break at, so at the shared editorial size it wraps mid-word wherever it
+   happens to fit — this smaller clamp keeps it to one line instead. */
+.page-hero__title--compact { font-size: clamp(2.6rem, 7.2vw, 6rem); }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+  .page-hero__title--compact { font-size: clamp(2.1rem, 9.5vw, 3.4rem); }
 }
 
 /* Photo-background variant of .page-hero (Service): mirrors the About
@@ -1044,6 +1055,19 @@ html:has(.stack) footer { scroll-snap-align: start; }
 
 /* ---------- Footer ---------- */
 
+/* No scroll-snap here on purpose. It was tried (scroll-snap-type:
+   proximity + scroll-snap-align:end on <footer>) to give every ordinary
+   page the same "auto-completes to reveal exactly the footer" feel as
+   the fixed About/Awards page — but Chromium's proximity threshold turned
+   out to be roughly a full viewport height, not "only when already very
+   close": it snapped early and jumped the last stretch in one motion,
+   reproducing the exact same premature-jump bug on every page instead of
+   fixing anything. Plain, unsnapped scrolling already does exactly what
+   was wanted here for free — it moves proportionally with the input and
+   naturally stops exactly at the true end of the page, footer fully
+   revealed, no more — which is the same natural behaviour the Awards fix
+   now matches once its own snap disarms. */
+
 footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
 .footer__inner {
   display: flex;
@@ -1055,7 +1079,15 @@ footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
   color: var(--color-text-muted);
 }
 .footer__social { display: flex; gap: 18px; }
-.footer__social a:hover { color: var(--color-accent); }
+.footer__social a { transition: color 0.2s ease; }
+.footer__social a:hover { color: var(--color-panel-hover); }
+
+/* ---------- Letter-jump hover (About/Awards/Service/Contact titles) ----------
+   Each character is split into its own span (see initLetterFx in
+   js/main.js) so a hover can animate them individually via the Web
+   Animations API — a staggered per-letter bounce+blue-flash, restarted
+   cleanly on every hover rather than fighting CSS animation replay. */
+.hover-letters .letter-fx__char { display: inline-block; }
 
 /* ---------- Lightbox (project photo zoom) ---------- */
 
