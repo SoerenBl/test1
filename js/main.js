@@ -629,8 +629,6 @@ document.addEventListener('DOMContentLoaded', function () {
   var parallaxEls = document.querySelectorAll('.tile__caption');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
-  var exitPanel = document.querySelector('.stack__panel--exit');
-  var exitBg = exitPanel ? exitPanel.querySelector('.stack__bg') : null;
 
   // --- Stack pages (About/Awards): arm scroll-snap only for the
   // About→Awards "cover" transition, disarm it once Awards is reached, so
@@ -720,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.__remeasureProjectHero = measureProjectHero;
   }
 
-  if (!reduceMotion && (parallaxEls.length || heroContent || exitBg || projectHero)) {
+  if (!reduceMotion && (parallaxEls.length || heroContent || projectHero)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -736,28 +734,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var progress = Math.max(0, Math.min(1, window.scrollY / heroHeight));
         var scale = 1 - progress * 0.14;
         heroContent.style.transform = 'scale(' + scale.toFixed(3) + ')';
-      }
-      if (exitBg) {
-        // A sticky element's "stuck" duration comes from how much normal-
-        // flow content follows it, not from its own height — so the exit
-        // window here is exactly the height of the invisible spacer that
-        // follows this panel (see .stack__exit-spacer), not the panel's
-        // own height. During that window only the background is nudged
-        // upward — the title/text sit in a separate sibling we never
-        // touch, so they stay exactly in place until the panel finally
-        // releases and the footer takes over.
-        var exitPanelTop = 0;
-        var sib = exitPanel.previousElementSibling;
-        while (sib) {
-          if (sib.classList.contains('stack__panel')) exitPanelTop += sib.offsetHeight;
-          sib = sib.previousElementSibling;
-        }
-        var spacer = exitPanel.nextElementSibling;
-        var exitRange = spacer ? spacer.offsetHeight : 0;
-        var exitProgress = exitRange > 0
-          ? Math.max(0, Math.min(1, (window.scrollY - exitPanelTop) / exitRange))
-          : 0;
-        exitBg.style.transform = 'translateY(' + (-exitProgress * 100).toFixed(2) + '%)';
       }
       if (projectHero && projectHeroNatural && projectHeroDock) {
         var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
