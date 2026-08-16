@@ -266,10 +266,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // clearly run out.
   var GALLERY_BATCH_SIZE = 4;
   var GALLERY_MAX_CONSECUTIVE_MISSES = 4;
-  function probeGallerySequence(base, maxSlots) {
+  // startIndex lets a caller skip past a photo already claimed elsewhere
+  // (photo 1 is the project's hero — see .project-hero-panel below — so
+  // the gallery itself only ever needs to scan from photo 2 on).
+  function probeGallerySequence(base, startIndex, maxSlots) {
     var results = [];
     var consecutiveMisses = 0;
-    var nextIndex = 1;
+    var nextIndex = startIndex;
     function nextBatch() {
       if (nextIndex > maxSlots || consecutiveMisses >= GALLERY_MAX_CONSECUTIVE_MISSES) {
         return Promise.resolve(results);
@@ -292,28 +295,36 @@ document.addEventListener('DOMContentLoaded', function () {
     return nextBatch();
   }
 
+  // --- Project photo gallery (photos 2+ — photo 1 is the static hero
+  // slot resolved by resolveStaticPhotos below, like any other single
+  // photo). Same orientation-aware masonry placement as the category tile
+  // grids: each tile's shape (landscape/square/portrait) is read from its
+  // own photo before anything renders, instead of a fixed alternating
+  // pattern that ignores what's actually in the picture. ---
   var galleryGrids = document.querySelectorAll('.tile-grid--projects[data-fixed-layout]');
   galleryGrids.forEach(function (grid) {
     var base = grid.getAttribute('data-photo-path') || '';
-    probeGallerySequence(base, MAX_GALLERY_PHOTOS).then(function (results) {
-      var found = results.filter(function (url) { return url; });
-      if (!found.length) {
-        grid.innerHTML =
-          '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
-          '<span data-lang="de">Fotos folgen in Kürze</span><span data-lang="en">Photos coming soon</span>' +
-          '</div></div></div>';
-        grid.style.setProperty('--rows', 1);
+    probeGallerySequence(base, 2, MAX_GALLERY_PHOTOS).then(function (results) {
+      var found = [];
+      results.forEach(function (url) { if (url) found.push(url); });
+      if (!found.length) return; // nothing beyond the hero photo — leave the grid empty
+      return Promise.all(found.map(function (url) {
+        return getOrientationSpan(url).then(function (span) { return { url: url, span: span }; });
+      }));
+    }).then(function (resolved) {
+      if (!resolved || !resolved.length) return;
+      // A single leftover photo spans full width — otherwise it would sit
+      // alone in one column, leaving the other half of that row blank.
+      if (resolved.length === 1) {
+        grid.innerHTML = '<div class="tile tile--full"><div class="tile__media"><img src="' + resolved[0].url + '" alt=""></div></div>';
         return;
       }
-      var normalCount = found.length - 1;
-      var html = '';
-      found.forEach(function (url, idx) {
-        var isLastOdd = idx > 0 && idx === found.length - 1 && normalCount % 2 === 1;
-        var full = (idx === 0 || isLastOdd) ? ' tile--full' : '';
-        html += '<div class="tile' + full + '"><div class="tile__media"><img src="' + url + '" alt=""></div></div>';
-      });
+      var html = resolved.map(function (r) {
+        return '<div class="tile" data-row-span="' + r.span + '"><div class="tile__media"><img src="' + r.url + '" alt=""></div></div>';
+      }).join('');
       grid.innerHTML = html;
-      grid.style.setProperty('--rows', 1 + Math.ceil(normalCount / 2));
+      var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
+      layoutTilesGapFree(tiles, { preserveFull: true });
     });
   });
 
@@ -684,8 +695,10 @@ document.addEventListener('DOMContentLoaded', function () {
     projectHeroNatural = {
       // Stored as document-relative (rect.top is viewport-relative at the
       // current scroll position) so it stays valid no matter when/where
-      // we're scrolled to when this runs.
+      // we're scrolled to when this runs. left doesn't need the same
+      // scrollY correction — horizontal scroll position never changes.
       top: rect.top + window.scrollY,
+      left: rect.left,
       height: rect.height,
       fontSize: parseFloat(getComputedStyle(projectHeroTitleEl).fontSize)
     };
@@ -701,9 +714,20 @@ document.addEventListener('DOMContentLoaded', function () {
       var navFontPx = parseFloat(getComputedStyle(projectHeroNav).fontSize) || 24;
       var targetFontPx = navFontPx * 2;
       var minScale = Math.min(1, targetFontPx / projectHeroNatural.fontSize);
+      // Desktop only: docks to the right of the nav name instead of the
+      // title's own natural left gutter, which would otherwise land both
+      // at the same x position and read as overlapping/smashed-together
+      // text. Mobile is deferred to a separate pass — .nav__mark wraps to
+      // two shorter lines there and the lang toggle/menu button sit much
+      // closer in, so the same fixed offset runs straight into them
+      // instead; natural-left keeps mobile at its prior (already known,
+      // not-yet-addressed) behaviour rather than trading one overlap for
+      // a worse one against the actually-clickable menu button.
+      var isDesktop = window.matchMedia('(min-width: 761px)').matches;
       projectHeroDock = {
         // Top edges of both text boxes flush, not vertically centred.
         top: navRect.top,
+        left: isDesktop ? navRect.right + 24 : projectHeroNatural.left,
         scale: minScale
       };
     }
@@ -742,11 +766,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // element's own natural scroll-away drift once fully docked
         // (translateY grows 1:1 with scrollY beyond that point), which is
         // what makes it read as "pinned in the nav" without ever switching
-        // position modes. transform-origin is left/top, so this is a pure
-        // vertical slide — the left edge never moves.
+        // position modes. translateX has no such drift to cancel (the page
+        // never scrolls horizontally) — it just slides left→right toward
+        // the docked spot, same as translateY does top→bottom.
+        var translateX = dockProgress * (projectHeroDock.left - projectHeroNatural.left);
         var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
         var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
-        projectHeroTitleEl.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+        projectHeroTitleEl.style.transform = 'translate(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
       }
       ticking = false;
     }

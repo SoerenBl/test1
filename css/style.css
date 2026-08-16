@@ -229,6 +229,31 @@ p { margin: 0 0 1em; }
   transition: opacity 0.2s ease;
 }
 .project-hero__title a:hover { opacity: 0.75; }
+
+/* Project detail pages: photo 1 is a full-viewport sticky hero, photos 2+
+   sit in a normal (non-sticky) tile grid directly after it — same "cover
+   slide" mechanic as the About→Awards stack, but simpler: the gallery
+   grid doesn't need to be sticky itself, since default DOM-paint-order
+   already puts it above the hero as it scrolls up (explicit z-index here
+   just makes that certain rather than relying on the implicit rule).
+   Once the gallery's own content is exhausted, normal scrolling continues
+   straight into the "About the project" section below — the hero panel's
+   sticky window is exactly the gallery's height (a sticky element's stuck
+   duration comes from trailing content, not its own height), so it can
+   never outlast the thing covering it. */
+.project-stack { position: relative; }
+.project-hero-panel {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  z-index: 1;
+}
+.project-stack .tile-grid--projects {
+  position: relative;
+  z-index: 2;
+}
 @media (max-width: 760px) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease; }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
@@ -447,15 +472,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   gap: 0;
 }
 
-/* Fill the remaining viewport height instead of fixed-height rows —
-   used for categories with few projects (see --rows on the element). */
-.tile-grid--fill {
-  grid-auto-rows: unset;
-  grid-template-rows: repeat(var(--rows, 1), 1fr);
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
 /* Category listing pages: the tile grid itself fills the window on load
    (nav floats over it, same as project pages) — the category title is a
    .project-hero__overlay that hovers directly over the existing tiles and
@@ -510,7 +526,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 
 @media (max-width: 760px) {
   .tile-grid { grid-template-columns: 1fr; grid-auto-rows: 300px; }
-  .tile-grid--fill { grid-template-rows: unset; grid-auto-rows: 60vh; min-height: 0; }
   .tile { grid-column: span 1 !important; }
   .tile--tall, .tile--portrait { grid-row: span 1; }
 }
