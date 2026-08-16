@@ -263,6 +263,10 @@ p { margin: 0 0 1em; }
   font-size: inherit;
   padding: 4px 6px;
   transition: background-color 0.2s ease;
+  /* Buttons don't inherit text-shadow from .lang-toggle in practice (form
+     controls opt out of most inherited typographic properties), so it
+     has to be set here directly — same soft blur as .nav__mark. */
+  text-shadow: var(--nav-shadow);
 }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
 /* Same soft blur nav__mark/menu-btn already have for legibility over any
@@ -690,17 +694,27 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    later panels sit at a higher stacking order, so as you scroll past one
    the next slides up from below and covers it, like turning a page. */
 
-/* Scroll-snap so nudging past a panel completes the transition on its
-   own, landing fully on the next full-viewport panel instead of
-   requiring a slow, precise scroll through its entire height. Scoped to
-   pages that actually contain a .stack so it never affects normal
-   scrolling elsewhere on the site. */
-html:has(.stack) { scroll-snap-type: y mandatory; }
-/* Without a snap target after the last panel, mandatory snapping has
-   nowhere further to go and traps scrolling on that panel forever — give
-   the footer a snap point too so continuing past Awards auto-completes
-   down to the footer instead of getting stuck. */
-html:has(.stack) footer { scroll-snap-align: start; }
+/* No scroll-snap here (deliberately — this used to use scroll-snap-type,
+   see below for why it was removed). Panel1→panel2 covering entirely via
+   position:sticky + z-index (no snap needed for that: panel2 just slides
+   over panel1 as you scroll, it's a visual effect of stacking, not a
+   discrete jump), and the Awards→footer reveal via the exit-spacer +
+   scroll-tied transform in js/main.js needs to play out over its actual
+   scroll range, not get intercepted by snapping.
+   Both "mandatory" and "proximity" were tried and both broke this: the
+   footer sits so close to the end of the document that its snap target
+   (scroll-snap-align:start on <footer>) is geometrically unreachable —
+   there isn't enough content below it to ever scroll its top edge flush
+   with the viewport top — so the browser coerces that target to
+   max-scroll. With a snap-type active, that coerced point became the
+   nearest rest position after literally the first small wheel tick off
+   Awards' start (closer than snapping back to Awards), so the browser
+   teleported straight to the very bottom in one jump — exactly the "whole
+   panel scrolls up at once" bug reported, on both engines tested. Without
+   any footer snap target, mandatory snapping has nothing to go to beyond
+   Awards' own start and traps scrolling there forever instead (confirmed
+   the hard way). Plain unsnapped scrolling has neither problem: it moves
+   proportionally with the input the whole way, panel to panel to footer. */
 
 .stack { position: relative; }
 .stack__panel {
@@ -711,7 +725,6 @@ html:has(.stack) footer { scroll-snap-align: start; }
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
-  scroll-snap-align: start;
 }
 .stack__panel:nth-of-type(1) { z-index: 1; }
 .stack__panel:nth-of-type(2) { z-index: 2; }
@@ -731,9 +744,7 @@ html:has(.stack) footer { scroll-snap-align: start; }
    add an invisible spacer after it rather than making the panel itself
    taller (which would have no effect, since nothing would follow it). */
 /* Matches the footer's own natural height (~83px) — the same distance
-   you'd scroll to reveal the footer on any other page, no more. Also
-   short enough that, with mandatory scroll-snap, a single ordinary
-   scroll input clears it instead of repeatedly snapping back. */
+   you'd scroll to reveal the footer on any other page, no more. */
 .stack__exit-spacer { height: 90px; }
 .stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
@@ -866,9 +877,14 @@ html:has(.stack) footer { scroll-snap-align: start; }
   margin: 0 0 clamp(20px, 3vh, 36px);
   overflow-wrap: anywhere;
 }
+/* One long compound word (e.g. "Datenschutzerklärung") has no spaces to
+   break at, so at the shared editorial size it wraps mid-word wherever it
+   happens to fit — this smaller clamp keeps it to one line instead. */
+.page-hero__title--compact { font-size: clamp(2.6rem, 7.2vw, 6rem); }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+  .page-hero__title--compact { font-size: clamp(2.1rem, 9.5vw, 3.4rem); }
 }
 
 /* Photo-background variant of .page-hero (Service): mirrors the About
@@ -1055,7 +1071,15 @@ footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
   color: var(--color-text-muted);
 }
 .footer__social { display: flex; gap: 18px; }
-.footer__social a:hover { color: var(--color-accent); }
+.footer__social a { transition: color 0.2s ease; }
+.footer__social a:hover { color: var(--color-panel-hover); }
+
+/* ---------- Letter-jump hover (About/Awards/Service/Contact titles) ----------
+   Each character is split into its own span (see initLetterFx in
+   js/main.js) so a hover can animate them individually via the Web
+   Animations API — a staggered per-letter bounce+blue-flash, restarted
+   cleanly on every hover rather than fighting CSS animation replay. */
+.hover-letters .letter-fx__char { display: inline-block; }
 
 /* ---------- Lightbox (project photo zoom) ---------- */
 

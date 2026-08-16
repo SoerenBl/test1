@@ -45,6 +45,48 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   applyLang(document.documentElement.getAttribute('data-lang') || 'de');
 
+  // --- Letter-jump hover on select page titles (About, Awards, Service,
+  // Contact) --- Splits each title's text into one span per character so
+  // a hover can bounce them individually via the Web Animations API: a
+  // wave sweeps left to right, each letter hopping up a little and
+  // flashing blue, like the Pixar-lamp bounce. Runs per [data-lang] child
+  // so bilingual titles keep working after a language switch (display
+  // toggling still applies to the whole span, letters and all).
+  function initLetterFx(titleEl) {
+    if (!titleEl || titleEl.dataset.letterFxInit) return;
+    titleEl.dataset.letterFxInit = 'true';
+    var langSpans = titleEl.querySelectorAll(':scope > [data-lang]');
+    var containers = langSpans.length ? Array.prototype.slice.call(langSpans) : [titleEl];
+    containers.forEach(function (container) {
+      var text = container.textContent;
+      container.textContent = '';
+      Array.prototype.forEach.call(text, function (ch) {
+        var span = document.createElement('span');
+        span.className = 'letter-fx__char';
+        span.textContent = ch === ' ' ? ' ' : ch;
+        container.appendChild(span);
+      });
+    });
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--color-panel-hover').trim() || '#9fd8ff';
+    titleEl.addEventListener('mouseenter', function () {
+      var chars = titleEl.querySelectorAll('.letter-fx__char');
+      chars.forEach(function (span, i) {
+        var base = getComputedStyle(span).color;
+        if (span.__letterAnim) span.__letterAnim.cancel();
+        span.__letterAnim = span.animate([
+          { transform: 'translateY(0)', color: base, offset: 0 },
+          { transform: 'translateY(-0.22em)', color: accent, offset: 0.4 },
+          { transform: 'translateY(0)', color: base, offset: 1 }
+        ], {
+          duration: 520,
+          delay: i * 26,
+          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+        });
+      });
+    });
+  }
+  document.querySelectorAll('.hover-letters').forEach(initLetterFx);
+
   // --- Footer year ---
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
