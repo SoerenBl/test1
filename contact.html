@@ -7,11 +7,11 @@
 <meta name="description" content="Kontakt — Sören Bläcker, Produktdesigner.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="favicon.svg" id="faviconLink" data-favicon-fallback="logo2">
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=23">
 </head>
-<body class="nav-pad">
+<body>
 
-<header class="nav nav--solid">
+<header class="nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__mark"><span class="nav__mark-text">Sören Bläcker</span><img class="nav__mark-logo" data-photo="logo" alt="Sören Bläcker"></a>
     <div class="nav__right">
@@ -51,7 +51,12 @@
   </div>
 </div>
 
-<section class="section--gray page-hero">
+<section class="page-hero page-hero--photo">
+  <div class="page-hero__bg">
+    <div class="ph"><span data-lang="de">Hintergrundfoto — Porträt oder Atelier, querformatig</span><span data-lang="en">Background photo — portrait or studio shot, landscape orientation</span></div>
+    <img data-photo="contact-cover" alt="">
+    <div class="stack__scrim"></div>
+  </div>
   <div class="wrap">
     <h1 class="page-hero__title">
       <span data-lang="de">Lass uns reden.</span><span data-lang="en">Let's talk.</span>
@@ -83,7 +88,7 @@
         <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en">Message</span></label>
         <textarea id="message" name="message" rows="5" required></textarea>
       </div>
-      <button type="submit" class="link-arrow">
+      <button type="submit" class="link-arrow link-arrow--light">
         <span data-lang="de">Nachricht senden</span><span data-lang="en">Send message</span>
       </button>
     </form>
@@ -103,6 +108,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=22"></script>
+<script src="js/main.js?v=23"></script>
 </body>
 </html>

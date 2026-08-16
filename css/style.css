@@ -185,60 +185,50 @@ p { margin: 0 0 1em; }
 .nav__mark.has-logo .nav__mark-text { display: none; }
 .nav__mark.has-logo .nav__mark-logo { display: block; }
 
-.nav__center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--nav-fg);
-  text-shadow: var(--nav-shadow);
-  /* Docked state of the project-page title (see .project-hero__title):
-     hidden until js/main.js fades it in once the big overlay title has
-     scrolled far enough to hand off. Opacity is set inline by JS, so only
-     the transition and pointer-events toggle live here. */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-.nav__center.is-visible { pointer-events: auto; }
-.nav__center:hover { opacity: 0.7; }
-@media (prefers-reduced-motion: reduce) {
-  .nav__center { opacity: 1; pointer-events: auto; }
-}
-
-/* ---------- Project page hero title (hovers over the first tiles, then
-   hands off to .nav__center as you scroll — see js/main.js) ---------- */
+/* ---------- Project/category page hero title ----------
+   Hovers large over the first tiles, styled exactly like the Service/
+   About titles (same size, all white). On scroll it slides straight up
+   and shrinks into the nav bar in one continuous motion — a single
+   element animated by transform (see updateParallax in js/main.js), not
+   two elements crossfading. transform-origin is the top-left corner, so
+   translateY alone moves it (purely vertical, no horizontal drift) while
+   scale shrinks it toward that same fixed left edge. The element stays
+   position:absolute the whole time; the transform math itself cancels
+   out the normal scroll-away drift once "docked", which is what makes it
+   read as pinned in the nav without ever switching position modes. */
 .project-hero { position: relative; }
 .project-hero__overlay {
   position: absolute;
   top: 0; left: 0; right: 0;
-  z-index: 5;
+  z-index: 105;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   pointer-events: none;
   transform-origin: left top;
-  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .project-hero__title {
   font-family: var(--font-display);
   text-transform: uppercase;
   line-height: 0.95;
   letter-spacing: -0.01em;
-  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-size: var(--editorial-title-size);
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.45);
   margin: 0;
   overflow-wrap: anywhere;
 }
+.project-hero__title a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+.project-hero__title a:hover { opacity: 0.75; }
 @media (max-width: 760px) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .project-hero__overlay { display: none; }
+  .project-hero__overlay { position: relative; z-index: 5; }
 }
 
 .nav__right { display: flex; align-items: center; gap: 20px; }
@@ -462,6 +452,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .tile-grid--single .tile {
   grid-column: 1 / -1 !important;
   grid-row: 1 / -1 !important;
+}
+/* Two-project category: both tiles take the full available height,
+   side by side in the existing two columns, instead of half-height
+   masonry tiles with empty space below. */
+.tile-grid--duo { grid-template-rows: 1fr; }
+.tile-grid--duo .tile {
+  grid-column: span 1 !important;
+  grid-row: 1 / -1 !important;
+}
+@media (max-width: 760px) {
+  .tile-grid--duo { grid-template-rows: 1fr 1fr; }
+  .tile-grid--duo .tile { grid-column: 1 / -1 !important; grid-row: span 1 !important; }
 }
 
 .tile { position: relative; display: block; grid-column: span 1; }
@@ -941,6 +943,19 @@ html:has(.stack) footer { scroll-snap-align: start; }
   font-size: 0.95rem;
 }
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-accent); }
+
+/* White-on-photo variant, same treatment as .page-hero--photo .editorial-row */
+.page-hero--photo .contact-list li { border-top-color: rgba(255,255,255,0.25); color: #fff; }
+.page-hero--photo .contact-list li span { color: rgba(250,248,245,0.75); }
+.page-hero--photo .field label { color: rgba(250,248,245,0.75); }
+.page-hero--photo .field input,
+.page-hero--photo .field textarea {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+.page-hero--photo .field input::placeholder,
+.page-hero--photo .field textarea::placeholder { color: rgba(255,255,255,0.5); }
 
 /* ---------- Footer ---------- */
 

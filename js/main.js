@@ -323,8 +323,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
     grid.classList.toggle('tile-grid--single', tiles.length === 1);
-    if (tiles.length !== 1) {
-      layoutTilesGapFree(tiles, { randomTall: tiles.length >= 3, preserveFull: true });
+    grid.classList.toggle('tile-grid--duo', tiles.length === 2);
+    if (tiles.length >= 3) {
+      layoutTilesGapFree(tiles, { randomTall: true, preserveFull: true });
     }
     resolveStaticPhotos(grid);
   }
@@ -478,11 +479,38 @@ document.addEventListener('DOMContentLoaded', function () {
   var exitPanel = document.querySelector('.stack__panel--exit');
   var exitBg = exitPanel ? exitPanel.querySelector('.stack__bg') : null;
   var projectHero = document.querySelector('.project-hero__overlay');
-  var projectNavCenter = document.querySelector('.nav__center');
-  // Distance over which the big overlay title hands off to the small
-  // docked nav title — a fixed value (not tied to the title's own height)
-  // so the handoff feels the same regardless of how long the title text is.
+  var projectHeroNav = document.querySelector('.nav__mark');
+  // Distance over which the big overlay title docks into the nav bar — a
+  // fixed value (not tied to the title's own height) so the motion feels
+  // the same regardless of how long the title text is.
   var PROJECT_DOCK_RANGE = 200;
+  var PROJECT_DOCK_FONT_PX = 20;
+  var projectHeroNatural = null;
+  function measureProjectHero() {
+    if (!projectHero) return;
+    var prevTransform = projectHero.style.transform;
+    projectHero.style.transform = 'none';
+    var rect = projectHero.getBoundingClientRect();
+    var titleEl = projectHero.querySelector('.project-hero__title');
+    projectHeroNatural = {
+      // Stored as document-relative (rect.top is viewport-relative at the
+      // current scroll position) so it stays valid no matter when/where
+      // we're scrolled to when this runs.
+      top: rect.top + window.scrollY,
+      height: rect.height,
+      fontSize: titleEl ? parseFloat(getComputedStyle(titleEl).fontSize) : 16
+    };
+    projectHero.style.transform = prevTransform;
+  }
+  if (projectHero) {
+    measureProjectHero();
+    window.addEventListener('resize', measureProjectHero);
+    // Exposed for js/project.js (the /404.html fallback template): its
+    // title starts empty and is filled in slightly after this script
+    // already ran, so it needs to trigger a re-measurement once the real
+    // title text (and therefore the element's real size) is in place.
+    window.__remeasureProjectHero = measureProjectHero;
+  }
 
   if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent || exitBg || projectHero)) {
     var ticking = false;
@@ -537,14 +565,22 @@ document.addEventListener('DOMContentLoaded', function () {
           : 0;
         exitBg.style.transform = 'translateY(' + (-exitProgress * 100).toFixed(2) + '%)';
       }
-      if (projectHero) {
+      if (projectHero && projectHeroNatural) {
+        var navRect = projectHeroNav ? projectHeroNav.getBoundingClientRect() : null;
+        var dockedCenterY = navRect ? navRect.top + navRect.height / 2 : 43;
+        var minScale = Math.min(1, PROJECT_DOCK_FONT_PX / projectHeroNatural.fontSize);
+        var dockedTop = dockedCenterY - (projectHeroNatural.height * minScale) / 2;
         var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
-        projectHero.style.opacity = String(1 - dockProgress);
-        projectHero.style.transform = 'scale(' + (1 - dockProgress * 0.25).toFixed(3) + ')';
-        if (projectNavCenter) {
-          projectNavCenter.style.opacity = String(dockProgress);
-          projectNavCenter.classList.toggle('is-visible', dockProgress > 0.05);
-        }
+        // Kept position:absolute the whole time (see CSS) — this transform
+        // both slides/shrinks it toward the docked spot AND cancels the
+        // element's own natural scroll-away drift once fully docked
+        // (translateY grows 1:1 with scrollY beyond that point), which is
+        // what makes it read as "pinned in the nav" without ever switching
+        // position modes. transform-origin is left/top, so this is a pure
+        // vertical slide — the left edge never moves.
+        var translateY = dockProgress * (dockedTop - projectHeroNatural.top) + window.scrollY;
+        var scale = 1 - dockProgress * (1 - minScale);
+        projectHero.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
       }
       ticking = false;
     }
