@@ -726,6 +726,12 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .about-grid { grid-template-columns: 1fr; }
   .about-grid .ph { min-height: 300px; }
 }
+/* Project pages ("Über das Projekt"): description paragraph in the same
+   muted grey as the Kategorie/Land/Jahr/Material list next to it, instead
+   of the default near-black body text — one consistent text colour for
+   all of a project's info, not two. Scoped away from the About page's own
+   .about-grid.stack__body (light text over a photo background there). */
+.about-grid:not(.stack__body) p { color: var(--color-text-muted); }
 .stack__body p { margin: 0 0 1.3em; }
 .stack__body p:last-child { margin-bottom: 0; }
 
