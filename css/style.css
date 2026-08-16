@@ -284,7 +284,6 @@ p { margin: 0 0 1em; }
   font-family: var(--font-heading);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
-  text-shadow: var(--nav-shadow);
 }
 .lang-toggle button {
   background: none;
@@ -296,13 +295,9 @@ p { margin: 0 0 1em; }
   font-size: inherit;
   padding: 4px 6px;
   transition: background-color 0.2s ease;
-  /* Buttons don't inherit text-shadow from .lang-toggle in practice (form
-     controls opt out of most inherited typographic properties), so it
-     has to be set here directly — same soft blur as .nav__mark. */
-  text-shadow: var(--nav-shadow);
-  /* Thin outline on the letterforms themselves, on top of the soft blur
-     above — keeps DE/EN legible over busy or light photo backgrounds
-     where the blur alone isn't enough contrast. */
+  /* Thin outline on the letterforms themselves instead of the soft blur
+     the rest of the nav uses — keeps DE/EN legible over busy or light
+     photo backgrounds. */
   -webkit-text-stroke: 0.6px #000;
   text-stroke: 0.6px #000;
 }
