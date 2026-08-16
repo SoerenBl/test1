@@ -49,16 +49,104 @@ document.addEventListener('DOMContentLoaded', function () {
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // --- Randomize project tile sizes (1x1 / 1x2) on each load ---
-  // Order of projects always stays as written in the HTML — only which
-  // tiles render tall is randomized, and only once there are 3+ of them.
-  document.querySelectorAll('.tile-grid--projects:not([data-fixed-layout])').forEach(function (grid) {
-    var tiles = grid.querySelectorAll(':scope > .tile');
-    if (tiles.length < 3) return;
-    tiles.forEach(function (tile) {
+  // --- Deterministic, gap-free 2-column tile placement. ---
+  // CSS grid-auto-flow:dense can't be trusted here: with several
+  // row-spanning "tall" tiles in the mix it can strand an empty cell
+  // anywhere in the grid, not just at the end. So instead of letting the
+  // browser auto-place tiles, we compute each tile's column/row ourselves
+  // with a simple shortest-column-first (masonry) rule, which by
+  // construction never leaves a hole — the shorter column always receives
+  // the next tile, so any gap is always filled a step later. A full-width
+  // tile realigns both columns to the same row. Only a single row can ever
+  // remain short at the very end, which we close explicitly.
+  function layoutTilesGapFree(tiles, opts) {
+    opts = opts || {};
+    if (!tiles.length) return;
+    // Below the 2-column breakpoint the grid is a single full-width
+    // column (see the max-width:760px rules in style.css) — setting an
+    // explicit grid-column here would make the browser create a 2nd
+    // implicit column regardless, breaking that. So on narrow viewports
+    // just clear any leftover placement and leave tiles to the normal
+    // single-column flow; there's no 2-column gap to prevent there anyway.
+    var twoCol = window.matchMedia('(min-width: 761px)').matches;
+    if (!twoCol) {
+      tiles.forEach(function (tile) {
+        tile.classList.remove('tile--tall', 'tile--full');
+        tile.style.gridColumn = '';
+        tile.style.gridRow = '';
+      });
+      return;
+    }
+    var colTop = [1, 1];
+    var placed = [];
+
+    // Bring the shorter column level with the taller one by stretching its
+    // last (single-column) tile down — used both before a full-width tile
+    // jumps in and once more at the very end, so no column is ever left
+    // with an abandoned cell behind a tile that already moved past it.
+    function closeGap() {
+      while (colTop[0] !== colTop[1]) {
+        var shortCol = colTop[0] < colTop[1] ? 0 : 1;
+        var bottomTile = null;
+        for (var j = placed.length - 1; j >= 0; j--) {
+          if (placed[j].col === shortCol && placed[j].colSpan === 1) { bottomTile = placed[j]; break; }
+        }
+        if (!bottomTile) break;
+        bottomTile.rowSpan += 1;
+        bottomTile.tile.style.gridRow = bottomTile.row + ' / span ' + bottomTile.rowSpan;
+        bottomTile.tile.classList.add('tile--tall');
+        colTop[shortCol] += 1;
+      }
+    }
+
+    tiles.forEach(function (tile, i) {
+      var forceFull = opts.preserveFull && tile.classList.contains('tile--full');
+      var forceTall = opts.preserveTall && tile.classList.contains('tile--tall');
       tile.classList.remove('tile--tall', 'tile--full');
-      if (Math.random() < 0.32) tile.classList.add('tile--tall');
+      tile.style.gridColumn = '';
+      tile.style.gridRow = '';
+      var isLast = i === tiles.length - 1;
+
+      if (forceFull) {
+        closeGap();
+        var row = colTop[0];
+        tile.style.gridColumn = '1 / span 2';
+        tile.style.gridRow = row + ' / span 1';
+        tile.classList.add('tile--full');
+        colTop[0] = colTop[1] = row + 1;
+        placed.push({ tile: tile, col: 0, colSpan: 2, row: row, rowSpan: 1 });
+        return;
+      }
+
+      var col = colTop[0] <= colTop[1] ? 0 : 1;
+      var tall = forceTall || (opts.randomTall && !isLast && Math.random() < 0.32);
+      var span = tall ? 2 : 1;
+      var row = colTop[col];
+      tile.style.gridColumn = (col + 1) + ' / span 1';
+      tile.style.gridRow = row + ' / span ' + span;
+      if (tall) tile.classList.add('tile--tall');
+      placed.push({ tile: tile, col: col, colSpan: 1, row: row, rowSpan: span });
+      colTop[col] += span;
     });
+
+    closeGap();
+  }
+
+  // Category-listing pages (e.g. Möbel & Beleuchtung): order stays as
+  // written in the HTML; which tiles render tall is randomized, but an
+  // authored full-width tile (e.g. a closing banner) stays full-width.
+  document.querySelectorAll('.tile-grid--projects:not([data-fixed-layout])').forEach(function (grid) {
+    var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
+    if (tiles.length < 3) return;
+    layoutTilesGapFree(tiles, { randomTall: true, preserveFull: true });
+  });
+
+  // Homepage category grid: sizes are hand-picked in the HTML, not
+  // randomized — but still run through the same gap-free placement so a
+  // future edit (adding/removing a category) can never leave a hole.
+  document.querySelectorAll('#categories > .tile-grid').forEach(function (grid) {
+    var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
+    layoutTilesGapFree(tiles, { preserveTall: true, preserveFull: true });
   });
 
   // --- Photo formats: try these extensions in order for any photo slot,
@@ -115,8 +203,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Fixed single photo slots (hero, category covers, listing thumbnails):
   // same format tolerance, applied to a static <img data-photo="path/without/extension">.
+  // An optional data-photo-fallback is tried if the primary path has no
+  // file — e.g. a project tile prefers its own cover.jpg but falls back to
+  // photo 1 automatically when no cover has been added yet.
   document.querySelectorAll('img[data-photo]').forEach(function (img) {
-    probePhoto(img.getAttribute('data-photo')).then(function (url) {
+    var primary = img.getAttribute('data-photo');
+    var fallback = img.getAttribute('data-photo-fallback');
+    probePhoto(primary).then(function (url) {
+      if (url || !fallback) return url;
+      return probePhoto(fallback);
+    }).then(function (url) {
       if (url) {
         img.src = url;
         var ph = img.previousElementSibling;
