@@ -300,6 +300,11 @@ p { margin: 0 0 1em; }
      controls opt out of most inherited typographic properties), so it
      has to be set here directly — same soft blur as .nav__mark. */
   text-shadow: var(--nav-shadow);
+  /* Thin outline on the letterforms themselves, on top of the soft blur
+     above — keeps DE/EN legible over busy or light photo backgrounds
+     where the blur alone isn't enough contrast. */
+  -webkit-text-stroke: 0.6px #000;
+  text-stroke: 0.6px #000;
 }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
 /* Same soft blur nav__mark/menu-btn already have for legibility over any
