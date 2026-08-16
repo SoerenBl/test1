@@ -570,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // --- Cutout objects: fade in like a soft cloud once ~1/3 of their
-  // tile has scrolled into view, instead of being visible immediately. ---
+  // --- Category cover photos: fade/blur in once ~1/3 of their tile has
+  // scrolled into view, instead of being visible immediately. ---
   if ('IntersectionObserver' in window) {
     var revealObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -624,14 +624,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { passive: true });
   })();
 
-  // --- Scroll parallax: tile captions, hero zoom, cutout product images ---
+  // --- Scroll parallax: tile captions, hero zoom ---
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var parallaxEls = document.querySelectorAll('.tile__caption');
-  var objectEls = document.querySelectorAll('.tile__object');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
   var exitPanel = document.querySelector('.stack__panel--exit');
   var exitBg = exitPanel ? exitPanel.querySelector('.stack__bg') : null;
+
+  // --- Stack pages (About/Awards): arm scroll-snap only for the
+  // About→Awards "cover" transition, disarm it once Awards is reached, so
+  // that transition still auto-completes on a partial scroll while the
+  // rest of the page (Awards→footer) scrolls naturally, same as anywhere
+  // else. See the CSS comment above .stack__panel for why a single static
+  // scroll-snap-type can't give both behaviours at once. ---
+  (function () {
+    var stackEl = document.querySelector('.stack');
+    if (!stackEl) return;
+    var firstPanel = stackEl.querySelector(':scope > .stack__panel');
+    if (!firstPanel) return;
+    var armedThreshold = 0;
+    function measureThreshold() { armedThreshold = firstPanel.offsetHeight; }
+    measureThreshold();
+    window.addEventListener('resize', measureThreshold);
+    var snapTicking = false;
+    function updateStackSnap() {
+      var armed = window.scrollY < armedThreshold - 2;
+      document.documentElement.style.scrollSnapType = armed ? 'y mandatory' : '';
+      snapTicking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!snapTicking) {
+        window.requestAnimationFrame(updateStackSnap);
+        snapTicking = true;
+      }
+    }, { passive: true });
+    updateStackSnap();
+  })();
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroNav = document.querySelector('.nav__mark');
   // Distance over which the big overlay title docks into the nav bar — a
@@ -691,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.__remeasureProjectHero = measureProjectHero;
   }
 
-  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent || exitBg || projectHero)) {
+  if (!reduceMotion && (parallaxEls.length || heroContent || exitBg || projectHero)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -701,20 +730,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
         var px = Math.max(-16, Math.min(16, offset * 26));
         el.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
-      });
-      objectEls.forEach(function (el) {
-        var rect = el.parentElement.getBoundingClientRect();
-        var center = rect.top + rect.height / 2;
-        var offset = (center - vh / 2) / vh;
-        // Range scales with the tile's own height, so a tall tile (e.g.
-        // tile--tall) drifts proportionally more than a normal one instead
-        // of the same fixed pixel range looking smaller inside it. The
-        // 1.45 multiplier keeps the same saturation point as before
-        // (full range only near the edges of the tile's transit) so the
-        // motion still reads as continuous rather than snapping to max.
-        var range = rect.height * 0.16;
-        var px = Math.max(-range, Math.min(range, offset * range * 1.45));
-        el.style.transform = 'translate(-50%, calc(-50% + ' + px.toFixed(1) + 'px))';
       });
       if (heroContent && heroTile) {
         var heroHeight = heroTile.offsetHeight || vh;
