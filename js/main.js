@@ -611,6 +611,190 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // --- Editorial Design: interactive PDF page-flip viewer. Runs only on a
+  // project page inside /editorial/. PDF filenames are arbitrary (not a
+  // fixed numbered pattern like the photos), so finding one needs a real
+  // folder listing rather than the relative-probe trick used elsewhere —
+  // one GitHub API call against that project's own folder. If a .pdf turns
+  // up, pdf.js is loaded on demand and a full-viewport "last tile" section
+  // is appended right after the photo gallery, where it can be read page
+  // by page: click the page itself to zoom (loupe, same mechanic as the
+  // lightbox), click the empty margin left/right of it to turn instead —
+  // the two click areas never overlap, so zooming can't accidentally turn
+  // a page or vice versa. */
+  (function () {
+    var heroSection = document.querySelector('section.project-hero');
+    if (!heroSection || !document.querySelector('.project-hero-panel')) return;
+    var pathParts = location.pathname.split('/').filter(Boolean);
+    if (pathParts.length && pathParts[pathParts.length - 1].indexOf('.html') !== -1) pathParts.pop();
+    var pdfCategory = pathParts[pathParts.length - 2];
+    var pdfSlug = pathParts[pathParts.length - 1];
+    if (pdfCategory !== 'editorial' || !pdfSlug) return;
+
+    var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + pdfCategory + '/' + encodeURIComponent(pdfSlug) + '?ref=' + GH_BRANCH;
+    fetch(apiUrl).then(function (res) {
+      if (!res.ok) throw new Error('GitHub API ' + res.status);
+      return res.json();
+    }).then(function (entries) {
+      var pdfEntry = entries.filter(function (e) { return e.type === 'file' && /\.pdf$/i.test(e.name); })[0];
+      if (!pdfEntry) return;
+      return loadPdfJs().then(function (pdfjsLib) { initPdfViewer(pdfjsLib, pdfEntry.download_url); });
+    }).catch(function () { /* no PDF in this project's folder, or offline — leave the page as-is */ });
+
+    // pdf.js is vendored locally (js/vendor/pdfjs/) rather than pulled from a
+    // CDN — one dependency less for the live site to rely on at runtime.
+    // Resolved as an absolute URL from main.js's own <script> tag so it
+    // works the same regardless of how many folders deep the current page
+    // sits (project pages are two levels under the site root).
+    var pdfJsPromise = null;
+    function loadPdfJs() {
+      if (pdfJsPromise) return pdfJsPromise;
+      var mainScript = document.querySelector('script[src*="js/main.js"]');
+      var base = mainScript ? new URL('vendor/pdfjs/', mainScript.src).href : 'js/vendor/pdfjs/';
+      pdfJsPromise = import(base + 'pdf.min.mjs').then(function (pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.mjs';
+        return pdfjsLib;
+      });
+      return pdfJsPromise;
+    }
+
+    function initPdfViewer(pdfjsLib, url) {
+      var section = document.createElement('section');
+      section.className = 'section--flush pdfv-section';
+      section.innerHTML =
+        '<div class="pdfv">' +
+          '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
+          '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
+          '<div class="pdfv__stage">' +
+            '<div class="pdfv__page pdfv__page--back"><canvas></canvas></div>' +
+            '<div class="pdfv__page pdfv__page--front"><canvas></canvas></div>' +
+          '</div>' +
+          '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
+          '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
+          '<div class="pdfv__count"></div>' +
+        '</div>';
+      heroSection.insertAdjacentElement('afterend', section);
+
+      var zonePrev = section.querySelector('.pdfv__zone--prev');
+      var zoneNext = section.querySelector('.pdfv__zone--next');
+      var stage = section.querySelector('.pdfv__stage');
+      var frontPage = section.querySelector('.pdfv__page--front');
+      var backPage = section.querySelector('.pdfv__page--back');
+      var frontCanvas = frontPage.querySelector('canvas');
+      var backCanvas = backPage.querySelector('canvas');
+      var arrowPrev = section.querySelector('.pdfv__arrow--prev');
+      var arrowNext = section.querySelector('.pdfv__arrow--next');
+      var countEl = section.querySelector('.pdfv__count');
+
+      var pdfDoc = null, numPages = 0, currentPage = 1, isAnimating = false, isZoomed = false;
+
+      pdfjsLib.getDocument(url).promise.then(function (doc) {
+        pdfDoc = doc;
+        numPages = doc.numPages;
+        return renderInto(frontCanvas, currentPage);
+      }).then(function () {
+        sizeStageToCanvas();
+        updateUi();
+      }).catch(function () { section.remove(); }); // unreadable PDF — don't leave a broken tile
+
+      function renderInto(canvas, pageNum) {
+        return pdfDoc.getPage(pageNum).then(function (page) {
+          var baseViewport = page.getViewport({ scale: 1 });
+          var targetWidth = Math.min(900, window.innerWidth * 0.78) * (window.devicePixelRatio || 1);
+          var viewport = page.getViewport({ scale: targetWidth / baseViewport.width });
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          canvas.setAttribute('data-aspect', (viewport.width / viewport.height).toFixed(4));
+          return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+        });
+      }
+
+      function sizeStageToCanvas() {
+        var aspect = parseFloat(frontCanvas.getAttribute('data-aspect') || '0.77');
+        var maxW = window.innerWidth * 0.78, maxH = window.innerHeight * 0.82;
+        var w = Math.min(maxW, maxH * aspect);
+        stage.style.width = w + 'px';
+        stage.style.height = (w / aspect) + 'px';
+      }
+      window.addEventListener('resize', function () { if (pdfDoc) sizeStageToCanvas(); });
+
+      function updateUi() {
+        zonePrev.setAttribute('data-disabled', currentPage <= 1 ? 'true' : 'false');
+        zoneNext.setAttribute('data-disabled', currentPage >= numPages ? 'true' : 'false');
+        arrowPrev.style.display = currentPage <= 1 ? 'none' : '';
+        arrowNext.style.display = currentPage >= numPages ? 'none' : '';
+        countEl.textContent = currentPage + ' / ' + numPages;
+      }
+
+      function turn(dir) {
+        if (isAnimating || isZoomed) return;
+        var target = currentPage + dir;
+        if (target < 1 || target > numPages) return;
+        isAnimating = true;
+        renderInto(backCanvas, target).then(function () {
+          frontPage.classList.add(dir > 0 ? 'is-turning-next' : 'is-turning-prev');
+          setTimeout(function () {
+            currentPage = target;
+            // Front becomes an exact copy of what the back canvas now shows
+            // — cheaper than asking pdf.js to render the same page twice.
+            frontCanvas.width = backCanvas.width;
+            frontCanvas.height = backCanvas.height;
+            frontCanvas.setAttribute('data-aspect', backCanvas.getAttribute('data-aspect'));
+            frontCanvas.getContext('2d').drawImage(backCanvas, 0, 0);
+            frontPage.classList.remove('is-turning-next', 'is-turning-prev');
+            sizeStageToCanvas();
+            isAnimating = false;
+            updateUi();
+          }, 640);
+        });
+      }
+
+      zonePrev.addEventListener('click', function () { turn(-1); });
+      zoneNext.addEventListener('click', function () { turn(1); });
+
+      function setZoomOrigin(e) {
+        var rect = frontCanvas.getBoundingClientRect();
+        frontCanvas.style.transformOrigin =
+          (((e.clientX - rect.left) / rect.width) * 100) + '% ' + (((e.clientY - rect.top) / rect.height) * 100) + '%';
+      }
+      frontPage.addEventListener('click', function (e) {
+        if (isAnimating) return;
+        e.stopPropagation();
+        isZoomed = !isZoomed;
+        if (isZoomed) setZoomOrigin(e);
+        frontPage.classList.toggle('is-zoomed', isZoomed);
+      });
+      frontPage.addEventListener('mousemove', function (e) { if (isZoomed) setZoomOrigin(e); });
+      frontPage.addEventListener('mouseleave', function () {
+        if (!isZoomed) return;
+        isZoomed = false;
+        frontPage.classList.remove('is-zoomed');
+      });
+
+      // Trackpad / Magic Mouse horizontal swipe — one clear horizontal
+      // gesture turns a single page, then a short cooldown ignores the
+      // rest of that same swipe instead of rifling through several pages.
+      var wheelCooldown = false;
+      section.addEventListener('wheel', function (e) {
+        if (Math.abs(e.deltaX) < 24 || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        e.preventDefault();
+        if (wheelCooldown) return;
+        wheelCooldown = true;
+        turn(e.deltaX > 0 ? 1 : -1);
+        setTimeout(function () { wheelCooldown = false; }, 700);
+      }, { passive: false });
+
+      var touchStartX = null;
+      section.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+      section.addEventListener('touchend', function (e) {
+        if (touchStartX == null) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        touchStartX = null;
+        if (Math.abs(dx) > 50) turn(dx < 0 ? 1 : -1);
+      }, { passive: true });
+    }
+  })();
+
   // --- Category cover photos: fade in + rise slightly once about half of
   // their tile has scrolled into view, then hold at that position — not
   // a one-off reveal, it un-reveals again once the tile leaves the

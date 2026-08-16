@@ -1086,13 +1086,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   align-items: flex-start;
   gap: 8px;
 }
-.contact-list li.row-detail > span:last-child { color: var(--color-text); max-width: 46ch; }
+.contact-list li.row-detail > span:last-child { color: var(--color-text-muted); max-width: 46ch; }
 .contact-list li.row-detail ul {
   list-style: disc;
   padding-left: 1.2em;
   margin: 0;
   max-width: 46ch;
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 .contact-list li.row-detail ul li {
   border: none;
@@ -1247,6 +1247,117 @@ body.lightbox-open { overflow: hidden; }
   height: 100%;
   object-fit: cover;
   min-height: 0;
+}
+
+/* ---------- PDF page-flip viewer (Editorial Design projects only) ----------
+   Injected by js/main.js as the last full-viewport section on a project
+   page, only when a .pdf file is found in that project's own folder.
+   Layout: a page floats centered over a dark stage. Clicking the page
+   itself zooms (loupe, same mechanic as the lightbox); clicking the empty
+   margin left/right of the page turns to the previous/next page instead —
+   the two click zones never overlap, so an accidental page-turn while
+   trying to zoom (or vice versa) isn't possible. */
+.pdfv-section {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--color-text);
+  overflow: hidden;
+}
+.pdfv {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2200px;
+}
+.pdfv__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 3;
+  cursor: pointer;
+}
+.pdfv__zone--prev { left: 0; }
+.pdfv__zone--next { right: 0; }
+.pdfv__zone[data-disabled="true"] { cursor: default; }
+
+.pdfv__stage {
+  position: relative;
+  z-index: 5;
+  max-width: 78vw;
+  max-height: 82vh;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+}
+.pdfv__page {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: transform 0.62s cubic-bezier(.4,.1,.3,1), opacity 0.62s ease;
+  cursor: zoom-in;
+  z-index: 2;
+}
+.pdfv__page.is-zoomed { cursor: zoom-out; }
+.pdfv__page canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transition: transform 0.25s ease;
+  transform-origin: 50% 50%;
+}
+.pdfv__page.is-zoomed canvas { transform: scale(2.2); }
+.pdfv__page--back { z-index: 1; transition: none; }
+
+.pdfv__page.is-turning-next { transform-origin: 100% 50%; transform: rotateY(-92deg); opacity: 0; }
+.pdfv__page.is-turning-prev { transform-origin: 0% 50%; transform: rotateY(92deg); opacity: 0; }
+
+.pdfv__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.pdfv__arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border-right: 3px solid var(--color-panel-hover);
+  border-bottom: 3px solid var(--color-panel-hover);
+}
+.pdfv__arrow--prev { left: clamp(16px, 4vw, 56px); }
+.pdfv__arrow--prev::before { transform: translate(-30%, -50%) rotate(135deg); }
+.pdfv__arrow--next { right: clamp(16px, 4vw, 56px); }
+.pdfv__arrow--next::before { transform: translate(-70%, -50%) rotate(-45deg); }
+.pdfv__zone--prev:hover .pdfv__arrow--prev,
+.pdfv__zone--next:hover .pdfv__arrow--next { opacity: 0.85; }
+
+.pdfv__count {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(18px, 4vh, 36px);
+  transform: translateX(-50%);
+  z-index: 4;
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+@media (max-width: 760px) {
+  .pdfv__stage { max-width: 88vw; max-height: 78vh; }
+  .pdfv__arrow { width: 26px; height: 26px; }
 }
 
 /* ---------- i18n ---------- */
