@@ -206,21 +206,137 @@ document.addEventListener('DOMContentLoaded', function () {
   // An optional data-photo-fallback is tried if the primary path has no
   // file — e.g. a project tile prefers its own cover.jpg but falls back to
   // photo 1 automatically when no cover has been added yet.
-  document.querySelectorAll('img[data-photo]').forEach(function (img) {
-    var primary = img.getAttribute('data-photo');
-    var fallback = img.getAttribute('data-photo-fallback');
-    probePhoto(primary).then(function (url) {
-      if (url || !fallback) return url;
-      return probePhoto(fallback);
-    }).then(function (url) {
-      if (url) {
-        img.src = url;
-        var ph = img.previousElementSibling;
-        if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
-      } else {
-        img.style.display = 'none';
-      }
+  function resolveStaticPhotos(root) {
+    (root || document).querySelectorAll('img[data-photo]').forEach(function (img) {
+      var primary = img.getAttribute('data-photo');
+      var fallback = img.getAttribute('data-photo-fallback');
+      probePhoto(primary).then(function (url) {
+        if (url || !fallback) return url;
+        return probePhoto(fallback);
+      }).then(function (url) {
+        if (url) {
+          img.src = url;
+          var ph = img.previousElementSibling;
+          if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
+        } else {
+          img.style.display = 'none';
+        }
+      });
     });
+  }
+  resolveStaticPhotos();
+
+  // --- Discover project folders automatically instead of hardcoding a
+  // tile per project. A project folder is named "{slug}-{country}-{year}"
+  // (e.g. "scandinavian-tech-nightstand-de-2025") — renaming or adding a
+  // folder on GitHub/GitHub Desktop is enough, no code edit needed. The
+  // display title defaults to a title-cased version of the slug, or can
+  // be overridden by dropping a plain-text title.txt in the folder (useful
+  // for capitalisation/ampersands a folder name can't represent, e.g.
+  // "HiFi" or "&"). Cached in localStorage for a few minutes to go easy
+  // on GitHub's unauthenticated API rate limit.
+  var GH_REPO = 'SoerenBl/test1';
+  var GH_BRANCH = 'main';
+  var DISCOVER_CACHE_MS = 5 * 60 * 1000;
+  var FOLDER_RE = /^(.+)-([a-z]{2})-(\d{4})$/;
+
+  function titleCaseSlug(slug) {
+    return slug.split('-').map(function (w) {
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+
+  function fetchTitleOverride(category, slug) {
+    var url = 'https://raw.githubusercontent.com/' + GH_REPO + '/' + GH_BRANCH + '/' + category + '/' + slug + '/title.txt';
+    return fetch(url).then(function (res) {
+      return res.ok ? res.text() : null;
+    }).then(function (text) {
+      return text ? text.trim() : null;
+    }).catch(function () { return null; });
+  }
+
+  function discoverCategoryProjects(category) {
+    var cacheKey = 'discover:' + category;
+    try {
+      var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+      if (cached && (Date.now() - cached.at) < DISCOVER_CACHE_MS) {
+        return Promise.resolve(cached.projects);
+      }
+    } catch (e) { /* ignore bad cache */ }
+
+    var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + category + '?ref=' + GH_BRANCH;
+    return fetch(apiUrl).then(function (res) {
+      if (!res.ok) throw new Error('GitHub API ' + res.status);
+      return res.json();
+    }).then(function (entries) {
+      var folders = entries.filter(function (e) { return e.type === 'dir' && FOLDER_RE.test(e.name); });
+      return Promise.all(folders.map(function (e) {
+        var m = e.name.match(FOLDER_RE);
+        var slug = m[1], country = m[2].toUpperCase(), year = m[3];
+        return fetchTitleOverride(category, e.name).then(function (customTitle) {
+          return { slug: e.name, title: customTitle || titleCaseSlug(slug), country: country, year: year };
+        });
+      }));
+    }).then(function (projects) {
+      projects.sort(function (a, b) { return b.year - a.year || a.title.localeCompare(b.title); });
+      try { localStorage.setItem(cacheKey, JSON.stringify({ at: Date.now(), projects: projects })); } catch (e) { /* storage full/disabled */ }
+      return projects;
+    });
+  }
+
+  function buildCategoryTiles(grid, projects) {
+    if (!projects.length) {
+      grid.innerHTML =
+        '<div class="tile tile--full"><div class="tile__media"><div class="ph">' +
+        '<span data-lang="de">Projekte folgen in Kürze</span><span data-lang="en">Projects coming soon</span>' +
+        '</div></div></div>';
+      applyLang(document.documentElement.getAttribute('data-lang') || 'de');
+      return;
+    }
+    var html = projects.map(function (p) {
+      return '<a class="tile" href="' + p.slug + '/">' +
+        '<div class="tile__media">' +
+        '<div class="ph"><span data-lang="de">Projektfoto — ' + p.title + '</span><span data-lang="en">Project photo — ' + p.title + '</span></div>' +
+        '<img data-photo="' + p.slug + '/cover" data-photo-fallback="' + p.slug + '/1" alt="">' +
+        '<div class="tile__caption">' +
+        '<h3 class="tile__title display">' + p.title + '</h3>' +
+        '<span class="tile__meta">' + p.country + ' · ' + p.year + '</span>' +
+        '</div></div></a>';
+    }).join('');
+    grid.innerHTML = html;
+    applyLang(document.documentElement.getAttribute('data-lang') || 'de');
+
+    var tiles = Array.prototype.slice.call(grid.querySelectorAll(':scope > .tile'));
+    if (grid.classList.contains('tile-grid--fill')) {
+      grid.style.setProperty('--rows', Math.ceil(tiles.length / 2));
+      layoutTilesGapFree(tiles, {});
+    } else {
+      layoutTilesGapFree(tiles, { randomTall: tiles.length >= 3, preserveFull: true });
+    }
+    resolveStaticPhotos(grid);
+  }
+
+  document.querySelectorAll('[data-discover-category]').forEach(function (grid) {
+    var category = grid.getAttribute('data-discover-category');
+    discoverCategoryProjects(category).then(function (projects) {
+      buildCategoryTiles(grid, projects);
+    }).catch(function () {
+      buildCategoryTiles(grid, []);
+    });
+  });
+
+  // --- Homepage category tiles: "N Projekte" is read from the same
+  // discovery data instead of being typed in twice (and going stale the
+  // moment a project is added or removed). ---
+  document.querySelectorAll('[data-project-count]').forEach(function (el) {
+    var category = el.getAttribute('data-project-count');
+    discoverCategoryProjects(category).then(function (projects) {
+      var n = projects.length;
+      el.innerHTML =
+        '<span data-lang="de">' + n + ' Projekt' + (n === 1 ? '' : 'e') + '</span>' +
+        '<span data-lang="en">' + n + ' project' + (n === 1 ? '' : 's') + '</span>';
+      applyLang(document.documentElement.getAttribute('data-lang') || 'de');
+    }).catch(function () { /* leave blank rather than show a wrong number */ });
   });
 
   // --- Project photo lightbox: click to enlarge, click again to zoom + follow mouse ---

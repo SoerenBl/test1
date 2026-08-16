@@ -562,6 +562,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    pages that actually contain a .stack so it never affects normal
    scrolling elsewhere on the site. */
 html:has(.stack) { scroll-snap-type: y mandatory; }
+/* Without a snap target after the last panel, mandatory snapping has
+   nowhere further to go and traps scrolling on that panel forever — give
+   the footer a snap point too so continuing past Awards auto-completes
+   down to the footer instead of getting stuck. */
+html:has(.stack) footer { scroll-snap-align: start; }
 
 .stack { position: relative; }
 .stack__panel {
