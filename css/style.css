@@ -1315,15 +1315,26 @@ body.lightbox-open { overflow: hidden; }
   z-index: 2;
 }
 .pdfv__page.is-zoomed { cursor: zoom-out; }
-.pdfv__page canvas {
-  display: block;
+/* A view is 1 canvas (cover/back cover) or 2 (an open spread) — the flex
+   row sizes each canvas by its own intrinsic aspect at a shared height, so
+   two canvases side by side naturally read as one continuous open page. */
+.pdfv__sheet {
+  display: flex;
   width: 100%;
   height: 100%;
-  background: #fff;
   transition: transform 0.25s ease;
   transform-origin: 50% 50%;
 }
-.pdfv__page.is-zoomed canvas { transform: scale(2.2); }
+.pdfv__sheet canvas {
+  display: block;
+  height: 100%;
+  width: auto;
+  background: #fff;
+}
+/* Subtle spine shadow where two pages meet in a spread. */
+.pdfv__sheet canvas:first-child:not(:last-child) { box-shadow: inset -10px 0 14px -10px rgba(0,0,0,0.4); }
+.pdfv__sheet canvas:last-child:not(:first-child) { box-shadow: inset 10px 0 14px -10px rgba(0,0,0,0.4); }
+.pdfv__page.is-zoomed .pdfv__sheet { transform: scale(2.2); }
 .pdfv__page--back { z-index: 1; transition: none; }
 
 .pdfv__page.is-turning-next { transform-origin: 100% 50%; transform: rotateY(-92deg); opacity: 0; }

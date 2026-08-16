@@ -658,6 +658,26 @@ document.addEventListener('DOMContentLoaded', function () {
       return pdfJsPromise;
     }
 
+    // A project's PDFs are always built cover / spreads / back cover:
+    // page 1 alone, then every following pair of pages shown together as
+    // one open-book spread, with the very last page alone again (a 24-page
+    // booklet reads as [1], [2,3], [4,5] … [22,23], [24]). Works out to a
+    // plain single-page "view" whenever an odd page can't find a partner,
+    // so a differently-structured PDF still degrades sensibly instead of
+    // breaking.
+    function buildViews(numPages) {
+      var views = [];
+      if (numPages < 1) return views;
+      views.push([1]);
+      var i = 2, last = numPages;
+      while (i < last) {
+        if (i + 1 === last) { views.push([i]); i++; }
+        else { views.push([i, i + 1]); i += 2; }
+      }
+      if (last >= 2) views.push([last]);
+      return views;
+    }
+
     function initPdfViewer(pdfjsLib, url) {
       var section = document.createElement('section');
       section.className = 'section--flush pdfv-section';
@@ -666,8 +686,8 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
           '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
           '<div class="pdfv__stage">' +
-            '<div class="pdfv__page pdfv__page--back"><canvas></canvas></div>' +
-            '<div class="pdfv__page pdfv__page--front"><canvas></canvas></div>' +
+            '<div class="pdfv__page pdfv__page--back"><div class="pdfv__sheet"></div></div>' +
+            '<div class="pdfv__page pdfv__page--front"><div class="pdfv__sheet"></div></div>' +
           '</div>' +
           '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
           '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
@@ -678,71 +698,89 @@ document.addEventListener('DOMContentLoaded', function () {
       var zonePrev = section.querySelector('.pdfv__zone--prev');
       var zoneNext = section.querySelector('.pdfv__zone--next');
       var stage = section.querySelector('.pdfv__stage');
-      var frontPage = section.querySelector('.pdfv__page--front');
-      var backPage = section.querySelector('.pdfv__page--back');
-      var frontCanvas = frontPage.querySelector('canvas');
-      var backCanvas = backPage.querySelector('canvas');
+      var pageEls = [section.querySelector('.pdfv__page--back'), section.querySelector('.pdfv__page--front')];
+      var frontIndex = 1; // pageEls[frontIndex] is always the currently-visible page
       var arrowPrev = section.querySelector('.pdfv__arrow--prev');
       var arrowNext = section.querySelector('.pdfv__arrow--next');
       var countEl = section.querySelector('.pdfv__count');
 
-      var pdfDoc = null, numPages = 0, currentPage = 1, isAnimating = false, isZoomed = false;
+      var pdfDoc = null, views = [], currentViewIndex = 0, isAnimating = false, isZoomed = false;
 
       pdfjsLib.getDocument(url).promise.then(function (doc) {
         pdfDoc = doc;
-        numPages = doc.numPages;
-        return renderInto(frontCanvas, currentPage);
+        views = buildViews(doc.numPages);
+        return renderInto(pageEls[frontIndex].querySelector('.pdfv__sheet'), views[0]);
       }).then(function () {
-        sizeStageToCanvas();
+        sizeStageToCanvas(pageEls[frontIndex].querySelector('.pdfv__sheet'));
         updateUi();
       }).catch(function () { section.remove(); }); // unreadable PDF — don't leave a broken tile
 
-      function renderInto(canvas, pageNum) {
-        return pdfDoc.getPage(pageNum).then(function (page) {
-          var baseViewport = page.getViewport({ scale: 1 });
-          var targetWidth = Math.min(900, window.innerWidth * 0.78) * (window.devicePixelRatio || 1);
-          var viewport = page.getViewport({ scale: targetWidth / baseViewport.width });
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          canvas.setAttribute('data-aspect', (viewport.width / viewport.height).toFixed(4));
-          return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+      // Renders 1 or 2 PDF pages into fresh canvases inside sheetEl, all at
+      // the same target height, so a two-page view naturally comes out
+      // twice as wide as a single page — exactly like an open spread next
+      // to a lone cover — instead of needing separate sizing logic per case.
+      function renderInto(sheetEl, pageNums) {
+        sheetEl.innerHTML = '';
+        var targetHeight = Math.min(1100, window.innerHeight * 0.82) * (window.devicePixelRatio || 1);
+        return Promise.all(pageNums.map(function (n) {
+          return pdfDoc.getPage(n).then(function (page) {
+            var baseViewport = page.getViewport({ scale: 1 });
+            var viewport = page.getViewport({ scale: targetHeight / baseViewport.height });
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            sheetEl.appendChild(canvas);
+            return page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function () {
+              return viewport.width / viewport.height;
+            });
+          });
+        })).then(function (aspects) {
+          var total = aspects.reduce(function (a, b) { return a + b; }, 0);
+          sheetEl.setAttribute('data-aspect', total.toFixed(4));
         });
       }
 
-      function sizeStageToCanvas() {
-        var aspect = parseFloat(frontCanvas.getAttribute('data-aspect') || '0.77');
+      function sizeStageToCanvas(sheetEl) {
+        var aspect = parseFloat(sheetEl.getAttribute('data-aspect') || '0.77');
         var maxW = window.innerWidth * 0.78, maxH = window.innerHeight * 0.82;
         var w = Math.min(maxW, maxH * aspect);
         stage.style.width = w + 'px';
         stage.style.height = (w / aspect) + 'px';
       }
-      window.addEventListener('resize', function () { if (pdfDoc) sizeStageToCanvas(); });
+      window.addEventListener('resize', function () {
+        if (pdfDoc) sizeStageToCanvas(pageEls[frontIndex].querySelector('.pdfv__sheet'));
+      });
 
       function updateUi() {
-        zonePrev.setAttribute('data-disabled', currentPage <= 1 ? 'true' : 'false');
-        zoneNext.setAttribute('data-disabled', currentPage >= numPages ? 'true' : 'false');
-        arrowPrev.style.display = currentPage <= 1 ? 'none' : '';
-        arrowNext.style.display = currentPage >= numPages ? 'none' : '';
-        countEl.textContent = currentPage + ' / ' + numPages;
+        zonePrev.setAttribute('data-disabled', currentViewIndex <= 0 ? 'true' : 'false');
+        zoneNext.setAttribute('data-disabled', currentViewIndex >= views.length - 1 ? 'true' : 'false');
+        arrowPrev.style.display = currentViewIndex <= 0 ? 'none' : '';
+        arrowNext.style.display = currentViewIndex >= views.length - 1 ? 'none' : '';
+        var pages = views[currentViewIndex];
+        var label = pages.length === 2 ? (pages[0] + '–' + pages[1]) : String(pages[0]);
+        countEl.textContent = label + ' / ' + pdfDoc.numPages;
       }
 
       function turn(dir) {
         if (isAnimating || isZoomed) return;
-        var target = currentPage + dir;
-        if (target < 1 || target > numPages) return;
+        var target = currentViewIndex + dir;
+        if (target < 0 || target >= views.length) return;
         isAnimating = true;
-        renderInto(backCanvas, target).then(function () {
-          frontPage.classList.add(dir > 0 ? 'is-turning-next' : 'is-turning-prev');
+        var front = pageEls[frontIndex];
+        var back = pageEls[1 - frontIndex];
+        renderInto(back.querySelector('.pdfv__sheet'), views[target]).then(function () {
+          front.classList.add(dir > 0 ? 'is-turning-next' : 'is-turning-prev');
           setTimeout(function () {
-            currentPage = target;
-            // Front becomes an exact copy of what the back canvas now shows
-            // — cheaper than asking pdf.js to render the same page twice.
-            frontCanvas.width = backCanvas.width;
-            frontCanvas.height = backCanvas.height;
-            frontCanvas.setAttribute('data-aspect', backCanvas.getAttribute('data-aspect'));
-            frontCanvas.getContext('2d').drawImage(backCanvas, 0, 0);
-            frontPage.classList.remove('is-turning-next', 'is-turning-prev');
-            sizeStageToCanvas();
+            front.classList.remove('is-turning-next', 'is-turning-prev');
+            // The page that was hidden underneath becomes the new front —
+            // no re-render needed, just swap which element plays which role.
+            front.classList.remove('pdfv__page--front');
+            front.classList.add('pdfv__page--back');
+            back.classList.remove('pdfv__page--back');
+            back.classList.add('pdfv__page--front');
+            frontIndex = 1 - frontIndex;
+            currentViewIndex = target;
+            sizeStageToCanvas(back.querySelector('.pdfv__sheet'));
             isAnimating = false;
             updateUi();
           }, 640);
@@ -752,28 +790,37 @@ document.addEventListener('DOMContentLoaded', function () {
       zonePrev.addEventListener('click', function () { turn(-1); });
       zoneNext.addEventListener('click', function () { turn(1); });
 
-      function setZoomOrigin(e) {
-        var rect = frontCanvas.getBoundingClientRect();
-        frontCanvas.style.transformOrigin =
+      function setZoomOrigin(e, sheetEl) {
+        var rect = sheetEl.getBoundingClientRect();
+        sheetEl.style.transformOrigin =
           (((e.clientX - rect.left) / rect.width) * 100) + '% ' + (((e.clientY - rect.top) / rect.height) * 100) + '%';
       }
-      frontPage.addEventListener('click', function (e) {
+      section.addEventListener('click', function (e) {
         if (isAnimating) return;
+        var front = pageEls[frontIndex];
+        if (!front.contains(e.target)) return;
         e.stopPropagation();
+        var sheetEl = front.querySelector('.pdfv__sheet');
         isZoomed = !isZoomed;
-        if (isZoomed) setZoomOrigin(e);
-        frontPage.classList.toggle('is-zoomed', isZoomed);
+        if (isZoomed) setZoomOrigin(e, sheetEl);
+        front.classList.toggle('is-zoomed', isZoomed);
       });
-      frontPage.addEventListener('mousemove', function (e) { if (isZoomed) setZoomOrigin(e); });
-      frontPage.addEventListener('mouseleave', function () {
+      section.addEventListener('mousemove', function (e) {
         if (!isZoomed) return;
-        isZoomed = false;
-        frontPage.classList.remove('is-zoomed');
+        setZoomOrigin(e, pageEls[frontIndex].querySelector('.pdfv__sheet'));
+      });
+      pageEls.forEach(function (el) {
+        el.addEventListener('mouseleave', function () {
+          if (!isZoomed || el !== pageEls[frontIndex]) return;
+          isZoomed = false;
+          el.classList.remove('is-zoomed');
+        });
       });
 
       // Trackpad / Magic Mouse horizontal swipe — one clear horizontal
-      // gesture turns a single page, then a short cooldown ignores the
-      // rest of that same swipe instead of rifling through several pages.
+      // gesture turns to the next/previous view, then a short cooldown
+      // ignores the rest of that same swipe instead of rifling through
+      // several spreads at once.
       var wheelCooldown = false;
       section.addEventListener('wheel', function (e) {
         if (Math.abs(e.deltaX) < 24 || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
