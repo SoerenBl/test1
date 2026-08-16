@@ -152,19 +152,31 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Photo formats: try these extensions in order for any photo slot,
   // so it doesn't matter whether a file was exported as .jpg, .png, etc. ---
   var PHOTO_EXTS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
+  // Tries every extension at once instead of one after another — a
+  // sequential chain means a file saved as e.g. .png pays for 4 failed
+  // round-trips (jpg/JPG/jpeg/JPEG) before it even starts loading the real
+  // file, which is exactly the multi-second placeholder-then-photo flash
+  // this was causing. In parallel, the real file wins as soon as it's
+  // done regardless of its position in the list, and the "no photo here"
+  // case is bounded by the single slowest request instead of the sum of
+  // all eight.
   function probePhoto(baseNoExt) {
-    var exts = PHOTO_EXTS.slice();
-    function tryNext() {
-      if (!exts.length) return Promise.resolve(null);
-      var url = baseNoExt + '.' + exts.shift();
-      return new Promise(function (resolve) {
+    return new Promise(function (resolve) {
+      var remaining = PHOTO_EXTS.length;
+      var settled = false;
+      PHOTO_EXTS.forEach(function (ext) {
+        var url = baseNoExt + '.' + ext;
         var img = new Image();
-        img.onload = function () { resolve(url); };
-        img.onerror = function () { resolve(null); };
+        img.onload = function () {
+          if (!settled) { settled = true; resolve(url); }
+        };
+        img.onerror = function () {
+          remaining -= 1;
+          if (remaining === 0 && !settled) { settled = true; resolve(null); }
+        };
         img.src = url;
-      }).then(function (ok) { return ok || tryNext(); });
-    }
-    return tryNext();
+      });
+    });
   }
 
   // --- Project photo galleries: fully dynamic. Probes numbered files
@@ -446,19 +458,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var nav = document.querySelector('.nav');
     if (!nav) return;
+    var navHeroOverlay = document.querySelector('.project-hero__overlay');
     var lastY = window.scrollY;
     var navTicking = false;
     function updateNavVisibility() {
       var isMobile = window.matchMedia('(max-width: 760px)').matches;
       var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
       var y = window.scrollY;
-      if (!isMobile || menuOpen) {
-        nav.classList.remove('is-hidden');
-      } else if (y > lastY && y > 80) {
+      var hide = isMobile && !menuOpen && y > lastY && y > 80;
+      var show = !isMobile || menuOpen || y < lastY;
+      if (hide) {
         nav.classList.add('is-hidden');
-      } else if (y < lastY) {
+      } else if (show) {
         nav.classList.remove('is-hidden');
       }
+      // Docked project/category title lives visually inside the nav bar
+      // once scrolled — hide/show it in the exact same frame as the nav
+      // itself so the two never drift out of sync.
+      if (navHeroOverlay) navHeroOverlay.classList.toggle('is-nav-hidden', hide);
       lastY = y;
       navTicking = false;
     }
@@ -484,23 +501,48 @@ document.addEventListener('DOMContentLoaded', function () {
   // fixed value (not tied to the title's own height) so the motion feels
   // the same regardless of how long the title text is.
   var PROJECT_DOCK_RANGE = 200;
-  var PROJECT_DOCK_FONT_PX = 20;
   var projectHeroNatural = null;
+  var projectHeroDock = null;
+  var projectHeroTitleEl = projectHero ? projectHero.querySelector('.project-hero__title') : null;
   function measureProjectHero() {
-    if (!projectHero) return;
-    var prevTransform = projectHero.style.transform;
-    projectHero.style.transform = 'none';
-    var rect = projectHero.getBoundingClientRect();
-    var titleEl = projectHero.querySelector('.project-hero__title');
+    if (!projectHero || !projectHeroTitleEl) return;
+    var prevTransform = projectHeroTitleEl.style.transform;
+    projectHeroTitleEl.style.transform = 'none';
+    // Measured on the title element itself, not the padded wrapper around
+    // it — the wrapper's padding-top is what pushes the big title down
+    // from the very top of the section, but transforming the wrapper
+    // would scale that padding too, leaving the title's rendered position
+    // offset from the docked target by (padding * scale) instead of
+    // landing exactly on it. Transforming the title directly sidesteps
+    // that entirely: its own top-left is the only thing that has to line
+    // up with the docked target.
+    var rect = projectHeroTitleEl.getBoundingClientRect();
     projectHeroNatural = {
       // Stored as document-relative (rect.top is viewport-relative at the
       // current scroll position) so it stays valid no matter when/where
       // we're scrolled to when this runs.
       top: rect.top + window.scrollY,
       height: rect.height,
-      fontSize: titleEl ? parseFloat(getComputedStyle(titleEl).fontSize) : 16
+      fontSize: parseFloat(getComputedStyle(projectHeroTitleEl).fontSize)
     };
-    projectHero.style.transform = prevTransform;
+    projectHeroTitleEl.style.transform = prevTransform;
+    // Docked target is measured once here (and again on resize/nav-hide
+    // toggle) rather than every scroll frame — .nav__mark only actually
+    // moves on resize or during the mobile show/hide transition (handled
+    // separately via the .is-nav-hidden CSS transition), so re-reading
+    // its rect on every single scroll tick was pure wasted layout work
+    // and the main source of scroll lag on mobile.
+    if (projectHeroNav) {
+      var navRect = projectHeroNav.getBoundingClientRect();
+      var navFontPx = parseFloat(getComputedStyle(projectHeroNav).fontSize) || 24;
+      var targetFontPx = navFontPx * 2;
+      var minScale = Math.min(1, targetFontPx / projectHeroNatural.fontSize);
+      projectHeroDock = {
+        // Top edges of both text boxes flush, not vertically centred.
+        top: navRect.top,
+        scale: minScale
+      };
+    }
   }
   if (projectHero) {
     measureProjectHero();
@@ -565,11 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
           : 0;
         exitBg.style.transform = 'translateY(' + (-exitProgress * 100).toFixed(2) + '%)';
       }
-      if (projectHero && projectHeroNatural) {
-        var navRect = projectHeroNav ? projectHeroNav.getBoundingClientRect() : null;
-        var dockedCenterY = navRect ? navRect.top + navRect.height / 2 : 43;
-        var minScale = Math.min(1, PROJECT_DOCK_FONT_PX / projectHeroNatural.fontSize);
-        var dockedTop = dockedCenterY - (projectHeroNatural.height * minScale) / 2;
+      if (projectHero && projectHeroNatural && projectHeroDock) {
         var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
         // Kept position:absolute the whole time (see CSS) — this transform
         // both slides/shrinks it toward the docked spot AND cancels the
@@ -578,9 +616,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // what makes it read as "pinned in the nav" without ever switching
         // position modes. transform-origin is left/top, so this is a pure
         // vertical slide — the left edge never moves.
-        var translateY = dockProgress * (dockedTop - projectHeroNatural.top) + window.scrollY;
-        var scale = 1 - dockProgress * (1 - minScale);
-        projectHero.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+        var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
+        var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
+        projectHeroTitleEl.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
       }
       ticking = false;
     }
