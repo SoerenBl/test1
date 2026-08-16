@@ -185,60 +185,50 @@ p { margin: 0 0 1em; }
 .nav__mark.has-logo .nav__mark-text { display: none; }
 .nav__mark.has-logo .nav__mark-logo { display: block; }
 
-.nav__center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--nav-fg);
-  text-shadow: var(--nav-shadow);
-  /* Docked state of the project-page title (see .project-hero__title):
-     hidden until js/main.js fades it in once the big overlay title has
-     scrolled far enough to hand off. Opacity is set inline by JS, so only
-     the transition and pointer-events toggle live here. */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-.nav__center.is-visible { pointer-events: auto; }
-.nav__center:hover { opacity: 0.7; }
-@media (prefers-reduced-motion: reduce) {
-  .nav__center { opacity: 1; pointer-events: auto; }
-}
-
-/* ---------- Project page hero title (hovers over the first tiles, then
-   hands off to .nav__center as you scroll — see js/main.js) ---------- */
+/* ---------- Project/category page hero title ----------
+   Hovers large over the first tiles, styled exactly like the Service/
+   About titles (same size, all white). On scroll it slides straight up
+   and shrinks into the nav bar in one continuous motion — a single
+   element animated by transform (see updateParallax in js/main.js), not
+   two elements crossfading. transform-origin is the top-left corner, so
+   translateY alone moves it (purely vertical, no horizontal drift) while
+   scale shrinks it toward that same fixed left edge. The element stays
+   position:absolute the whole time; the transform math itself cancels
+   out the normal scroll-away drift once "docked", which is what makes it
+   read as pinned in the nav without ever switching position modes. */
 .project-hero { position: relative; }
 .project-hero__overlay {
   position: absolute;
   top: 0; left: 0; right: 0;
-  z-index: 5;
+  z-index: 105;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   pointer-events: none;
   transform-origin: left top;
-  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .project-hero__title {
   font-family: var(--font-display);
   text-transform: uppercase;
-  line-height: 0.88;
+  line-height: 0.95;
   letter-spacing: -0.01em;
-  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-size: var(--editorial-title-size);
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.45);
   margin: 0;
   overflow-wrap: anywhere;
 }
+.project-hero__title a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+.project-hero__title a:hover { opacity: 0.75; }
 @media (max-width: 760px) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .project-hero__overlay { display: none; }
+  .project-hero__overlay { position: relative; z-index: 5; }
 }
 
 .nav__right { display: flex; align-items: center; gap: 20px; }
@@ -443,29 +433,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   min-height: 100dvh;
 }
 
-/* Category listing pages: title header + tile grid together fill the
-   window on load (nav-pad already reserves --nav-h above), so a category
-   with little content still reads as "one screen, then scroll once for
-   the footer" — and a lone project fills that whole screen by itself. */
+/* Category listing pages: the tile grid itself fills the window on load
+   (nav floats over it, same as project pages) — the category title is a
+   .project-hero__overlay that hovers directly over the existing tiles and
+   docks into .nav__center on scroll, it does not add a separate hero/photo
+   section or push the grid down. See .project-hero below. */
 .category-page-body {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - var(--nav-h));
-  min-height: calc(100dvh - var(--nav-h));
+  min-height: 100vh;
+  min-height: 100dvh;
 }
-.category-hero {
-  flex: 0 0 auto;
-  position: relative;
-  overflow: hidden;
-  color: #fff;
-  padding: var(--editorial-top-pad) 0 clamp(30px, 4vh, 50px);
-}
-/* Category cover photo (optional cover.jpg dropped directly in the
-   category folder, e.g. furniture-lighting/cover.jpg) — same .page-hero__bg
-   treatment as the Service/About photo heroes, so the title hovers over a
-   full-bleed image instead of sitting on an empty bar when no photo has
-   been added yet the striped .ph placeholder shows instead. */
-.category-hero > .wrap { position: relative; z-index: 1; }
 .category-grid-section { flex: 1 1 auto; display: flex; }
 .category-grid-section .tile-grid { flex: 1 1 auto; }
 /* Single-project category: that one tile takes the full width and the
@@ -474,6 +452,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .tile-grid--single .tile {
   grid-column: 1 / -1 !important;
   grid-row: 1 / -1 !important;
+}
+/* Two-project category: both tiles take the full available height,
+   side by side in the existing two columns, instead of half-height
+   masonry tiles with empty space below. */
+.tile-grid--duo { grid-template-rows: 1fr; }
+.tile-grid--duo .tile {
+  grid-column: span 1 !important;
+  grid-row: 1 / -1 !important;
+}
+@media (max-width: 760px) {
+  .tile-grid--duo { grid-template-rows: 1fr 1fr; }
+  .tile-grid--duo .tile { grid-column: 1 / -1 !important; grid-row: span 1 !important; }
 }
 
 .tile { position: relative; display: block; grid-column: span 1; }
@@ -635,19 +625,22 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   grid-template-columns: 0.8fr 1.2fr;
   gap: clamp(30px, 6vw, 70px);
   align-items: start;
+  margin-top: clamp(10px, 2vh, 24px);
 }
 .about-grid .ph { min-height: 460px; }
 @media (max-width: 860px) {
   .about-grid { grid-template-columns: 1fr; }
   .about-grid .ph { min-height: 300px; }
 }
+.stack__body p { margin: 0 0 1.3em; }
+.stack__body p:last-child { margin-bottom: 0; }
 
-.timeline { margin-top: 30px; }
+.timeline { margin-top: clamp(20px, 4vh, 40px); }
 .timeline__row {
   display: grid;
   grid-template-columns: 110px 1fr;
   gap: 20px;
-  padding: 16px 0;
+  padding: 18px 0;
   border-top: 1px solid var(--color-line);
 }
 .timeline__row time { font-family: var(--font-heading); color: var(--color-text-muted); font-size: 0.85rem; }
@@ -745,7 +738,11 @@ html:has(.stack) footer { scroll-snap-align: start; }
 .stack__title {
   font-family: var(--font-display);
   text-transform: uppercase;
-  line-height: 0.82;
+  /* Not 1:1 with the glyphs' cap-height (would be tighter/more "editorial")
+     but tight enough to touch on titles that wrap to 2+ lines (e.g.
+     "Datenschutzerklärung") — 0.92 keeps the tight look on one-line
+     titles while giving wrapped ones clearance. */
+  line-height: 0.92;
   letter-spacing: -0.01em;
   font-size: var(--editorial-title-size);
   color: #fff;
@@ -787,7 +784,7 @@ html:has(.stack) footer { scroll-snap-align: start; }
 .page-hero__title {
   font-family: var(--font-display);
   text-transform: uppercase;
-  line-height: 0.82;
+  line-height: 0.92;
   letter-spacing: -0.01em;
   font-size: var(--editorial-title-size);
   margin: 0 0 clamp(20px, 3vh, 36px);
@@ -806,11 +803,15 @@ html:has(.stack) footer { scroll-snap-align: start; }
    below a reserved nav bar. */
 .page-hero--photo {
   position: relative;
-  overflow: hidden;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
+  /* min-height (not a fixed height) so the whole page is exactly this one
+     panel followed by the footer — no separate scrollable section below
+     it. Content (title/lede/services) determines the actual height; on
+     any normal viewport that's one screen, so scrolling once reveals the
+     footer directly, same as the rest of the site. */
+  min-height: 100vh;
+  min-height: 100dvh;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  padding-bottom: clamp(30px, 5vh, 60px);
   color: #fff;
 }
 .page-hero__bg {
@@ -818,7 +819,19 @@ html:has(.stack) footer { scroll-snap-align: start; }
   inset: 0;
   z-index: 0;
 }
-.page-hero__bg .ph { border: none; min-height: 100%; margin: 0; }
+/* Bottom-corner, dimmed placeholder text — this hero has real content
+   (title, lede, services) sitting on top of it, so the instructional copy
+   must stay out of the way instead of competing for the centre. */
+.page-hero__bg .ph,
+.stack__bg .ph {
+  border: none;
+  min-height: 100%;
+  margin: 0;
+  align-items: flex-end;
+  justify-content: flex-start;
+  text-align: left;
+  opacity: 0.45;
+}
 .page-hero__bg img {
   position: absolute;
   inset: 0;
@@ -839,7 +852,7 @@ html:has(.stack) footer { scroll-snap-align: start; }
 @media (max-width: 760px) {
   .stack__content.wrap,
   .page-hero .wrap,
-  .category-hero .wrap {
+  .project-hero__overlay {
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -879,6 +892,23 @@ html:has(.stack) footer { scroll-snap-align: start; }
   .editorial-row { grid-template-columns: 1fr; gap: 14px; }
 }
 
+/* Compact variant used inside .page-hero--photo (Service): the same three
+   rows, but tightened up and recoloured for white text on a dark photo so
+   the whole page — title, lede and services — fits in the one hero panel
+   instead of needing a second scrollable section. */
+.page-hero--photo .editorial-row {
+  padding: clamp(10px, 1.6vh, 20px) 0;
+  border-top-color: rgba(255,255,255,0.25);
+}
+.page-hero--photo .editorial-row:last-child { border-bottom-color: rgba(255,255,255,0.25); }
+.page-hero--photo .editorial-row h3 {
+  font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.page-hero--photo .editorial-row p { color: rgba(250,248,245,0.82); text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+.page-hero--photo .editorial-row__links span { color: rgba(250,248,245,0.55); }
+.page-hero--photo .editorial-row__links a { color: #fff; }
+
 /* ---------- Contact ---------- */
 
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 70px); }
@@ -913,6 +943,19 @@ html:has(.stack) footer { scroll-snap-align: start; }
   font-size: 0.95rem;
 }
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-accent); }
+
+/* White-on-photo variant, same treatment as .page-hero--photo .editorial-row */
+.page-hero--photo .contact-list li { border-top-color: rgba(255,255,255,0.25); color: #fff; }
+.page-hero--photo .contact-list li span { color: rgba(250,248,245,0.75); }
+.page-hero--photo .field label { color: rgba(250,248,245,0.75); }
+.page-hero--photo .field input,
+.page-hero--photo .field textarea {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+.page-hero--photo .field input::placeholder,
+.page-hero--photo .field textarea::placeholder { color: rgba(255,255,255,0.5); }
 
 /* ---------- Footer ---------- */
 
