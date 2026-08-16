@@ -56,8 +56,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!titleEl || titleEl.dataset.letterFxInit) return;
     titleEl.dataset.letterFxInit = 'true';
     var langSpans = titleEl.querySelectorAll(':scope > [data-lang]');
-    var containers = langSpans.length ? Array.prototype.slice.call(langSpans) : [titleEl];
+    var langSpansArr = langSpans.length ? Array.prototype.slice.call(langSpans) : null;
+    var containers;
+    if (langSpansArr) {
+      containers = langSpansArr;
+    } else {
+      // No existing [data-lang] wrapper (e.g. "About", same in both
+      // languages) — make one purely so there's an inline element to hang
+      // the hover listener on (see below for why that matters).
+      var wrap = document.createElement('span');
+      while (titleEl.firstChild) wrap.appendChild(titleEl.firstChild);
+      titleEl.appendChild(wrap);
+      containers = [wrap];
+    }
     containers.forEach(function (container) {
+      container.style.display = 'inline';
       var text = container.textContent;
       container.textContent = '';
       Array.prototype.forEach.call(text, function (ch) {
@@ -68,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
     var accent = getComputedStyle(document.documentElement).getPropertyValue('--color-panel-hover').trim() || '#9fd8ff';
-    titleEl.addEventListener('mouseenter', function () {
+    function bounceLetters() {
       var chars = titleEl.querySelectorAll('.letter-fx__char');
       chars.forEach(function (span, i) {
         var base = getComputedStyle(span).color;
@@ -83,6 +96,13 @@ document.addEventListener('DOMContentLoaded', function () {
           easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
         });
       });
+    }
+    // Listener lives on the (now inline, tightly-fit) containers rather
+    // than the title element itself, which stays block-level so normal
+    // page layout (spacing before whatever follows the title) is
+    // unaffected — that's the actual point of this whole change.
+    containers.forEach(function (container) {
+      container.addEventListener('mouseenter', bounceLetters);
     });
   }
   document.querySelectorAll('.hover-letters').forEach(initLetterFx);
@@ -559,6 +579,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (media && media.querySelector('img')) openLightbox(media);
       });
     });
+    // Hero panel's photo (project 1) isn't part of a gallery grid, but
+    // should still open in the same lightbox as the rest — its <img> is
+    // static in the HTML (not inserted async like the gallery tiles), so
+    // no delegation needed here.
+    var heroPanelMedia = document.querySelector('.project-hero-panel .tile__media');
+    if (heroPanelMedia) {
+      heroPanelMedia.addEventListener('click', function () {
+        if (heroPanelMedia.querySelector('img')) openLightbox(heroPanelMedia);
+      });
+    }
     lbBackdrop.addEventListener('click', closeLightbox);
     lbClose.addEventListener('click', closeLightbox);
     document.addEventListener('keydown', function (e) {
@@ -581,17 +611,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // --- Category cover photos: fade/blur in once ~1/3 of their tile has
-  // scrolled into view, instead of being visible immediately. ---
+  // --- Category cover photos: fade in + rise slightly once about half of
+  // their tile has scrolled into view, then hold at that position — not
+  // a one-off reveal, it un-reveals again once the tile leaves the
+  // viewport (isIntersecting false), so scrolling away and back replays
+  // the same fade+rise each time, rather than only ever once per page
+  // load. Homepage only (#categories) — the hero tile plays no part in
+  // this, it isn't inside #categories at all. ---
   if ('IntersectionObserver' in window) {
     var revealObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
         var obj = entry.target.querySelector('.tile__object');
-        if (obj) obj.classList.add('is-revealed');
-        revealObserver.unobserve(entry.target);
+        if (obj) obj.classList.toggle('is-revealed', entry.isIntersecting);
       });
-    }, { threshold: 0.33 });
+    }, { threshold: 0.5 });
     document.querySelectorAll('#categories .tile__media').forEach(function (el) {
       revealObserver.observe(el);
     });
