@@ -477,8 +477,14 @@ document.addEventListener('DOMContentLoaded', function () {
   var heroTile = document.querySelector('.hero-tile');
   var exitPanel = document.querySelector('.stack__panel--exit');
   var exitBg = exitPanel ? exitPanel.querySelector('.stack__bg') : null;
+  var projectHero = document.querySelector('.project-hero__overlay');
+  var projectNavCenter = document.querySelector('.nav__center');
+  // Distance over which the big overlay title hands off to the small
+  // docked nav title — a fixed value (not tied to the title's own height)
+  // so the handoff feels the same regardless of how long the title text is.
+  var PROJECT_DOCK_RANGE = 200;
 
-  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent || exitBg)) {
+  if (!reduceMotion && (parallaxEls.length || objectEls.length || heroContent || exitBg || projectHero)) {
     var ticking = false;
     function updateParallax() {
       var vh = window.innerHeight;
@@ -530,6 +536,15 @@ document.addEventListener('DOMContentLoaded', function () {
           ? Math.max(0, Math.min(1, (window.scrollY - exitPanelTop) / exitRange))
           : 0;
         exitBg.style.transform = 'translateY(' + (-exitProgress * 100).toFixed(2) + '%)';
+      }
+      if (projectHero) {
+        var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
+        projectHero.style.opacity = String(1 - dockProgress);
+        projectHero.style.transform = 'scale(' + (1 - dockProgress * 0.25).toFixed(3) + ')';
+        if (projectNavCenter) {
+          projectNavCenter.style.opacity = String(dockProgress);
+          projectNavCenter.classList.toggle('is-visible', dockProgress > 0.05);
+        }
       }
       ticking = false;
     }

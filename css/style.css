@@ -197,9 +197,49 @@ p { margin: 0 0 1em; }
   text-transform: uppercase;
   color: var(--nav-fg);
   text-shadow: var(--nav-shadow);
+  /* Docked state of the project-page title (see .project-hero__title):
+     hidden until js/main.js fades it in once the big overlay title has
+     scrolled far enough to hand off. Opacity is set inline by JS, so only
+     the transition and pointer-events toggle live here. */
+  opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
+.nav__center.is-visible { pointer-events: auto; }
 .nav__center:hover { opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) {
+  .nav__center { opacity: 1; pointer-events: auto; }
+}
+
+/* ---------- Project page hero title (hovers over the first tiles, then
+   hands off to .nav__center as you scroll — see js/main.js) ---------- */
+.project-hero { position: relative; }
+.project-hero__overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 5;
+  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  pointer-events: none;
+  transform-origin: left top;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.project-hero__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.45);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-hero__overlay { display: none; }
+}
 
 .nav__right { display: flex; align-items: center; gap: 20px; }
 
@@ -413,7 +453,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   min-height: calc(100vh - var(--nav-h));
   min-height: calc(100dvh - var(--nav-h));
 }
-.category-hero { flex: 0 0 auto; padding: var(--editorial-top-pad) 0 clamp(30px, 4vh, 50px); }
+.category-hero {
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  padding: var(--editorial-top-pad) 0 clamp(30px, 4vh, 50px);
+}
+/* Category cover photo (optional cover.jpg dropped directly in the
+   category folder, e.g. furniture-lighting/cover.jpg) — same .page-hero__bg
+   treatment as the Service/About photo heroes, so the title hovers over a
+   full-bleed image instead of sitting on an empty bar when no photo has
+   been added yet the striped .ph placeholder shows instead. */
+.category-hero > .wrap { position: relative; z-index: 1; }
 .category-grid-section { flex: 1 1 auto; display: flex; }
 .category-grid-section .tile-grid { flex: 1 1 auto; }
 /* Single-project category: that one tile takes the full width and the
@@ -744,6 +796,41 @@ html:has(.stack) footer { scroll-snap-align: start; }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+}
+
+/* Photo-background variant of .page-hero (Service): mirrors the About
+   page's full-bleed .stack__bg treatment — one photo fills the whole
+   viewport including behind the nav, title/lede sit on top. Pairs with a
+   floating (non-solid) nav and no body.nav-pad, same as About, so the
+   photo actually reaches the very top of the window instead of stopping
+   below a reserved nav bar. */
+.page-hero--photo {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  color: #fff;
+}
+.page-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.page-hero__bg .ph { border: none; min-height: 100%; margin: 0; }
+.page-hero__bg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.page-hero--photo > .wrap { position: relative; z-index: 1; }
+.page-hero--photo .lede { color: rgba(250,248,245,0.85); }
+@media (max-width: 760px) {
+  .page-hero--photo { padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
 }
 
 /* Edge-to-edge on mobile: these hero/title blocks use a smaller gutter
