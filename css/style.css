@@ -32,7 +32,7 @@
   /* Shared grid for Service/Contact/About/Awards: same title size and
      the same distance from the top, so all four read as one system. */
   --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
-  --editorial-top-pad: clamp(120px, 16vh, 190px);
+  --editorial-top-pad: clamp(50px, 7vh, 100px);
 
   --cat-1: #8d8d90;
   --cat-2: #33538f;
@@ -138,6 +138,14 @@ p { margin: 0 0 1em; }
   border: none;
   color: var(--nav-fg);
 }
+/* Mobile only: nav slides away on scroll-down, back on scroll-up (see
+   js/main.js). Desktop keeps it always visible. */
+@media (max-width: 760px) {
+  .nav {
+    transition: transform 0.3s ease;
+  }
+  .nav.is-hidden { transform: translateY(-100%); }
+}
 .nav.nav--solid {
   --nav-fg: var(--color-text);
   --nav-fg-muted: var(--color-text-muted);
@@ -160,8 +168,22 @@ p { margin: 0 0 1em; }
   color: var(--nav-fg);
   text-shadow: var(--nav-shadow);
   transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 .nav__mark:hover { opacity: 0.7; }
+/* Swapped in automatically when a logo.* file exists at the repo root
+   (see js/main.js) — filter:drop-shadow mirrors --nav-shadow so a
+   cutout/handwritten logo stays legible over a photo background too. */
+.nav__mark-logo {
+  display: none;
+  height: 34px;
+  width: auto;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.55)) drop-shadow(0 2px 14px rgba(0,0,0,0.35));
+}
+.nav.nav--solid .nav__mark-logo { filter: none; }
+.nav__mark.has-logo .nav__mark-text { display: none; }
+.nav__mark.has-logo .nav__mark-logo { display: block; }
 
 .nav__center {
   position: absolute;
@@ -381,6 +403,27 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   min-height: 100dvh;
 }
 
+/* Category listing pages: title header + tile grid together fill the
+   window on load (nav-pad already reserves --nav-h above), so a category
+   with little content still reads as "one screen, then scroll once for
+   the footer" — and a lone project fills that whole screen by itself. */
+.category-page-body {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100dvh - var(--nav-h));
+}
+.category-hero { flex: 0 0 auto; padding: var(--editorial-top-pad) 0 clamp(30px, 4vh, 50px); }
+.category-grid-section { flex: 1 1 auto; display: flex; }
+.category-grid-section .tile-grid { flex: 1 1 auto; }
+/* Single-project category: that one tile takes the full width and the
+   full remaining height instead of sitting in a half-width column. */
+.tile-grid--single { grid-template-rows: 1fr; }
+.tile-grid--single .tile {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
+}
+
 .tile { position: relative; display: block; grid-column: span 1; }
 .tile--full { grid-column: span 2; }
 .tile--tall { grid-row: span 2; }
@@ -588,9 +631,28 @@ html:has(.stack) footer { scroll-snap-align: start; }
 .stack__panel:nth-of-type(1) { z-index: 1; }
 .stack__panel:nth-of-type(2) { z-index: 2; }
 .stack__panel:nth-of-type(3) { z-index: 3; }
+
+.stack__bg {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100vh;
+  height: 100dvh;
+  will-change: transform;
+}
+/* A sticky element's "stuck" duration comes from how much normal-flow
+   content follows it, not from its own height — so to give the last
+   panel room to play the "background exits, text stays put" effect
+   (driven by js/main.js) before it finally releases to the footer, we
+   add an invisible spacer after it rather than making the panel itself
+   taller (which would have no effect, since nothing would follow it). */
+/* Matches the footer's own natural height (~83px) — the same distance
+   you'd scroll to reveal the footer on any other page, no more. Also
+   short enough that, with mandatory scroll-snap, a single ordinary
+   scroll input clears it instead of repeatedly snapping back. */
+.stack__exit-spacer { height: 90px; }
 .stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
-.stack__panel > img {
+.stack__panel img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -636,6 +698,7 @@ html:has(.stack) footer { scroll-snap-align: start; }
   font-size: var(--editorial-title-size);
   color: #fff;
   margin: 0 0 clamp(20px, 3vh, 36px);
+  overflow-wrap: anywhere;
 }
 .stack__panel--light .stack__title { color: var(--color-text); }
 .stack__body { color: rgba(250,248,245,0.92); }
@@ -646,7 +709,10 @@ html:has(.stack) footer { scroll-snap-align: start; }
 
 @media (max-width: 760px) {
   .stack__content { padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
-  .stack__title { font-size: clamp(3rem, 16vw, 5.5rem); }
+  /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
+     lines at this width and need clearance so ascenders/descenders
+     don't collide between lines. */
+  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
 }
 
 /* Plain-section counterpart of .stack__content/.stack__title, used by
@@ -654,7 +720,18 @@ html:has(.stack) footer { scroll-snap-align: start; }
    size and top offset as the full-viewport About/Awards panels, without
    being full-viewport themselves. */
 .section--gray { background: var(--color-bg-gray); }
-.page-hero { padding: var(--editorial-top-pad) 0 clamp(50px, 8vh, 90px); }
+.page-hero {
+  padding: var(--editorial-top-pad) 0 clamp(50px, 8vh, 90px);
+  /* Fills the window on its own (body.nav-pad already reserves --nav-h
+     above it) so short content still reads as "one screen, then scroll
+     once for the footer" instead of leaving a stub of empty space.
+     Plain block layout (not flex) so the title still starts at the top,
+     matching the About/Awards grid — any extra space lands below the
+     content, not by centring it. */
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100dvh - var(--nav-h));
+}
 .page-hero__title {
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -662,10 +739,23 @@ html:has(.stack) footer { scroll-snap-align: start; }
   letter-spacing: -0.01em;
   font-size: var(--editorial-title-size);
   margin: 0 0 clamp(20px, 3vh, 36px);
+  overflow-wrap: anywhere;
 }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
-  .page-hero__title { font-size: clamp(3rem, 16vw, 5.5rem); }
+  .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+}
+
+/* Edge-to-edge on mobile: these hero/title blocks use a smaller gutter
+   than the rest of the site so the big title gets more of the narrow
+   screen instead of losing width to the standard side margins. */
+@media (max-width: 760px) {
+  .stack__content.wrap,
+  .page-hero .wrap,
+  .category-hero .wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* ---------- Editorial list (Services) ---------- */
