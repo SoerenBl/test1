@@ -714,16 +714,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
         var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
         projectHeroTitleEl.style.transform = 'translateY(' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
-        // A title that wraps to two lines at full size has no room to
-        // stay wrapped once docked (the nav bar is one line tall). Forcing
-        // that switch early was tried and rejected: at low dockProgress
-        // the text is still close to full size, so collapsing it to one
-        // line there overflows way past the viewport edge. Waiting until
-        // fully docked (already shrunk to its smallest, nav-appropriate
-        // size) means the same switch happens at a size that was always
-        // going to fit on one line — it reads as the last, subtle step of
-        // the same shrink motion instead of a separate jump.
-        projectHeroTitleEl.classList.toggle('is-docking', dockProgress >= 1);
       }
       ticking = false;
     }
