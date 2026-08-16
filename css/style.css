@@ -26,6 +26,7 @@
   --color-line: #e2ddd3;
   --color-panel: #17161a;
   --color-panel-text: #faf8f5;
+  --color-panel-hover: #9fd8ff;
 
   --cat-1: #8d8d90;
   --cat-2: #33538f;
@@ -262,8 +263,7 @@ p { margin: 0 0 1em; }
   transition: color 0.2s ease, transform 0.2s ease;
   transform-origin: left center;
 }
-.menu-panel__nav a:hover { color: var(--color-accent); transform: translateX(6px); }
-.menu-panel__nav a[aria-current="page"] { color: var(--color-accent); }
+.menu-panel__nav a:hover { color: var(--color-panel-hover); transform: translateX(6px); }
 
 .menu-panel__foot {
   margin-top: 40px;
@@ -276,7 +276,7 @@ p { margin: 0 0 1em; }
   gap: 14px;
 }
 .menu-panel__social { display: flex; gap: 16px; font-family: var(--font-heading); font-size: 0.85rem; }
-.menu-panel__social a:hover { color: var(--color-accent); }
+.menu-panel__social a:hover { color: var(--color-panel-hover); }
 
 .menu-scrim {
   position: fixed;
@@ -359,7 +359,9 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: 360px;
+  /* Row height = half the column width, so a tile--tall (2 rows) is an
+     exact square: 2 * 25vw = 50vw = one column's own width. */
+  grid-auto-rows: 25vw;
   grid-auto-flow: dense;
   gap: 0;
 }
@@ -421,6 +423,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 #categories .tile:nth-of-type(6) { --tile-hover: var(--cat-6); }
 #categories .tile:hover .tile__media { background-color: var(--tile-hover, var(--color-accent)); }
 #categories .tile:hover .ph { opacity: 0.22; border-color: rgba(255,255,255,0.6); color: rgba(255,255,255,0.9); }
+
+/* Service tile: a permanent solid-colour CTA banner, not a hover-reveal category.
+   Matches the specificity of the nth-of-type rules above so it reliably wins. */
+#categories .tile.tile--cta .tile__media { background-color: var(--color-text); }
+#categories .tile.tile--cta .tile__cat,
+#categories .tile.tile--cta .tile__title { color: #fff; }
+#categories .tile.tile--cta:hover .tile__media { background-color: var(--color-accent); }
 
 /* Project detail pages: own photos open in the lightbox on click */
 .tile-grid--projects[data-fixed-layout] .tile__media { cursor: zoom-in; }
@@ -541,6 +550,108 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   border-top: 1px solid var(--color-line);
 }
 .timeline__row time { font-family: var(--font-heading); color: var(--color-text-muted); font-size: 0.85rem; }
+
+/* ---------- Stacking full-screen panels (About) ----------
+   Each panel is full-viewport and position:sticky at the same top:0 —
+   later panels sit at a higher stacking order, so as you scroll past one
+   the next slides up from below and covers it, like turning a page. */
+
+.stack { position: relative; }
+.stack__panel {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-bg-alt);
+}
+.stack__panel:nth-of-type(1) { z-index: 1; }
+.stack__panel:nth-of-type(2) { z-index: 2; }
+.stack__panel:nth-of-type(3) { z-index: 3; }
+.stack__panel:nth-of-type(4) { z-index: 4; }
+.stack__panel .ph { border: none; min-height: 100%; margin: 0; }
+.stack__panel > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.stack__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(23,22,26,0.25) 0%, rgba(23,22,26,0.6) 100%);
+  pointer-events: none;
+}
+.stack__panel--light { background: #f5f5f4; }
+.stack__panel--light .stack__scrim { display: none; }
+
+.stack__content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(100px, 14vh, 170px) 0 clamp(50px, 8vh, 90px);
+}
+.stack__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  font-size: clamp(4rem, 15vw, 10.5rem);
+  color: #fff;
+  margin: 0 0 clamp(20px, 4vh, 50px);
+}
+.stack__panel--light .stack__title { color: var(--color-text); }
+.stack__body { color: rgba(250,248,245,0.92); }
+.stack__panel--light .stack__body { color: var(--color-text); }
+.stack__body p { max-width: 60ch; }
+.stack__body .eyebrow { color: rgba(255,255,255,0.85); }
+.stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
+
+@media (max-width: 760px) {
+  .stack__content { padding-top: clamp(90px, 18vh, 140px); }
+  .stack__title { font-size: clamp(3rem, 16vw, 5.5rem); }
+}
+
+/* ---------- Editorial list (Services) ---------- */
+
+.editorial-row {
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr 0.8fr;
+  gap: clamp(20px, 4vw, 50px);
+  padding: clamp(30px, 5vh, 50px) 0;
+  border-top: 1px solid var(--color-line);
+}
+.editorial-row:last-child { border-bottom: 1px solid var(--color-line); }
+.editorial-row h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.92;
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+  margin: 0;
+  transition: transform 0.3s ease, color 0.3s ease;
+  transform-origin: left center;
+}
+.editorial-row:hover h3 { transform: scale(1.06); color: var(--color-accent); }
+.editorial-row p { margin: 0; color: var(--color-text-muted); }
+.editorial-row__links { display: flex; flex-direction: column; gap: 8px; }
+.editorial-row__links span { font-family: var(--font-heading); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
+.editorial-row__links a {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  color: var(--color-accent);
+  transition: opacity 0.2s ease;
+}
+.editorial-row__links a:hover { opacity: 0.6; }
+@media (max-width: 860px) {
+  .editorial-row { grid-template-columns: 1fr; gap: 14px; }
+}
 
 /* ---------- Contact ---------- */
 

@@ -6,13 +6,14 @@
 <title>Über mich — Sören Bläcker</title>
 <meta name="description" content="Über Sören Bläcker — Produktdesigner.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
-<body class="nav-pad">
+<body>
 
-<header class="nav nav--solid">
+<header class="nav">
   <div class="nav__inner">
     <a href="index.html" class="nav__mark">Sören Bläcker</a>
+    <a href="index.html" class="nav__center"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
     <div class="nav__right">
       <div class="lang-toggle">
         <button type="button" data-set-lang="de">DE</button>
@@ -36,7 +37,7 @@
   <nav class="menu-panel__nav">
     <a href="index.html"><span data-lang="de">Start</span><span data-lang="en">Home</span></a>
     <a href="index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
-    <a href="index.html#services"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
+    <a href="services/"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
     <a href="about.html" aria-current="page"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
     <a href="contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
   </nav>
@@ -50,51 +51,64 @@
   </div>
 </div>
 
-<section style="padding-bottom:0;">
-  <div class="wrap">
-    <span class="eyebrow"><span data-lang="de">Über mich</span><span data-lang="en">About</span></span>
-    <h1 class="display page-title--sm">Sören Bläcker</h1>
-  </div>
-</section>
+<div class="stack">
 
-<section>
-  <div class="wrap about-grid">
-    <div class="ph">
-      <span data-lang="de">Portraitfoto (hochkant)</span>
-      <span data-lang="en">Portrait photo (portrait orientation)</span>
-    </div>
-    <div>
-      <p>
-        <span data-lang="de">Platzhaltertext — hier folgt später ein kurzer Steckbrief: Ausbildung/Studium, Werdegang, Arbeitsweise, was dich als Produktdesigner ausmacht.</span>
-        <span data-lang="en">Placeholder text — a short bio will go here: education, background, way of working, what defines you as a product designer.</span>
-      </p>
-      <p>
-        <span data-lang="de">Zweiter Absatz — z. B. Materialverständnis, Philosophie, was Kund:innen von einer Zusammenarbeit erwarten können.</span>
-        <span data-lang="en">Second paragraph — e.g. material knowledge, philosophy, what clients can expect from working together.</span>
-      </p>
-
-      <div class="timeline">
-        <div class="timeline__row">
-          <time>2026</time>
-          <span data-lang="de">Platzhalter — Station/Ereignis</span>
-          <span data-lang="en">Placeholder — milestone/event</span>
+  <section class="stack__panel">
+    <div class="ph"><span data-lang="de">Hintergrundfoto — Porträt oder Atelier, querformatig</span><span data-lang="en">Background photo — portrait or studio shot, landscape orientation</span></div>
+    <img data-photo="about/cover" alt="">
+    <div class="stack__scrim"></div>
+    <div class="stack__content wrap">
+      <h1 class="stack__title">About</h1>
+      <div class="about-grid stack__body">
+        <div>
+          <p>
+            <span data-lang="de">Platzhaltertext — hier folgt später ein kurzer Steckbrief: Ausbildung/Studium, Werdegang, Arbeitsweise, was dich als Produktdesigner ausmacht.</span>
+            <span data-lang="en">Placeholder text — a short bio will go here: education, background, way of working, what defines you as a product designer.</span>
+          </p>
+          <p>
+            <span data-lang="de">Zweiter Absatz — z. B. Materialverständnis, Philosophie, was Kund:innen von einer Zusammenarbeit erwarten können.</span>
+            <span data-lang="en">Second paragraph — e.g. material knowledge, philosophy, what clients can expect from working together.</span>
+          </p>
         </div>
-        <div class="timeline__row">
-          <time>20XX</time>
-          <span data-lang="de">Platzhalter — Station/Ereignis</span>
-          <span data-lang="en">Placeholder — milestone/event</span>
-        </div>
-        <div class="timeline__row">
-          <time>20XX</time>
-          <span data-lang="de">Platzhalter — Station/Ereignis</span>
-          <span data-lang="en">Placeholder — milestone/event</span>
+        <div class="timeline">
+          <div class="timeline__row">
+            <time>2026</time>
+            <span data-lang="de">Platzhalter — Station/Ereignis</span>
+            <span data-lang="en">Placeholder — milestone/event</span>
+          </div>
+          <div class="timeline__row">
+            <time>20XX</time>
+            <span data-lang="de">Platzhalter — Station/Ereignis</span>
+            <span data-lang="en">Placeholder — milestone/event</span>
+          </div>
+          <div class="timeline__row">
+            <time>20XX</time>
+            <span data-lang="de">Platzhalter — Station/Ereignis</span>
+            <span data-lang="en">Placeholder — milestone/event</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
+  <section class="stack__panel">
+    <div class="ph"><span data-lang="de">Hintergrundfoto — z. B. Werkstatt oder Detailaufnahme</span><span data-lang="en">Background photo — e.g. workshop or detail shot</span></div>
+    <img data-photo="about/awards" alt="">
+    <div class="stack__scrim"></div>
+    <div class="stack__content wrap">
+      <h1 class="stack__title"><span data-lang="de">Auszeichnungen</span><span data-lang="en">Awards</span></h1>
+      <div class="stack__body">
+        <p style="color:var(--color-accent);">
+          <span data-lang="de">Platzhalter — hier sollen später Auszeichnungen, Presse oder Anerkennungen aufgeführt werden, sobald es welche gibt. Sag mir einfach Bescheid, sobald du etwas hast.</span>
+          <span data-lang="en">Placeholder — awards, press or recognitions will be listed here once there are any. Just let me know when you have something.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer style="position:relative; z-index:5;">
   <div class="wrap footer__inner">
     <span>&copy; <span id="year">2026</span> Sören Bläcker</span>
     <div class="footer__social">
@@ -107,6 +121,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=8"></script>
+<script src="js/main.js?v=9"></script>
 </body>
 </html>
