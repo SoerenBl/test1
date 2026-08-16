@@ -342,7 +342,7 @@ p { margin: 0 0 1em; }
 /* ---------- Sections ---------- */
 
 section { padding: clamp(50px, 9vh, 100px) 0; }
-.section--flush { padding: 0; scroll-margin-top: var(--nav-h); }
+.section--flush { padding: 0; }
 
 .section-head {
   display: flex;
@@ -556,6 +556,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    later panels sit at a higher stacking order, so as you scroll past one
    the next slides up from below and covers it, like turning a page. */
 
+/* Scroll-snap so nudging past a panel completes the transition on its
+   own, landing fully on the next full-viewport panel instead of
+   requiring a slow, precise scroll through its entire height. Scoped to
+   pages that actually contain a .stack so it never affects normal
+   scrolling elsewhere on the site. */
+html:has(.stack) { scroll-snap-type: y mandatory; }
+
 .stack { position: relative; }
 .stack__panel {
   position: sticky;
@@ -565,6 +572,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
+  scroll-snap-align: start;
 }
 .stack__panel:nth-of-type(1) { z-index: 1; }
 .stack__panel:nth-of-type(2) { z-index: 2; }
