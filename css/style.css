@@ -282,7 +282,7 @@ p { margin: 0 0 1em; }
   display: flex;
   gap: 6px;
   font-family: var(--font-heading);
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   letter-spacing: 0.04em;
 }
 .lang-toggle button {
