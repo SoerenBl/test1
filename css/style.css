@@ -27,6 +27,12 @@
   --color-panel: #17161a;
   --color-panel-text: #faf8f5;
   --color-panel-hover: #9fd8ff;
+  --color-bg-gray: #e7e3db;
+
+  /* Shared grid for Service/Contact/About/Awards: same title size and
+     the same distance from the top, so all four read as one system. */
+  --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
+  --editorial-top-pad: clamp(120px, 16vh, 190px);
 
   --cat-1: #8d8d90;
   --cat-2: #33538f;
@@ -608,17 +614,28 @@ html:has(.stack) footer { scroll-snap-align: start; }
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: clamp(100px, 14vh, 170px) 0 clamp(50px, 8vh, 90px);
+  justify-content: flex-start;
+  /* Longhand on purpose — this element is also .wrap (for the shared
+     left/right gutter); a padding shorthand here would silently wipe
+     that horizontal padding out since both rules target the same
+     property on the same element. Top-aligned (not centred) so the
+     title lands at the same spot as the Service/Contact page-hero
+     grid instead of drifting with how much body copy follows it.
+     Service/Contact sit under a solid nav that pushes content down by
+     --nav-h (body.nav-pad); this page's nav floats over the photo
+     instead, so --nav-h is added back in here to land at the same
+     spot regardless. */
+  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  padding-bottom: clamp(50px, 8vh, 90px);
 }
 .stack__title {
   font-family: var(--font-display);
   text-transform: uppercase;
   line-height: 0.82;
   letter-spacing: -0.01em;
-  font-size: clamp(4rem, 15vw, 10.5rem);
+  font-size: var(--editorial-title-size);
   color: #fff;
-  margin: 0 0 clamp(20px, 4vh, 50px);
+  margin: 0 0 clamp(20px, 3vh, 36px);
 }
 .stack__panel--light .stack__title { color: var(--color-text); }
 .stack__body { color: rgba(250,248,245,0.92); }
@@ -628,8 +645,27 @@ html:has(.stack) footer { scroll-snap-align: start; }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
 @media (max-width: 760px) {
-  .stack__content { padding-top: clamp(90px, 18vh, 140px); }
+  .stack__content { padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
   .stack__title { font-size: clamp(3rem, 16vw, 5.5rem); }
+}
+
+/* Plain-section counterpart of .stack__content/.stack__title, used by
+   normal scrolling pages (Service, Contact) that share the same title
+   size and top offset as the full-viewport About/Awards panels, without
+   being full-viewport themselves. */
+.section--gray { background: var(--color-bg-gray); }
+.page-hero { padding: var(--editorial-top-pad) 0 clamp(50px, 8vh, 90px); }
+.page-hero__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  font-size: var(--editorial-title-size);
+  margin: 0 0 clamp(20px, 3vh, 36px);
+}
+@media (max-width: 760px) {
+  .page-hero { padding-top: clamp(90px, 18vh, 140px); }
+  .page-hero__title { font-size: clamp(3rem, 16vw, 5.5rem); }
 }
 
 /* ---------- Editorial list (Services) ---------- */
