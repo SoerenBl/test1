@@ -229,12 +229,6 @@ p { margin: 0 0 1em; }
   transition: opacity 0.2s ease;
 }
 .project-hero__title a:hover { opacity: 0.75; }
-/* A title that wraps to two lines at full size has no room to stay
-   wrapped once docked in the one-line-tall nav bar — js/main.js switches
-   it to a single line right as the shrink/slide starts, so by the time
-   it's small enough to matter it's already reading as one continuous
-   line, not a title that wraps then un-wraps mid-transition. */
-.project-hero__title.is-docking { white-space: nowrap; }
 @media (max-width: 760px) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease; }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
@@ -262,13 +256,20 @@ p { margin: 0 0 1em; }
 .lang-toggle button {
   background: none;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
   color: var(--nav-fg-muted);
   font-family: inherit;
   font-size: inherit;
-  padding: 4px 2px;
+  padding: 4px 6px;
+  transition: background-color 0.2s ease;
 }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
+/* Same soft blur nav__mark/menu-btn already have for legibility over any
+   background, plus a faint hover backing (like the menu button's own
+   solid shape) so it reads clearly over light photos too — kept subtle,
+   just enough to place the button, not a full pill. */
+.lang-toggle button:hover { background-color: rgba(127,127,127,0.18); }
 
 /* Menu button: solid white shape with the label knocked out of it,
    so whatever sits behind the nav shows through the letterforms. */
@@ -677,6 +678,12 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   border-top: 1px solid var(--color-line);
 }
 .timeline__row time { font-family: var(--font-heading); color: var(--color-text-muted); font-size: 0.85rem; }
+/* var(--color-text-muted) is a warm grey tuned for the light body
+   background — on About/Awards' dark photo panels it needs to be part of
+   the same white family as the rest of .stack__body, just dimmed for
+   hierarchy, not a colour from a different palette entirely. */
+.stack__body .timeline__row time { color: rgba(250,248,245,0.6); }
+.stack__body .timeline__row { border-top-color: rgba(255,255,255,0.25); }
 
 /* ---------- Stacking full-screen panels (About) ----------
    Each panel is full-viewport and position:sticky at the same top:0 —
@@ -962,9 +969,9 @@ html:has(.stack) footer { scroll-snap-align: start; }
   font-family: var(--font-heading);
   font-size: 0.95rem;
   color: var(--color-accent);
-  transition: opacity 0.2s ease;
+  transition: color 0.2s ease;
 }
-.editorial-row__links a:hover { opacity: 0.6; }
+.editorial-row__links a:hover { color: var(--color-panel-hover); }
 @media (max-width: 860px) {
   .editorial-row { grid-template-columns: 1fr; gap: 14px; }
 }
@@ -984,7 +991,8 @@ html:has(.stack) footer { scroll-snap-align: start; }
 }
 .page-hero--photo .editorial-row p { color: rgba(250,248,245,0.82); text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 .page-hero--photo .editorial-row__links span { color: rgba(250,248,245,0.55); }
-.page-hero--photo .editorial-row__links a { color: #fff; }
+.page-hero--photo .editorial-row__links a { color: #fff; transition: color 0.2s ease; }
+.page-hero--photo .editorial-row__links a:hover { color: var(--color-panel-hover); }
 
 /* ---------- Contact ---------- */
 
