@@ -886,6 +886,13 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }, { passive: true });
     updateStackSnap();
+
+    var scrollCueBtn = document.getElementById('scrollCueBtn');
+    if (scrollCueBtn) {
+      scrollCueBtn.addEventListener('click', function () {
+        window.scrollTo({ top: firstPanel.offsetHeight, behavior: 'smooth' });
+      });
+    }
   })();
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroNav = document.querySelector('.nav__mark');
