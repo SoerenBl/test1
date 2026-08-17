@@ -935,9 +935,36 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('flip', updateUi);
         pageFlip.on('init', updateUi);
         updateUi();
-        return imageReady.then(function () {
-          // Only remove the spinner once StPageFlip's own image has
-          // actually loaded (see watchLibraryImageLoad above) — not before.
+        // Rendering the rest of the pages doesn't depend on the cover
+        // having been shown first — kicked off right away, in parallel
+        // with imageReady above, instead of only starting once the
+        // spinner comes down. The spinner now waits on *both* before
+        // revealing anything, so forward navigation works the instant
+        // the visitor actually sees the book, instead of being briefly
+        // locked while the rest loads in behind it (a fast reveal is
+        // worth less than one that's actually ready to use — this was a
+        // deliberate call after the first version worked but couldn't be
+        // flipped through immediately).
+        var pages = [];
+        for (var i = 2; i <= numPages; i++) pages.push(i);
+        var allImagesReady = pages.length
+          ? Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
+              pageFlip.updateFromImages([result.images[0]].concat(restImages));
+              allPagesLoaded = true;
+              updateUi();
+            }).catch(function (err) {
+              console.error('PDF viewer: failed to load remaining pages:', err);
+              allPagesLoaded = true; // don't leave navigation permanently blocked over this
+              updateUi();
+            })
+          : Promise.resolve().then(function () {
+              allPagesLoaded = true; // a genuine 1-page PDF -- nothing else to load
+              updateUi();
+            });
+        return Promise.all([imageReady, allImagesReady]).then(function () {
+          // Only remove the spinner once StPageFlip's own cover image has
+          // actually loaded (see watchLibraryImageLoad above) *and* every
+          // other page has too — not before either one.
           if (loaderEl) loaderEl.remove();
           // bookWrap's width and bookShift's transform (the -50% shift
           // that keeps a lone cover centred — see updateUi() below) were
@@ -958,31 +985,11 @@ document.addEventListener('DOMContentLoaded', function () {
           bookShift.style.transition = '';
           stageEl.classList.remove('is-loading');
           var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
-          // Only the cover image is real so far — the rest of
-          // result.images are the 1x1 placeholders it was padded out
-          // with (see where it's built) purely so StPageFlip's page
-          // count, and the cover-positioning decision that comes with
-          // it, never has to change later. The real pages render now, in
-          // the background, and get swapped in for those placeholders via
-          // updateFromImages (StPageFlip's own API for this — it
-          // preserves the current page position) without disturbing
-          // anything the visitor's already doing; allPagesLoaded is what
-          // actually keeps forward navigation from landing on a
-          // placeholder in the meantime (see updateUi() above).
-          var pages = [];
-          for (var i = 2; i <= numPages; i++) pages.push(i);
-          if (pages.length) {
-            Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
-              pageFlip.updateFromImages([result.images[0]].concat(restImages));
-              allPagesLoaded = true;
-              updateUi();
-            }).catch(function (err) {
-              console.error('PDF viewer: failed to load remaining pages:', err);
-            });
-          } else {
-            allPagesLoaded = true; // a genuine 1-page PDF -- nothing else to load
-            updateUi();
-          }
+          // allImagesReady above has already resolved by the time this
+          // runs — every real page is loaded and allPagesLoaded is
+          // already true, so forward navigation (gated on that flag —
+          // see turn()) works immediately, not just once the spinner is
+          // long gone.
           // .pdfv__stage now hugs the book's own size (see the CSS comment
           // on .pdfv__stage) instead of claiming a fixed chunk of the
           // viewport, so it can no longer double as "the available area"
