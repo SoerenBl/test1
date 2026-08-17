@@ -1452,6 +1452,65 @@ document.addEventListener('DOMContentLoaded', function () {
   // gesture has fully settled — it never touches native scroll machinery
   // itself, so there's nothing left for a real device to get stuck
   // fighting the way scroll-snap-type or position:sticky could.
+  // Shared by the About/Awards panel push below and the sitewide footer
+  // push further down: animates scrollY to an exact target over a fixed,
+  // short duration instead of leaving it to the browser's own
+  // smooth-scroll, whose duration is unspecified and tends to grow with
+  // distance -- the likely source of a "sluggish, mit Verzögerung"
+  // complaint on a tall panel. Driving every frame itself also means it
+  // always lands exactly on target, so nothing further needs to watch
+  // for or correct an overshoot, and the caller knows the *exact* frame
+  // it's finished instead of having to guess with a timer.
+  function pushScrollTo(target, onDone) {
+    var startY = window.scrollY;
+    var diff = target - startY;
+    if (Math.abs(diff) < 1) { if (onDone) onDone(); return; }
+    var duration = 420;
+    var startTime = null;
+    function step(ts) {
+      if (startTime === null) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      // { behavior: 'instant' } matters here, not stylistic -- html has
+      // scroll-behavior:smooth sitewide, which applies to *any*
+      // programmatic scrollTo call, including the plain two-argument
+      // form. Without overriding it per frame, every one of these calls
+      // would itself kick off a browser-driven smooth scroll, fighting
+      // this rAF loop's own easing and producing exactly the
+      // sluggish/uneven motion this helper was written to get rid of.
+      window.scrollTo({ top: startY + diff * eased, left: 0, behavior: 'instant' });
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else if (onDone) {
+        onDone();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Shared across BOTH push mechanisms below (About/Awards panel seam and
+  // the sitewide footer seam), not one flag per mechanism. A single wheel
+  // gesture dispatches a whole stream of wheel events, not one -- real
+  // trackpad momentum does this, and Chromium's synthetic wheel input
+  // does too (confirmed while testing the panel-push mechanism earlier).
+  // With two independent flags, residual events from one mechanism's own
+  // in-flight push could still reach the *other* listener, whose flag was
+  // still false, and kick off a second competing pushScrollTo animation
+  // to a different target while the first was still running -- both
+  // fighting over window.scrollTo every frame. One shared flag means
+  // only one push can ever be in flight at a time, globally.
+  var anyPushTransitioning = false;
+  // A landing target can, on some viewports/pages, sit right at the edge
+  // of *another* push's own trigger zone (e.g. Awards is short enough on
+  // some screens that its start and the footer's pre-boundary zone are
+  // only a few px apart) -- combined with sub-pixel rounding on the
+  // exact landing position, a residual wheel event arriving right as one
+  // push finishes could otherwise immediately re-trigger a second one
+  // before the user has actually seen what just loaded. This short
+  // cooldown after any push completes requires a genuinely fresh gesture.
+  var lastPushEndedAt = 0;
+  var PUSH_COOLDOWN_MS = 280;
+
   (function () {
     var stackEl = document.querySelector('.stack');
     if (!stackEl) return;
@@ -1485,66 +1544,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // footer still takes its own separate, ordinary scroll like on every
     // other page.
     var REVERSE_ZONE_PX = 200;
-    var transitioning = false, transitionTimer = null, transitionTarget = 0, transitionDir = 0, transitionStartedAt = 0;
-    // A trackpad "flick" isn't one wheel event, it's a whole stream of
-    // them, and real hardware/OS momentum can keep sending residual ones
-    // for an unpredictable stretch — sometimes well over a second for a
-    // strong flick. A *fixed*-duration cooldown from the start of the
-    // gesture (900ms, tried first) verified this precisely: traced the
-    // scrollY log directly and watched it converge smoothly to exactly
-    // the target, sit there, then jump again on one last stray event
-    // that arrived after the cooldown had already expired.
-    //
-    // Re-arming the timer on every qualifying wheel event fixed that, but
-    // introduced a *worse* bug: with no cap, it re-armed on *any* later
-    // wheel event too, not just ones from the same physical gesture —
-    // reported as "one scroll works, then nothing happens at all until
-    // the arrow button": trying again within 400ms of the first attempt
-    // (exactly what a person re-scrolling because nothing seemed to
-    // happen would do) kept re-arming the same stuck flag indefinitely,
-    // permanently swallowing every further wheel event. MAX_TRANSITION_MS
-    // below hard-caps the total window regardless of how many times it
-    // gets re-armed, so it's guaranteed to release even under a steady
-    // stream of input, while still surviving genuine short gaps in real
-    // momentum.
-    var MAX_TRANSITION_MS = 1200;
-    function armTransitionTimeout() {
-      clearTimeout(transitionTimer);
-      var remaining = Math.max(0, MAX_TRANSITION_MS - (Date.now() - transitionStartedAt));
-      transitionTimer = setTimeout(function () { transitioning = false; }, Math.min(400, remaining));
+    // Previously drove this with native window.scrollTo(...,
+    // {behavior:'smooth'}) and had to *guess* when it had actually
+    // finished -- several rounds of timer heuristics (a fixed cooldown,
+    // then a self-re-arming one with a hard cap to stop it getting stuck)
+    // existed purely to paper over that unknown. It also read as
+    // sluggish: native smooth-scroll duration is browser-chosen and
+    // grows with distance, so a tall About panel could take noticeably
+    // longer than expected to settle ("mit Verzögerung"). pushScrollTo
+    // (above) drives the scroll itself on a fixed, short duration and
+    // calls back on the exact frame it's done -- no guessing, no timers,
+    // consistently snappy regardless of distance.
+    function startTransition(target) {
+      anyPushTransitioning = true;
+      pushScrollTo(target, function () { anyPushTransitioning = false; lastPushEndedAt = Date.now(); });
     }
-    function startTransition(target, dir) {
-      transitioning = true;
-      transitionTarget = target;
-      transitionDir = dir;
-      transitionStartedAt = Date.now();
-      window.scrollTo({ top: target, behavior: 'smooth' });
-      armTransitionTimeout();
-    }
-    // Belt and braces on top of the wheel-blocking below: even with that
-    // in place, a single native scroll tick can still land a few pixels
-    // past the target before the next 'scroll' event gives this a
-    // chance to react — actively corrects the *result* instead of
-    // relying purely on suppressing input. Only ever clamps the downward
-    // push (dir>0): scrollY can't go negative, so the upward one can't
-    // overshoot past its target (0) in the first place, and clamping it
-    // too would just cut its smooth animation short.
-    window.addEventListener('scroll', function () {
-      if (transitioning && transitionDir > 0 && window.scrollY > transitionTarget + 2) {
-        window.scrollTo({ top: transitionTarget, behavior: 'instant' });
-      }
-    }, { passive: true });
     window.addEventListener('wheel', function (e) {
       if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
-      if (transitioning) { e.preventDefault(); armTransitionTimeout(); return; }
+      if (anyPushTransitioning) { e.preventDefault(); return; }
+      if (Date.now() - lastPushEndedAt < PUSH_COOLDOWN_MS) return;
       if (Math.abs(e.deltaY) <= 4) return;
       var y = window.scrollY;
       if (e.deltaY > 0 && y < boundaryY) {
         e.preventDefault();
-        startTransition(boundaryY, 1);
+        startTransition(boundaryY);
       } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
         e.preventDefault();
-        startTransition(0, -1);
+        startTransition(0);
       }
     }, { passive: false });
 
@@ -1574,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var yy = window.scrollY;
         var zoneStart = boundaryY - MOBILE_DEAD_ZONE_PX;
         if (yy > zoneStart + 4 && yy < boundaryY - 4) {
-          window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'smooth' });
+          pushScrollTo(scrollDir >= 0 ? boundaryY : zoneStart);
         }
       }, 150);
     }, { passive: true });
@@ -1582,15 +1608,62 @@ document.addEventListener('DOMContentLoaded', function () {
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {
-        window.scrollTo({ top: boundaryY, behavior: 'smooth' });
+        pushScrollTo(boundaryY);
       });
     }
     var scrollCueBtnUp = document.getElementById('scrollCueBtnUp');
     if (scrollCueBtnUp) {
       scrollCueBtnUp.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        pushScrollTo(0);
       });
     }
+  })();
+
+  // Sitewide footer push, mirroring the About/Awards mechanism above as
+  // "one more tile": near the very end of a page's own content, one
+  // wheel tick pushes the rest of the way to reveal the footer fully,
+  // and the same in reverse when scrolling up out of it. Zone-based
+  // rather than full-page-range on purpose -- unlike the About/Awards
+  // seam, which sits early in one short, fixed-length panel, the run of
+  // content above a footer can be an entire long project page, and
+  // triggering from anywhere in that whole range would hijack ordinary
+  // scrolling everywhere on the page. Only engages once already close to
+  // the seam, same zone width both directions.
+  (function () {
+    var footerEl = document.querySelector('footer');
+    if (!footerEl) return;
+    var narrowMq = window.matchMedia('(max-width: 760px)');
+    var ZONE_PX = 220;
+
+    function boundary() {
+      var top = footerEl.getBoundingClientRect().top + window.scrollY;
+      return Math.max(0, top - window.innerHeight);
+    }
+    function maxScroll() {
+      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    }
+    function startTransition(target) {
+      anyPushTransitioning = true;
+      pushScrollTo(target, function () { anyPushTransitioning = false; lastPushEndedAt = Date.now(); });
+    }
+
+    window.addEventListener('wheel', function (e) {
+      if (narrowMq.matches) return;
+      if (anyPushTransitioning) { e.preventDefault(); return; }
+      if (Date.now() - lastPushEndedAt < PUSH_COOLDOWN_MS) return;
+      if (Math.abs(e.deltaY) <= 4) return;
+      var boundaryY = boundary();
+      var openY = maxScroll();
+      if (openY <= boundaryY) return; // footer already fills the rest of the page, nothing to push
+      var y = window.scrollY;
+      if (e.deltaY > 0 && y < boundaryY && y > boundaryY - ZONE_PX) {
+        e.preventDefault();
+        startTransition(openY);
+      } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + ZONE_PX) {
+        e.preventDefault();
+        startTransition(boundaryY);
+      }
+    }, { passive: false });
   })();
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroSection = projectHero ? projectHero.closest('.project-hero') : null;
