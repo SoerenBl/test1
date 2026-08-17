@@ -1416,19 +1416,21 @@ document.addEventListener('DOMContentLoaded', function () {
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
-    // The "dead zone" is a small fixed margin right at the actual
-    // About/Awards boundary — NOT the whole last viewport-height of
-    // panel 1 (an earlier version did that, reasoning it would match the
-    // old "any partial scroll completes" feel for a short panel 1; in
-    // practice that meant literally any small scroll at all, anywhere in
-    // About, immediately auto-completed straight to Awards, and letting
-    // go bounced it back to the top — About and Awards need to read and
-    // scroll as two distinct, ordinary pages first, with only a small,
-    // deliberate nudge right at the seam between them). Settling inside
-    // this narrow zone completes the move onto whichever panel the
-    // scroll was already heading toward; anywhere else in either panel
-    // is left completely alone.
-    var DEAD_ZONE_PX = 100;
+    // Mobile and desktop need genuinely different dead-zone sizes, not
+    // just different input methods on the same logic. Desktop's "any
+    // partial scroll completes" feel was the original, always-working
+    // reference behaviour (a mouse wheel tick is a small, deliberate
+    // increment) — treating the *entire* panel 1 range as the dead zone
+    // reproduces that. Mobile is different: a touch-scroll can easily
+    // move 100-200px on the first frame of a single continuous swipe
+    // before your thumb has even finished moving, so that same
+    // full-range zone made *any* small swipe auto-complete instantly
+    // (reported: a small scroll jumped straight to Awards, and letting
+    // go bounced back to the top) — mobile instead only treats a small
+    // fixed margin right at the true boundary as the dead zone, so About
+    // and Awards read and scroll as two separate, ordinary pages first.
+    var narrowMq = window.matchMedia('(max-width: 760px)');
+    var MOBILE_DEAD_ZONE_PX = 100;
     var settleTimer = null;
     var prevScrollY = window.scrollY;
     var scrollDir = 0;
@@ -1439,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', function () {
       clearTimeout(settleTimer);
       settleTimer = setTimeout(function () {
         var yy = window.scrollY;
-        var zoneStart = boundaryY - DEAD_ZONE_PX;
+        var zoneStart = narrowMq.matches ? boundaryY - MOBILE_DEAD_ZONE_PX : 0;
         if (yy > zoneStart + 4 && yy < boundaryY - 4) {
           window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'instant' });
         }
