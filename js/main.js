@@ -1416,16 +1416,19 @@ document.addEventListener('DOMContentLoaded', function () {
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
-    // The "dead zone" is the last viewport-height's worth of panel 1's
-    // own range — i.e. exactly the part where its content has already
-    // scrolled out the top and Awards is starting to peek in from the
-    // bottom. Settling inside it completes the move onto whichever panel
-    // the scroll was already heading toward. For a short panel 1 (fits
-    // in one screen, the common case) the dead zone covers its *entire*
-    // range, so any partial scroll anywhere in it auto-completes —
-    // matching the original design's "any partial scroll" feel exactly
-    // in that case, and only requiring "scroll to the actual end" once
-    // panel 1 genuinely has more than one screen of content.
+    // The "dead zone" is a small fixed margin right at the actual
+    // About/Awards boundary — NOT the whole last viewport-height of
+    // panel 1 (an earlier version did that, reasoning it would match the
+    // old "any partial scroll completes" feel for a short panel 1; in
+    // practice that meant literally any small scroll at all, anywhere in
+    // About, immediately auto-completed straight to Awards, and letting
+    // go bounced it back to the top — About and Awards need to read and
+    // scroll as two distinct, ordinary pages first, with only a small,
+    // deliberate nudge right at the seam between them). Settling inside
+    // this narrow zone completes the move onto whichever panel the
+    // scroll was already heading toward; anywhere else in either panel
+    // is left completely alone.
+    var DEAD_ZONE_PX = 100;
     var settleTimer = null;
     var prevScrollY = window.scrollY;
     var scrollDir = 0;
@@ -1436,7 +1439,7 @@ document.addEventListener('DOMContentLoaded', function () {
       clearTimeout(settleTimer);
       settleTimer = setTimeout(function () {
         var yy = window.scrollY;
-        var zoneStart = boundaryY - window.innerHeight;
+        var zoneStart = boundaryY - DEAD_ZONE_PX;
         if (yy > zoneStart + 4 && yy < boundaryY - 4) {
           window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'instant' });
         }
