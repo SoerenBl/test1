@@ -1523,11 +1523,24 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__loader {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  /* Above every other layer in the stage (.pdfv__zone is 3, .pdfv__arrow
+     is 4, .pdfv__book-wrap is 5) -- at its old z-index:2 this sat
+     *underneath* the book, so giving it a background alone still
+     wouldn't have hidden anything, only ever drawing the spinning ring
+     on top of a cover that was already fully visible (and, sitting
+     under z-index 3, already had its click zones rendering above it
+     too) the instant the browser had painted it, regardless of whether
+     our own JS considered the viewer actually ready yet. That's what
+     let the cover show through, looking interactive, well before it
+     (or the rest of the pages behind it) had actually finished loading. */
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  /* Matches .pdfv-section's own background so it reads as part of the
+     page while up, not a separate box. */
+  background: var(--color-bg);
 }
 .pdfv__loader::after {
   content: '';
