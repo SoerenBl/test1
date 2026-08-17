@@ -1320,13 +1320,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!stackEl) return;
     var firstPanel = stackEl.querySelector(':scope > .stack__panel');
     if (!firstPanel) return;
+    // Mobile-only: the address bar showing/hiding mid-scroll resizes the
+    // panel's 100dvh height (and so armedThreshold) *while* a touch-scroll
+    // gesture is still in flight. WebKit/Blink can lose track of a valid
+    // snap point when that happens under an active "mandatory" snap-type
+    // and lock the page's scroll entirely -- no wheel/touch/swipe input
+    // moves it afterwards, in either direction, until reload. Desktop
+    // wheel-scrolling never hits that path (no dvh churn mid-gesture), so
+    // the snap-assist stays there; on mobile the arrow buttons below
+    // already cover the "jump to the next panel" case, so plain
+    // unassisted swipe-scrolling is what's used instead.
+    var narrowMq = window.matchMedia('(max-width: 760px)');
     var armedThreshold = 0;
     function measureThreshold() { armedThreshold = firstPanel.offsetHeight; }
     measureThreshold();
     window.addEventListener('resize', measureThreshold);
     var snapTicking = false;
     function updateStackSnap() {
-      var armed = window.scrollY < armedThreshold - 2;
+      var armed = !narrowMq.matches && window.scrollY < armedThreshold - 2;
       document.documentElement.style.scrollSnapType = armed ? 'y mandatory' : '';
       snapTicking = false;
     }
@@ -1337,6 +1348,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }, { passive: true });
     updateStackSnap();
+    if (narrowMq.addEventListener) narrowMq.addEventListener('change', updateStackSnap);
 
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
