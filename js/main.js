@@ -878,6 +878,23 @@ document.addEventListener('DOMContentLoaded', function () {
           // Only remove the spinner once StPageFlip's own image has
           // actually loaded (see watchLibraryImageLoad above) — not before.
           if (loaderEl) loaderEl.remove();
+          // bookWrap's width and bookShift's transform (the -50% shift
+          // that keeps a lone cover centred — see updateUi() below) were
+          // both already set while still hidden behind the spinner, and
+          // both carry a CSS transition meant for genuine page turns —
+          // not for this first reveal. Some engines can still replay a
+          // transition on an element becoming visible for the first time
+          // even though no new value is ever written by us here, which
+          // would show up as exactly what got reported: the cover
+          // visibly sliding off to one side right as the spinner
+          // disappears. Forcing both off, flushing with a reflow, then
+          // restoring them removes any such queued/replayed animation
+          // before this element is ever actually seen.
+          bookWrap.style.transition = 'none';
+          bookShift.style.transition = 'none';
+          void bookShift.offsetHeight;
+          bookWrap.style.transition = '';
+          bookShift.style.transition = '';
           stageEl.classList.remove('is-loading');
           var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
           // Only the cover image is loaded so far — the viewer is visible
