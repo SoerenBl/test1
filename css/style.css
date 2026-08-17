@@ -344,37 +344,47 @@ body.is-menu-open .nav__right {
   pointer-events: none;
 }
 
-/* iOS-style switch: a pill track (white, but more translucent than the
-   solid-white menu button next to it, per request) with a round thumb
-   that slides between the two halves — the DE/EN buttons themselves
-   stay exactly what they were (real, independently clickable elements
-   driving the same [data-set-lang] flow in main.js), just restyled as
-   transparent labels sitting on top of the track; the thumb is a third,
-   purely decorative element behind them that main.js slides via the
+/* iOS-style switch: a pill track (white, more translucent than the
+   solid-white menu button next to it) with a round thumb that slides
+   between the two halves — the DE/EN buttons themselves stay exactly
+   what they were (real, independently clickable elements driving the
+   same [data-set-lang] flow in main.js), just restyled as transparent
+   labels sitting on top of the track; the thumb is a third, purely
+   decorative element behind them that main.js slides via the
    .lang-toggle--en class set alongside the existing [data-active]
-   attribute. Blue thumb (--color-panel-hover, the site's own established
-   accent for this kind of highlight — see the menu-hover treatment
-   elsewhere) rather than Apple's green, per request. */
+   attribute.
+   Sized at 75% of the menu pill's own 104x36 (78x27, radius 13.5) and
+   solid white rather than blue, both per request. Thumb is 21px (track
+   height minus a 3px inset on each side) — every dimension below
+   (button left/right + width, thumb position/travel) is derived from
+   that same 3px/21px pair on purpose, not just eyeballed to roughly
+   match: the DE/EN buttons are positioned to cover *exactly* the same
+   rectangle the thumb occupies in each of its two states, so the
+   letterform always sits precisely centred on the thumb circle, not
+   just "somewhere in its half of the track" (drifted a few px off
+   before, when button width came from an even flex split instead). */
 .lang-toggle {
   position: relative;
-  display: flex;
-  align-items: center;
-  width: 74px;
-  height: 32px;
-  border-radius: 16px;
+  width: 78px;
+  height: 27px;
+  border-radius: 13.5px;
   background: rgba(255,255,255,0.22);
   font-family: var(--font-heading);
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
 }
 .lang-toggle button {
-  position: relative;
+  position: absolute;
   z-index: 2;
-  flex: 1 1 50%;
+  top: 0;
+  width: 21px;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
-  border-radius: 16px;
+  border-radius: 50%;
   cursor: pointer;
   color: var(--nav-fg-muted);
   font-family: inherit;
@@ -383,22 +393,25 @@ body.is-menu-open .nav__right {
   /* Thin outline on the letterforms themselves instead of the soft blur
      the rest of the nav uses — keeps DE/EN legible over busy or light
      photo backgrounds. */
-  -webkit-text-stroke: 0.6px #000;
-  text-stroke: 0.6px #000;
+  -webkit-text-stroke: 0.5px #000;
+  text-stroke: 0.5px #000;
 }
+.lang-toggle button[data-set-lang="de"] { left: 3px; }
+.lang-toggle button[data-set-lang="en"] { right: 3px; }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
 .lang-toggle__thumb {
   position: absolute;
   z-index: 1;
   top: 3px;
   left: 3px;
-  width: 26px;
-  height: 26px;
+  width: 21px;
+  height: 21px;
   border-radius: 50%;
-  background: var(--color-panel-hover);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
   transition: transform 0.25s cubic-bezier(.4,0,.2,1);
 }
-.lang-toggle--en .lang-toggle__thumb { transform: translateX(45px); }
+.lang-toggle--en .lang-toggle__thumb { transform: translateX(51px); }
 
 /* Menu button: solid white shape with the label knocked out of it,
    so whatever sits behind the nav shows through the letterforms. */

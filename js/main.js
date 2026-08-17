@@ -1485,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // footer still takes its own separate, ordinary scroll like on every
     // other page.
     var REVERSE_ZONE_PX = 200;
-    var transitioning = false, transitionTimer = null, transitionTarget = 0, transitionDir = 0;
+    var transitioning = false, transitionTimer = null, transitionTarget = 0, transitionDir = 0, transitionStartedAt = 0;
     // A trackpad "flick" isn't one wheel event, it's a whole stream of
     // them, and real hardware/OS momentum can keep sending residual ones
     // for an unpredictable stretch — sometimes well over a second for a
@@ -1493,21 +1493,31 @@ document.addEventListener('DOMContentLoaded', function () {
     // gesture (900ms, tried first) verified this precisely: traced the
     // scrollY log directly and watched it converge smoothly to exactly
     // the target, sit there, then jump again on one last stray event
-    // that arrived after the cooldown had already expired — landing
-    // right on the boundary at that point, which read as "already
-    // there" to the zone check and let that trailing event scroll
-    // natively on into Awards. Re-arming the timer on *every* qualifying
-    // wheel event instead means it only ever clears after a genuine
-    // pause (400ms of true silence) — self-adapting to however long the
-    // real gesture actually lasts, instead of guessing a duration.
+    // that arrived after the cooldown had already expired.
+    //
+    // Re-arming the timer on every qualifying wheel event fixed that, but
+    // introduced a *worse* bug: with no cap, it re-armed on *any* later
+    // wheel event too, not just ones from the same physical gesture —
+    // reported as "one scroll works, then nothing happens at all until
+    // the arrow button": trying again within 400ms of the first attempt
+    // (exactly what a person re-scrolling because nothing seemed to
+    // happen would do) kept re-arming the same stuck flag indefinitely,
+    // permanently swallowing every further wheel event. MAX_TRANSITION_MS
+    // below hard-caps the total window regardless of how many times it
+    // gets re-armed, so it's guaranteed to release even under a steady
+    // stream of input, while still surviving genuine short gaps in real
+    // momentum.
+    var MAX_TRANSITION_MS = 1200;
     function armTransitionTimeout() {
       clearTimeout(transitionTimer);
-      transitionTimer = setTimeout(function () { transitioning = false; }, 400);
+      var remaining = Math.max(0, MAX_TRANSITION_MS - (Date.now() - transitionStartedAt));
+      transitionTimer = setTimeout(function () { transitioning = false; }, Math.min(400, remaining));
     }
     function startTransition(target, dir) {
       transitioning = true;
       transitionTarget = target;
       transitionDir = dir;
+      transitionStartedAt = Date.now();
       window.scrollTo({ top: target, behavior: 'smooth' });
       armTransitionTimeout();
     }
