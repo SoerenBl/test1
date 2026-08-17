@@ -670,6 +670,19 @@ document.addEventListener('DOMContentLoaded', function () {
     var pdfSlug = pathParts[pathParts.length - 1];
     if (pdfCategory !== 'editorial' || !pdfSlug) return;
 
+    // Repeated real-device reports of the PDF viewer just not showing up,
+    // with no way for the person hitting it to open devtools and read the
+    // console.error() this used to be the only record of. Renders the
+    // actual failure reason directly on the page instead, so a plain
+    // screenshot carries enough to diagnose it -- remove once this class
+    // of report stops recurring.
+    function showPdfError(msg) {
+      var box = document.createElement('div');
+      box.style.cssText = 'margin:24px auto;max-width:640px;padding:14px 18px;border:1px solid #c33;background:#fff0f0;color:#900;font:13px/1.5 -apple-system,sans-serif;border-radius:6px;';
+      box.textContent = 'PDF-Viewer-Fehler (bitte Screenshot senden): ' + msg;
+      heroSection.insertAdjacentElement('afterend', box);
+    }
+
     // Unlike discoverCategoryProjects (used on category pages), this
     // fetch had no cache at all — every single visit to this project
     // page, including repeat visits by the same person within the same
@@ -718,6 +731,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // visit gets a fresh attempt instead of being stuck on a
         // transient failure for the rest of the cache window.
         console.error('PDF viewer setup failed:', err);
+        showPdfError(String((err && err.message) || err));
       });
     }
 
@@ -1169,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }).catch(function (err) {
         console.error('PDF viewer failed to initialize:', err);
+        showPdfError(String((err && err.message) || err) + ' | ' + String((err && err.stack) || ''));
         section.remove();
       }); // unreadable PDF, or the render pipeline ran out of memory — don't leave a broken tile
 
@@ -1470,36 +1485,56 @@ document.addEventListener('DOMContentLoaded', function () {
     // footer still takes its own separate, ordinary scroll like on every
     // other page.
     var REVERSE_ZONE_PX = 200;
-    var transitioning = false, transitionTimer = null;
-    function startTransition(target) {
-      transitioning = true;
-      window.scrollTo({ top: target, behavior: 'smooth' });
+    var transitioning = false, transitionTimer = null, transitionTarget = 0, transitionDir = 0;
+    // A trackpad "flick" isn't one wheel event, it's a whole stream of
+    // them, and real hardware/OS momentum can keep sending residual ones
+    // for an unpredictable stretch — sometimes well over a second for a
+    // strong flick. A *fixed*-duration cooldown from the start of the
+    // gesture (900ms, tried first) verified this precisely: traced the
+    // scrollY log directly and watched it converge smoothly to exactly
+    // the target, sit there, then jump again on one last stray event
+    // that arrived after the cooldown had already expired — landing
+    // right on the boundary at that point, which read as "already
+    // there" to the zone check and let that trailing event scroll
+    // natively on into Awards. Re-arming the timer on *every* qualifying
+    // wheel event instead means it only ever clears after a genuine
+    // pause (400ms of true silence) — self-adapting to however long the
+    // real gesture actually lasts, instead of guessing a duration.
+    function armTransitionTimeout() {
       clearTimeout(transitionTimer);
-      transitionTimer = setTimeout(function () { transitioning = false; }, 900);
+      transitionTimer = setTimeout(function () { transitioning = false; }, 400);
     }
+    function startTransition(target, dir) {
+      transitioning = true;
+      transitionTarget = target;
+      transitionDir = dir;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+      armTransitionTimeout();
+    }
+    // Belt and braces on top of the wheel-blocking below: even with that
+    // in place, a single native scroll tick can still land a few pixels
+    // past the target before the next 'scroll' event gives this a
+    // chance to react — actively corrects the *result* instead of
+    // relying purely on suppressing input. Only ever clamps the downward
+    // push (dir>0): scrollY can't go negative, so the upward one can't
+    // overshoot past its target (0) in the first place, and clamping it
+    // too would just cut its smooth animation short.
+    window.addEventListener('scroll', function () {
+      if (transitioning && transitionDir > 0 && window.scrollY > transitionTarget + 2) {
+        window.scrollTo({ top: transitionTarget, behavior: 'instant' });
+      }
+    }, { passive: true });
     window.addEventListener('wheel', function (e) {
       if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
-      // A trackpad "flick" isn't one wheel event, it's a whole stream of
-      // them decaying over a second or more (momentum scroll) — a
-      // time-based cooldown alone left a real gap where the *tail end*
-      // of that same physical gesture could arrive right as scrollY
-      // crossed the boundary (natural once the smooth-scroll animation
-      // itself had finished, or the cooldown had just expired), read as
-      // "already at/past the boundary" and pass straight through
-      // untouched, carrying its own leftover momentum on into Awards —
-      // reported as overshooting deep enough to see the footer. Blocking
-      // *every* wheel event unconditionally for the whole transition
-      // window, not just the one that started it, absorbs that entire
-      // gesture instead of just its first tick.
-      if (transitioning) { e.preventDefault(); return; }
+      if (transitioning) { e.preventDefault(); armTransitionTimeout(); return; }
       if (Math.abs(e.deltaY) <= 4) return;
       var y = window.scrollY;
       if (e.deltaY > 0 && y < boundaryY) {
         e.preventDefault();
-        startTransition(boundaryY);
+        startTransition(boundaryY, 1);
       } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
         e.preventDefault();
-        startTransition(0);
+        startTransition(0, -1);
       }
     }, { passive: false });
 
