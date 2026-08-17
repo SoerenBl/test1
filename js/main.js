@@ -1458,20 +1458,47 @@ document.addEventListener('DOMContentLoaded', function () {
     // motions: a scroll, a pause, then a sudden unexplained jump.
     // Intercepting the wheel event itself instead — the same pattern
     // already used for the PDF viewer's own wheel-driven page turns —
-    // means a single short scroll reads as one continuous "push" straight
-    // onto Awards instead, no separate jump afterwards. Only engages
-    // while still short of the boundary (anywhere in panel 1, matching
-    // the original always-working desktop reference behaviour); once at
-    // or past it, wheel scrolling is left completely alone.
-    var wheelCooldown = false;
+    // means a single short scroll reads as one continuous "push" across
+    // the seam instead, no separate jump afterwards. Symmetric: a scroll
+    // down while still short of the boundary pushes onto Awards, a
+    // scroll up while just past it pushes back onto About. Left
+    // completely alone everywhere else, in particular anywhere within
+    // Awards' own further content — this is only ever about the one
+    // seam between the two panels, not a general assist, so reaching the
+    // footer still takes its own separate, ordinary scroll like on every
+    // other page.
+    var REVERSE_ZONE_PX = 200;
+    var transitioning = false, transitionTimer = null;
+    function startTransition(target) {
+      transitioning = true;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+      clearTimeout(transitionTimer);
+      transitionTimer = setTimeout(function () { transitioning = false; }, 900);
+    }
     window.addEventListener('wheel', function (e) {
       if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
-      if (e.deltaY <= 4 || window.scrollY >= boundaryY) return;
-      e.preventDefault();
-      if (wheelCooldown) return;
-      wheelCooldown = true;
-      window.scrollTo({ top: boundaryY, behavior: 'smooth' });
-      setTimeout(function () { wheelCooldown = false; }, 700);
+      // A trackpad "flick" isn't one wheel event, it's a whole stream of
+      // them decaying over a second or more (momentum scroll) — a
+      // time-based cooldown alone left a real gap where the *tail end*
+      // of that same physical gesture could arrive right as scrollY
+      // crossed the boundary (natural once the smooth-scroll animation
+      // itself had finished, or the cooldown had just expired), read as
+      // "already at/past the boundary" and pass straight through
+      // untouched, carrying its own leftover momentum on into Awards —
+      // reported as overshooting deep enough to see the footer. Blocking
+      // *every* wheel event unconditionally for the whole transition
+      // window, not just the one that started it, absorbs that entire
+      // gesture instead of just its first tick.
+      if (transitioning) { e.preventDefault(); return; }
+      if (Math.abs(e.deltaY) <= 4) return;
+      var y = window.scrollY;
+      if (e.deltaY > 0 && y < boundaryY) {
+        e.preventDefault();
+        startTransition(boundaryY);
+      } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
+        e.preventDefault();
+        startTransition(0);
+      }
     }, { passive: false });
 
     // Mobile: touch scroll momentum is too unpredictable to safely

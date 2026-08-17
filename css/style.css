@@ -133,9 +133,19 @@ p { margin: 0 0 1em; }
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  /* Above .menu-scrim (290) and .menu-panel (300) so the menu button
-     itself — mobile's hamburger-to-X — stays visible and clickable
-     while the panel is open, instead of being covered by it. */
+  /* Above .menu-scrim (290) and .menu-panel (300) — needed everywhere
+     else so the floating nav stays above ordinary page content. While
+     the menu is open, though, .nav__mark and .nav__right (see their own
+     is-menu-open rules) are both hidden, so nothing inside .nav is
+     meant to be interactive any more — but .nav itself, being fixed and
+     spanning the full top strip at a z-index above the panel, was still
+     silently intercepting clicks meant for .menu-panel__close sitting
+     in that same corner underneath it (confirmed via elementFromPoint:
+     it resolved to .nav__inner, not the close button). Was previously
+     masked by the nav's own hamburger-turned-X button winning that same
+     click anyway; hiding it surfaced the block on the *actual* close
+     button. Disabled below so clicks pass straight through to whatever
+     the (fully visible) panel actually has there. */
   z-index: 310;
   --nav-fg: #fff;
   --nav-fg-muted: rgba(255,255,255,0.78);
@@ -144,6 +154,7 @@ p { margin: 0 0 1em; }
   border: none;
   color: var(--nav-fg);
 }
+body.is-menu-open .nav { pointer-events: none; }
 /* Mobile only: nav slides away on scroll-down, back on scroll-up (see
    js/main.js). Desktop keeps it always visible. */
 @media (max-width: 760px) {
