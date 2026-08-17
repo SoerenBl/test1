@@ -1107,7 +1107,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (projectHero) {
     measureProjectHero();
-    window.addEventListener('resize', measureProjectHero);
+    // Mobile browsers fire 'resize' while their address bar collapses/
+    // expands during an ordinary scroll (most reliably scrolling back up,
+    // when it re-expands) — that only changes window.innerHeight, never
+    // innerWidth. Re-measuring on every one of those mid-scroll re-reads
+    // the title's own rect and momentarily strips its transform (see
+    // measureProjectHero above), fighting the same frame's scroll-driven
+    // transform update and reading as the docked title jittering. An
+    // actual orientation change or real viewport resize always changes
+    // the width too, so gating on that keeps the genuine cases covered.
+    var lastInnerWidth = window.innerWidth;
+    window.addEventListener('resize', function () {
+      if (window.innerWidth === lastInnerWidth) return;
+      lastInnerWidth = window.innerWidth;
+      measureProjectHero();
+    });
     // Exposed for js/project.js (the /404.html fallback template): its
     // title starts empty and is filled in slightly after this script
     // already ran, so it needs to trigger a re-measurement once the real
