@@ -822,6 +822,40 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
         }
+        // Opt-in on-screen debug readout (?debug=1 in the URL) — no
+        // WebKit/real-device testing is available in the environment this
+        // was built in, so this turns the visitor's own phone into the
+        // test rig: append ?debug=1 to a project URL with a PDF, scroll to
+        // the viewer, and screenshot the numbers in both orientations.
+        // Safe to leave in — invisible unless that query param is present.
+        if (/[?&]debug=1(&|$)/.test(location.search)) {
+          var dbg = document.createElement('div');
+          dbg.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,0.85);' +
+            'color:#7CFC7C;font:11px/1.5 monospace;padding:8px 10px;max-width:100vw;white-space:pre;pointer-events:none;';
+          document.body.appendChild(dbg);
+          var renderDbg = function () {
+            var sRect = section.getBoundingClientRect();
+            var wRect = bookWrap.getBoundingClientRect();
+            var vv = window.visualViewport;
+            dbg.textContent =
+              'PDFV DEBUG\n' +
+              'window.innerWidth/Height: ' + window.innerWidth + ' / ' + window.innerHeight + '\n' +
+              'visualViewport w/h: ' + (vv ? Math.round(vv.width) + ' / ' + Math.round(vv.height) : 'n/a') + '\n' +
+              'section rect w/h: ' + Math.round(sRect.width) + ' / ' + Math.round(sRect.height) + '\n' +
+              'bookWrap rect w/h: ' + Math.round(wRect.width) + ' / ' + Math.round(wRect.height) + '\n' +
+              'frameW/frameH: ' + Math.round(frameW) + ' / ' + Math.round(frameH) + '\n' +
+              'devicePixelRatio raw/capped: ' + (window.devicePixelRatio || 1) + ' / ' + dpr + '\n' +
+              'orientation: ' + (pageFlip ? pageFlip.getOrientation() : 'n/a') + '\n' +
+              'scrollY: ' + Math.round(window.scrollY) + '\n' +
+              'docScrollHeight: ' + document.documentElement.scrollHeight;
+          };
+          renderDbg();
+          if (window.ResizeObserver) new ResizeObserver(renderDbg).observe(section);
+          window.addEventListener('resize', renderDbg);
+          window.addEventListener('scroll', renderDbg, { passive: true });
+          if (window.visualViewport) window.visualViewport.addEventListener('resize', renderDbg);
+          setInterval(renderDbg, 500);
+        }
       }).catch(function (err) {
         console.error('PDF viewer failed to initialize:', err);
         section.remove();
