@@ -9,11 +9,24 @@ document.addEventListener('DOMContentLoaded', function () {
     menuPanel.classList.add('is-open');
     menuScrim.classList.add('is-open');
     menuBtn.setAttribute('aria-expanded', 'true');
+    // .nav__mark (the name) and .project-hero__title (project/category
+    // pages' docking title) both sit above the menu panel in z-index on
+    // purpose — the docking title needs to slide over the nav as it
+    // lands, and the name needs to stay above the scrim — but that also
+    // means they visibly bled through the (semi-transparent) panel while
+    // it's open. Slid off with the panel instead, opposite direction from
+    // how it slides in, so it reads as being pushed off-screen by it;
+    // reversing the class brings both back the same way. Pure CSS
+    // (body.is-menu-open in style.css) so it can't fight the docking
+    // title's own scroll-driven transform, which is set directly on the
+    // title element itself, not this wrapper.
+    document.body.classList.add('is-menu-open');
   }
   function closeMenu() {
     menuPanel.classList.remove('is-open');
     menuScrim.classList.remove('is-open');
     menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('is-menu-open');
   }
 
   if (menuBtn) {

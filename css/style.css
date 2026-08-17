@@ -170,11 +170,23 @@ p { margin: 0 0 1em; }
   letter-spacing: -0.01em;
   color: var(--nav-fg);
   text-shadow: var(--nav-shadow);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.45s cubic-bezier(.16,.84,.44,1);
   display: flex;
   align-items: center;
 }
 .nav__mark:hover { opacity: 0.7; }
+/* .nav sits above the menu panel (310 vs 300) so the hamburger-to-X
+   button stays clickable while the panel is open — but that puts the
+   name above it too, visibly bleeding through the panel's own
+   transparency. Slid off to the left (opposite the panel's own
+   slide-in-from-the-right) so it reads as being pushed off-screen by
+   it; only .nav__mark is targeted, not .nav__right, so the menu
+   button itself stays put and usable throughout. */
+body.is-menu-open .nav__mark {
+  transform: translateX(-140%);
+  opacity: 0;
+  pointer-events: none;
+}
 /* Swapped in automatically when a logo.* file exists at the repo root
    (see js/main.js) — filter:drop-shadow mirrors --nav-shadow so a
    cutout/handwritten logo stays legible over a photo background too. */
@@ -209,6 +221,20 @@ p { margin: 0 0 1em; }
   z-index: 315;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   pointer-events: none;
+  /* Same reasoning as .nav__mark above: this being above the menu panel
+     is what lets the docking title slide *over* it while scrolling, but
+     it also bled through while the panel is open. Transformed on this
+     wrapper, not .project-hero__title itself — main.js rewrites the
+     title's own transform every scroll frame for the docking effect, so
+     a CSS transition on that same element/property would just get
+     fought over; a transform on the (otherwise untouched) parent
+     composes with the title's own and slides both together with no
+     conflict. */
+  transition: transform 0.5s cubic-bezier(.16,.84,.44,1), opacity 0.4s ease;
+}
+body.is-menu-open .project-hero__overlay {
+  transform: translateX(-120%);
+  opacity: 0;
 }
 /* The transform (translateY + scale, applied by js/main.js) lives on the
    title itself, not this wrapper — the wrapper's padding-top is what
