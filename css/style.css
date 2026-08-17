@@ -362,10 +362,6 @@ p { margin: 0 0 1em; }
   .menu-btn[aria-expanded="true"] .menu-btn__burger span:nth-child(1) { top: 7.5px; transform: rotate(45deg); }
   .menu-btn[aria-expanded="true"] .menu-btn__burger span:nth-child(2) { opacity: 0; }
   .menu-btn[aria-expanded="true"] .menu-btn__burger span:nth-child(3) { top: 7.5px; transform: rotate(-45deg); }
-  /* Redundant now that the hamburger itself morphs into the close
-     control, and would otherwise sit right next to it in the same
-     corner. */
-  .menu-panel__close { display: none; }
 }
 
 /* ---------- Slide menu panel ---------- */
@@ -412,6 +408,14 @@ p { margin: 0 0 1em; }
 }
 .menu-panel__close::before { transform: rotate(45deg); }
 .menu-panel__close::after { transform: rotate(-45deg); }
+/* Mobile: redundant now that the hamburger itself morphs into the close
+   control, and would otherwise sit right next to it in the same corner
+   as a second, overlapping X. Placed after the base rule above (rather
+   than inside the .menu-btn__burger block near the top of this file) so
+   it actually wins the cascade — same specificity, source order decides. */
+@media (max-width: 760px) {
+  .menu-panel__close { display: none; }
+}
 
 .menu-panel__nav { display: flex; flex-direction: column; }
 .menu-panel__nav a {

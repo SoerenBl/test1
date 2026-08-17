@@ -1129,11 +1129,45 @@ document.addEventListener('DOMContentLoaded', function () {
     window.__remeasureProjectHero = measureProjectHero;
   }
 
+  // Only tile captions actually near the viewport are tracked here — on a
+  // category page with a couple dozen tiles, reading getBoundingClientRect
+  // for every single one of them on every scroll frame (most of them
+  // nowhere near the screen) was slow enough to overrun the frame budget
+  // during scroll, and since the docking title's own transform update
+  // below runs in this same rAF callback, that slowdown showed up as the
+  // title stuttering/jittering while scrolling, not just the captions.
+  var activeParallaxEls = [];
+  if (parallaxEls.length) {
+    if ('IntersectionObserver' in window) {
+      var parallaxObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var idx = activeParallaxEls.indexOf(entry.target);
+          if (entry.isIntersecting) {
+            if (idx === -1) activeParallaxEls.push(entry.target);
+          } else if (idx !== -1) {
+            activeParallaxEls.splice(idx, 1);
+          }
+        });
+      }, { rootMargin: '50% 0px 50% 0px' });
+      parallaxEls.forEach(function (el) { parallaxObserver.observe(el); });
+    } else {
+      activeParallaxEls = Array.prototype.slice.call(parallaxEls);
+    }
+  }
+
   if (!reduceMotion && (parallaxEls.length || heroContent || projectHero)) {
-    var ticking = false;
+    // A persistent rAF loop, not 'scroll'-event-triggered — on mobile,
+    // 'scroll' events during momentum/inertial scrolling can fire less
+    // often than the browser actually paints, so a handler gated on them
+    // recalculates late and the JS-driven transform visibly steps/lags
+    // behind the rest of the page, which scrolls smoothly via the
+    // compositor regardless. Reading scrollY fresh on every rendered
+    // frame instead keeps this in lockstep with native scrolling — this
+    // was the real source of the docking title "jittering", worse on
+    // scroll-up because that's usually the faster momentum phase.
     function updateParallax() {
       var vh = window.innerHeight;
-      parallaxEls.forEach(function (el) {
+      activeParallaxEls.forEach(function (el) {
         var rect = el.parentElement.getBoundingClientRect();
         var center = rect.top + rect.height / 2;
         var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
@@ -1161,16 +1195,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
         projectHeroTitleEl.style.transform = 'translate(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
       }
-      ticking = false;
+      window.requestAnimationFrame(updateParallax);
     }
-    function onScroll() {
-      if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
-        ticking = true;
-      }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
     updateParallax();
   }
 });
