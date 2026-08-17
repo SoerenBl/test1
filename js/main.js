@@ -1503,13 +1503,43 @@ document.addEventListener('DOMContentLoaded', function () {
   // A landing target can, on some viewports/pages, sit right at the edge
   // of *another* push's own trigger zone (e.g. Awards is short enough on
   // some screens that its start and the footer's pre-boundary zone are
-  // only a few px apart) -- combined with sub-pixel rounding on the
-  // exact landing position, a residual wheel event arriving right as one
-  // push finishes could otherwise immediately re-trigger a second one
-  // before the user has actually seen what just loaded. This short
-  // cooldown after any push completes requires a genuinely fresh gesture.
-  var lastPushEndedAt = 0;
-  var PUSH_COOLDOWN_MS = 280;
+  // only a few px apart). Reported: pushing from About to Awards would
+  // sometimes keep going by itself and reveal a slice of the footer --
+  // a single strong trackpad flick is a whole stream of wheel events
+  // that can keep arriving for over a second (established earlier,
+  // while chasing the About/Awards overshoot bug), easily outlasting
+  // the panel push's own ~420ms animation. Its trailing tail was
+  // landing inside the *footer* push's trigger zone and kicking off a
+  // second, unrequested push -- one physical gesture, two jumps.
+  //
+  // A fixed cooldown after a push ends (tried first) still isn't
+  // enough to rule this out: momentum can run well past any reasonable
+  // fixed window. What actually distinguishes "residual tail of the
+  // gesture that just triggered a push" from "a genuinely new gesture"
+  // is silence -- a real gap with no wheel events at all. This gate
+  // only engages for that specific window, right after a push
+  // completes (awaitingFreshGesture), and stays out of the way of
+  // ordinary scrolling otherwise -- it must NOT judge every wheel event
+  // by the gap since the last one, or a normal continuous scroll would
+  // never have a large enough gap to trigger a push in the first place.
+  // Both push mechanisms share this (same reasoning as
+  // anyPushTransitioning above). Capture phase + registered before the
+  // two feature listeners below guarantees this always runs first for a
+  // given wheel event, so both of them see gestureEligible already
+  // resolved for the event they're about to handle.
+  var lastWheelAt = 0;
+  var awaitingFreshGesture = false;
+  var GESTURE_QUIET_MS = 220;
+  var gestureEligible = true;
+  window.addEventListener('wheel', function (e) {
+    var gap = e.timeStamp - lastWheelAt;
+    lastWheelAt = e.timeStamp;
+    if (awaitingFreshGesture) {
+      if (gap < GESTURE_QUIET_MS) { gestureEligible = false; return; }
+      awaitingFreshGesture = false;
+    }
+    gestureEligible = true;
+  }, { passive: true, capture: true });
 
   (function () {
     var stackEl = document.querySelector('.stack');
@@ -1557,12 +1587,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // consistently snappy regardless of distance.
     function startTransition(target) {
       anyPushTransitioning = true;
-      pushScrollTo(target, function () { anyPushTransitioning = false; lastPushEndedAt = Date.now(); });
+      pushScrollTo(target, function () { anyPushTransitioning = false; awaitingFreshGesture = true; });
     }
     window.addEventListener('wheel', function (e) {
       if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
       if (anyPushTransitioning) { e.preventDefault(); return; }
-      if (Date.now() - lastPushEndedAt < PUSH_COOLDOWN_MS) return;
+      // Swallow (not just skip) the rest of this gesture's tail --
+      // reported: About->Awards would occasionally keep going "by
+      // itself" and reveal a slice of the footer. Only *skipping* here
+      // still let the same residual wheel events fall through to
+      // ordinary unprevented scrolling, which -- with html's sitewide
+      // scroll-behavior:smooth compounding across several of them in
+      // quick succession -- could carry noticeably further than the one
+      // clean push the user actually made. One push should fully
+      // consume the gesture that triggered it; a genuinely later, fresh
+      // gesture is unaffected since gestureEligible flips back to true
+      // as soon as real silence is observed.
+      if (!gestureEligible) { e.preventDefault(); return; }
       if (Math.abs(e.deltaY) <= 4) return;
       var y = window.scrollY;
       if (e.deltaY > 0 && y < boundaryY) {
@@ -1644,13 +1685,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function startTransition(target) {
       anyPushTransitioning = true;
-      pushScrollTo(target, function () { anyPushTransitioning = false; lastPushEndedAt = Date.now(); });
+      pushScrollTo(target, function () { anyPushTransitioning = false; awaitingFreshGesture = true; });
     }
 
     window.addEventListener('wheel', function (e) {
       if (narrowMq.matches) return;
       if (anyPushTransitioning) { e.preventDefault(); return; }
-      if (Date.now() - lastPushEndedAt < PUSH_COOLDOWN_MS) return;
+      // Swallow (not just skip) the rest of this gesture's tail --
+      // reported: About->Awards would occasionally keep going "by
+      // itself" and reveal a slice of the footer. Only *skipping* here
+      // still let the same residual wheel events fall through to
+      // ordinary unprevented scrolling, which -- with html's sitewide
+      // scroll-behavior:smooth compounding across several of them in
+      // quick succession -- could carry noticeably further than the one
+      // clean push the user actually made. One push should fully
+      // consume the gesture that triggered it; a genuinely later, fresh
+      // gesture is unaffected since gestureEligible flips back to true
+      // as soon as real silence is observed.
+      if (!gestureEligible) { e.preventDefault(); return; }
       if (Math.abs(e.deltaY) <= 4) return;
       var boundaryY = boundary();
       var openY = maxScroll();

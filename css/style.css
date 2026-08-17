@@ -345,45 +345,27 @@ body.is-menu-open .nav__right {
 }
 
 /* iOS-style switch: a pill track with a round thumb sliding between DE
-   and EN — the letters themselves are cut straight out of the pill's
-   own SVG shape (.lang-toggle__cutout, same mask technique as the menu
-   button below) rather than drawn as coloured text on top of it, so
-   they show through to whatever's behind — the sliding thumb, when it's
-   positioned under one, or the page otherwise. Real, independently
-   clickable <button data-set-lang> elements still drive the same flow
-   in main.js as always; they're just invisible now; layered above the
-   cutout so clicks land, with the visible letterforms and thumb doing
-   all the actual rendering underneath. main.js slides the thumb via the
-   .lang-toggle--en class alongside the existing [data-active]
-   attribute.
-   58x30, radius 15 -- narrower and a touch taller than the first pass
-   at this (78x27) so DE and EN sit closer together with more air around
-   each letter, both per request. Thumb is 24px (track height minus a
-   3px inset each side); pill opacity raised (0.22 -> 0.4) to read as
-   more opaque, per request. */
+   and EN. Previously the letters were cut out of the *track* itself,
+   with the thumb just a plain white circle sliding underneath -- moved
+   the cutout onto the thumb instead, so the circle you're actually
+   watching slide carries whichever language it's about to switch you
+   to, rather than uncovering a letter that was already sitting there.
+   Two SVGs (.lang-toggle__thumb-cutout, one per language, same mask
+   technique as the menu button below) sit stacked inside the thumb;
+   the sitewide html[data-lang] rule that already hides every other
+   [data-lang] pair on the page hides whichever one isn't current, no
+   extra JS needed. The track itself is now a plain CSS pill (its own
+   text cutout would only fight with the thumb's). Real, independently
+   clickable <button data-set-lang> elements still drive the switch in
+   main.js as always, just invisible, layered above everything so
+   clicks land. main.js slides the thumb via the .lang-toggle--en class
+   alongside the existing [data-active] attribute. */
 .lang-toggle {
   position: relative;
   width: 58px;
   height: 30px;
   border-radius: 15px;
-}
-.lang-toggle__cutout {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  display: block;
-  /* A cutout hole is fully transparent, not tinted -- it shows exactly
-     whatever's directly behind it, full stop. With the thumb now white
-     (was blue) that's a real problem: when the thumb sits behind the
-     active letter, hole and thumb are the *same* white, and the letter
-     -- confirmed by direct pixel inspection -- disappears completely,
-     just a blank circle. drop-shadow follows the shape's own alpha
-     edges, including the inside edge of a hole, so it rims each
-     letterform with a faint dark edge regardless of what's behind it —
-     keeps it legible against the thumb without needing the hole itself
-     to carry any color. */
-  filter: drop-shadow(0 0 0.6px rgba(0,0,0,0.55)) drop-shadow(0 0 1.2px rgba(0,0,0,0.35));
+  background: rgba(255,255,255,0.4);
 }
 .lang-toggle button {
   position: absolute;
@@ -405,12 +387,23 @@ body.is-menu-open .nav__right {
   left: 3px;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
   transition: transform 0.25s cubic-bezier(.4,0,.2,1);
 }
 .lang-toggle--en .lang-toggle__thumb { transform: translateX(28px); }
+.lang-toggle__thumb-cutout {
+  position: absolute;
+  inset: 0;
+  display: block;
+  /* Same problem, same fix as before: a mask hole is fully transparent,
+     not tinted, so it shows exactly whatever sits behind the thumb --
+     the track's own near-white fill -- and the letter disappears
+     without this. drop-shadow follows the shape's alpha edges,
+     including a hole's inner edge, rimming the letterform with a faint
+     dark edge regardless of what's behind it. */
+  filter: drop-shadow(0 0 0.6px rgba(0,0,0,0.55)) drop-shadow(0 0 1.2px rgba(0,0,0,0.35));
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  border-radius: 50%;
+}
 
 /* Menu button: solid white shape with the label knocked out of it,
    so whatever sits behind the nav shows through the letterforms. */

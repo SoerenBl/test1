@@ -7,7 +7,7 @@
 <meta name="description" content="Gap Sans — Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="../../favicon.svg" id="faviconLink" data-favicon-fallback="../../logo2">
-<link rel="stylesheet" href="../../css/style.css?v=104">
+<link rel="stylesheet" href="../../css/style.css?v=105">
 </head>
 <body>
 
@@ -16,8 +16,10 @@
     <a href="../../index.html" class="nav__mark"><span class="nav__mark-text">Sören Bläcker</span><img class="nav__mark-logo" data-photo="../../logo" alt="Sören Bläcker"></a>
     <div class="nav__right">
       <div class="lang-toggle">
-        <span class="lang-toggle__thumb" aria-hidden="true"></span>
-        <svg class="lang-toggle__cutout" viewBox="0 0 58 30" width="58" height="30" aria-hidden="true"><mask id="langMask"><rect width="58" height="30" rx="15" ry="15" fill="#fff"/><text x="15" y="16" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="0.5" fill="#000">DE</text><text x="43" y="16" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="0.5" fill="#000">EN</text></mask><rect width="58" height="30" rx="15" ry="15" fill="rgba(255,255,255,0.4)" mask="url(#langMask)"/></svg>
+        <span class="lang-toggle__thumb" aria-hidden="true">
+          <svg class="lang-toggle__thumb-cutout" data-lang="de" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><mask id="langThumbDe"><rect width="24" height="24" rx="12" ry="12" fill="#fff"/><text x="12" y="13" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.3" fill="#000">DE</text></mask><rect width="24" height="24" rx="12" ry="12" fill="#fff" mask="url(#langThumbDe)"/></svg>
+          <svg class="lang-toggle__thumb-cutout" data-lang="en" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><mask id="langThumbEn"><rect width="24" height="24" rx="12" ry="12" fill="#fff"/><text x="12" y="13" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="8.5" letter-spacing="0.3" fill="#000">EN</text></mask><rect width="24" height="24" rx="12" ry="12" fill="#fff" mask="url(#langThumbEn)"/></svg>
+        </span>
         <button type="button" data-set-lang="de" aria-label="Deutsch"></button>
         <button type="button" data-set-lang="en" aria-label="English"></button>
       </div>
@@ -99,6 +101,6 @@
   </div>
 </footer>
 
-<script src="../../js/main.js?v=104"></script>
+<script src="../../js/main.js?v=105"></script>
 </body>
 </html>
