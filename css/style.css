@@ -934,9 +934,20 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
+  /* Vertically centres .stack__content (its one in-flow child) within
+     whatever extra room min-height leaves once the content itself is
+     shorter than a screen — on desktop. Has to live here, not on
+     .stack__content itself: that element is always sized snugly to its
+     own title+body (nothing to redistribute internally), so the actual
+     slack only ever exists at *this* level, between it and the panel's
+     own min-height floor. Mobile overrides back to flex-start below,
+     unchanged from before. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 @media (max-width: 760px) {
-  .stack__panel { min-height: 100svh; }
+  .stack__panel { min-height: 100svh; justify-content: flex-start; }
 }
 
 .stack__bg {
@@ -1019,20 +1030,21 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   z-index: 1;
   display: flex;
   flex-direction: column;
+  /* Just packs title above body here — the actual vertical centring
+     (desktop only) happens one level up, on .stack__panel; see its own
+     comment for why it has to live there. */
   justify-content: flex-start;
   /* Longhand on purpose — this element is also .wrap (for the shared
      left/right gutter); a padding shorthand here would silently wipe
      that horizontal padding out since both rules target the same
-     property on the same element. Top-aligned (not centred) so the
-     title lands at the same spot as the Service/Contact page-hero
-     grid instead of drifting with how much body copy follows it.
-     Service/Contact sit under a solid nav that pushes content down by
-     --nav-h (body.nav-pad); this page's nav floats over the photo
-     instead, so --nav-h is added back in here to land at the same
-     spot regardless. Plain in-flow content now (see the .stack__panel
-     comment above) — this is what actually determines each panel's
-     rendered height, growing past min-height on its own if the title
-     and body need more than one screen. */
+     property on the same element. Service/Contact sit under a solid nav
+     that pushes content down by --nav-h (body.nav-pad); this page's nav
+     floats over the photo instead, so --nav-h is added back in here so
+     centring still leaves the same minimum clearance under it. Plain
+     in-flow content now (see the .stack__panel comment above) — this is
+     what actually determines each panel's rendered height, growing past
+     min-height on its own if the title and body need more than one
+     screen. */
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   padding-bottom: clamp(50px, 8vh, 90px);
 }
@@ -1120,6 +1132,14 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      footer directly, same as the rest of the site. */
   min-height: 100vh;
   min-height: 100dvh;
+  /* Vertically centred on desktop, kept in step with .stack__content
+     (About/Awards) on purpose — see its own comment for why flex-start
+     (top-packed, with a dead gap of photo below the text on a short,
+     wide viewport) was replaced with this. Mobile overrides back to
+     flex-start below, unchanged. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   padding-bottom: clamp(30px, 5vh, 60px);
   color: #fff;
@@ -1153,7 +1173,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .page-hero--photo > .wrap { position: relative; z-index: 1; }
 .page-hero--photo .lede { color: rgba(250,248,245,0.85); }
 @media (max-width: 760px) {
-  .page-hero--photo { padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
+  .page-hero--photo { justify-content: flex-start; padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
 }
 
 /* Edge-to-edge on mobile: these hero/title blocks use a smaller gutter
