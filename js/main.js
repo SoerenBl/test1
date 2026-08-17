@@ -796,6 +796,26 @@ document.addEventListener('DOMContentLoaded', function () {
           });
         });
       }).then(function (result) {
+        // Rendering the canvas above only produces the image bytes —
+        // decoding a ~2000px-wide JPEG back out of a data: URL is its own
+        // real, sometimes multi-second cost on a phone CPU, and it was
+        // happening invisibly *after* the spinner had already been
+        // removed (the loader was hidden as soon as loadFromImages() was
+        // *called*, not once anything had actually decoded and painted —
+        // StPageFlip loads its own Image object asynchronously). Decoding
+        // it ourselves first and waiting for that here means the spinner
+        // now covers that whole cost; StPageFlip's own Image object below
+        // uses the identical data: URL, so browsers reuse this same
+        // already-decoded bitmap from their image cache instead of
+        // decoding it a second time — the cover should then appear
+        // essentially the instant the spinner disappears, not some
+        // seconds later.
+        var coverImg = new Image();
+        coverImg.src = result.images[0];
+        var decoded = coverImg.decode ? coverImg.decode().catch(function () {}) :
+          new Promise(function (resolve) { coverImg.onload = coverImg.onerror = resolve; });
+        return decoded.then(function () { return result; });
+      }).then(function (result) {
         sizeBook(result.pageAspect);
         pageFlip = new PageFlip(bookEl, {
           width: Math.round(800 * dpr),
@@ -840,10 +860,10 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('init', updateUi);
         updateUi();
         var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
-        // The cover's a data: URL (already decoded in memory, from the
-        // canvas render above), not a network request, so it's safe to
-        // consider the spinner's job done the moment we hand it over —
-        // no meaningful decode delay left to cover for.
+        // Safe to remove the spinner now — the .decode() wait two steps
+        // up already covered the real cost (JPEG decode), so the cover
+        // StPageFlip is about to draw is already sitting decoded in the
+        // browser's image cache under this identical data: URL.
         if (loaderEl) loaderEl.remove();
         stageEl.classList.remove('is-loading');
         // Only the cover image is loaded so far — the viewer is visible
