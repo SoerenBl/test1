@@ -822,6 +822,26 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
         }
+        // Real-device reports (book renders tiny on first paint, but full
+        // size again as soon as the visitor navigates a page or rotates)
+        // point at a specific iOS Safari quirk: 100dvh can briefly resolve
+        // against the wrong viewport on first paint and only self-correct
+        // once a genuine interaction happens — and critically, that
+        // self-correction doesn't necessarily change what
+        // getBoundingClientRect()/ResizeObserver report in the meantime,
+        // so the fix above alone doesn't catch it. Belt and braces: force
+        // one fresh re-measure shortly after load regardless of whether
+        // anything reports having changed, plus on the interactions most
+        // likely to coincide with the browser settling the real viewport.
+        var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
+        ['scroll', 'orientationchange', 'touchend', 'pageshow'].forEach(function (evt) {
+          window.addEventListener(evt, function once() {
+            window.removeEventListener(evt, once);
+            resettle();
+          }, { passive: true });
+        });
+        setTimeout(resettle, 400);
+        setTimeout(resettle, 1200);
         // Opt-in on-screen debug readout (?debug=1 in the URL) — no
         // WebKit/real-device testing is available in the environment this
         // was built in, so this turns the visitor's own phone into the
