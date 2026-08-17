@@ -344,23 +344,42 @@ body.is-menu-open .nav__right {
   pointer-events: none;
 }
 
+/* iOS-style switch: a pill track (white, but more translucent than the
+   solid-white menu button next to it, per request) with a round thumb
+   that slides between the two halves — the DE/EN buttons themselves
+   stay exactly what they were (real, independently clickable elements
+   driving the same [data-set-lang] flow in main.js), just restyled as
+   transparent labels sitting on top of the track; the thumb is a third,
+   purely decorative element behind them that main.js slides via the
+   .lang-toggle--en class set alongside the existing [data-active]
+   attribute. Blue thumb (--color-panel-hover, the site's own established
+   accent for this kind of highlight — see the menu-hover treatment
+   elsewhere) rather than Apple's green, per request. */
 .lang-toggle {
+  position: relative;
   display: flex;
-  gap: 6px;
+  align-items: center;
+  width: 74px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.22);
   font-family: var(--font-heading);
-  font-size: 0.92rem;
-  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
 }
 .lang-toggle button {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 50%;
+  height: 100%;
   background: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 16px;
   cursor: pointer;
   color: var(--nav-fg-muted);
   font-family: inherit;
   font-size: inherit;
-  padding: 4px 6px;
-  transition: background-color 0.2s ease;
+  transition: color 0.2s ease;
   /* Thin outline on the letterforms themselves instead of the soft blur
      the rest of the nav uses — keeps DE/EN legible over busy or light
      photo backgrounds. */
@@ -368,11 +387,18 @@ body.is-menu-open .nav__right {
   text-stroke: 0.6px #000;
 }
 .lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
-/* Same soft blur nav__mark/menu-btn already have for legibility over any
-   background, plus a faint hover backing (like the menu button's own
-   solid shape) so it reads clearly over light photos too — kept subtle,
-   just enough to place the button, not a full pill. */
-.lang-toggle button:hover { background-color: rgba(127,127,127,0.18); }
+.lang-toggle__thumb {
+  position: absolute;
+  z-index: 1;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-panel-hover);
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+}
+.lang-toggle--en .lang-toggle__thumb { transform: translateX(45px); }
 
 /* Menu button: solid white shape with the label knocked out of it,
    so whatever sits behind the nav shows through the letterforms. */

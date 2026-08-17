@@ -47,11 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Language toggle (DE/EN) ---
   var langButtons = document.querySelectorAll('[data-set-lang]');
+  var langToggleTrack = document.querySelector('.lang-toggle');
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
     langButtons.forEach(function (btn) {
       btn.setAttribute('data-active', String(btn.getAttribute('data-set-lang') === lang));
     });
+    if (langToggleTrack) langToggleTrack.classList.toggle('lang-toggle--en', lang === 'en');
   }
   langButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
