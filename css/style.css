@@ -344,74 +344,73 @@ body.is-menu-open .nav__right {
   pointer-events: none;
 }
 
-/* iOS-style switch: a pill track (white, more translucent than the
-   solid-white menu button next to it) with a round thumb that slides
-   between the two halves — the DE/EN buttons themselves stay exactly
-   what they were (real, independently clickable elements driving the
-   same [data-set-lang] flow in main.js), just restyled as transparent
-   labels sitting on top of the track; the thumb is a third, purely
-   decorative element behind them that main.js slides via the
-   .lang-toggle--en class set alongside the existing [data-active]
+/* iOS-style switch: a pill track with a round thumb sliding between DE
+   and EN — the letters themselves are cut straight out of the pill's
+   own SVG shape (.lang-toggle__cutout, same mask technique as the menu
+   button below) rather than drawn as coloured text on top of it, so
+   they show through to whatever's behind — the sliding thumb, when it's
+   positioned under one, or the page otherwise. Real, independently
+   clickable <button data-set-lang> elements still drive the same flow
+   in main.js as always; they're just invisible now; layered above the
+   cutout so clicks land, with the visible letterforms and thumb doing
+   all the actual rendering underneath. main.js slides the thumb via the
+   .lang-toggle--en class alongside the existing [data-active]
    attribute.
-   Sized at 75% of the menu pill's own 104x36 (78x27, radius 13.5) and
-   solid white rather than blue, both per request. Thumb is 21px (track
-   height minus a 3px inset on each side) — every dimension below
-   (button left/right + width, thumb position/travel) is derived from
-   that same 3px/21px pair on purpose, not just eyeballed to roughly
-   match: the DE/EN buttons are positioned to cover *exactly* the same
-   rectangle the thumb occupies in each of its two states, so the
-   letterform always sits precisely centred on the thumb circle, not
-   just "somewhere in its half of the track" (drifted a few px off
-   before, when button width came from an even flex split instead). */
+   58x30, radius 15 -- narrower and a touch taller than the first pass
+   at this (78x27) so DE and EN sit closer together with more air around
+   each letter, both per request. Thumb is 24px (track height minus a
+   3px inset each side); pill opacity raised (0.22 -> 0.4) to read as
+   more opaque, per request. */
 .lang-toggle {
   position: relative;
-  width: 78px;
-  height: 27px;
-  border-radius: 13.5px;
-  background: rgba(255,255,255,0.22);
-  font-family: var(--font-heading);
-  font-size: 0.72rem;
-  letter-spacing: 0.02em;
+  width: 58px;
+  height: 30px;
+  border-radius: 15px;
+}
+.lang-toggle__cutout {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: block;
+  /* A cutout hole is fully transparent, not tinted -- it shows exactly
+     whatever's directly behind it, full stop. With the thumb now white
+     (was blue) that's a real problem: when the thumb sits behind the
+     active letter, hole and thumb are the *same* white, and the letter
+     -- confirmed by direct pixel inspection -- disappears completely,
+     just a blank circle. drop-shadow follows the shape's own alpha
+     edges, including the inside edge of a hole, so it rims each
+     letterform with a faint dark edge regardless of what's behind it —
+     keeps it legible against the thumb without needing the hole itself
+     to carry any color. */
+  filter: drop-shadow(0 0 0.6px rgba(0,0,0,0.55)) drop-shadow(0 0 1.2px rgba(0,0,0,0.35));
 }
 .lang-toggle button {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: 0;
-  width: 21px;
+  width: 29px;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: none;
   border: none;
-  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
-  color: var(--nav-fg-muted);
-  font-family: inherit;
-  font-size: inherit;
-  transition: color 0.2s ease;
-  /* Thin outline on the letterforms themselves instead of the soft blur
-     the rest of the nav uses — keeps DE/EN legible over busy or light
-     photo backgrounds. */
-  -webkit-text-stroke: 0.5px #000;
-  text-stroke: 0.5px #000;
 }
-.lang-toggle button[data-set-lang="de"] { left: 3px; }
-.lang-toggle button[data-set-lang="en"] { right: 3px; }
-.lang-toggle button[data-active="true"] { color: var(--nav-fg); font-weight: 700; }
+.lang-toggle button[data-set-lang="de"] { left: 0; }
+.lang-toggle button[data-set-lang="en"] { right: 0; }
 .lang-toggle__thumb {
   position: absolute;
   z-index: 1;
   top: 3px;
   left: 3px;
-  width: 21px;
-  height: 21px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.35);
   transition: transform 0.25s cubic-bezier(.4,0,.2,1);
 }
-.lang-toggle--en .lang-toggle__thumb { transform: translateX(51px); }
+.lang-toggle--en .lang-toggle__thumb { transform: translateX(28px); }
 
 /* Menu button: solid white shape with the label knocked out of it,
    so whatever sits behind the nav shows through the letterforms. */

@@ -7,7 +7,7 @@
 <meta name="description" content="Concept Audio Speaker — Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="../../favicon.svg" id="faviconLink" data-favicon-fallback="../../logo2">
-<link rel="stylesheet" href="../../css/style.css?v=102">
+<link rel="stylesheet" href="../../css/style.css?v=103">
 </head>
 <body>
 
@@ -16,9 +16,10 @@
     <a href="../../index.html" class="nav__mark"><span class="nav__mark-text">Sören Bläcker</span><img class="nav__mark-logo" data-photo="../../logo" alt="Sören Bläcker"></a>
     <div class="nav__right">
       <div class="lang-toggle">
-        <button type="button" data-set-lang="de">DE</button>
-        <button type="button" data-set-lang="en">EN</button>
         <span class="lang-toggle__thumb" aria-hidden="true"></span>
+        <svg class="lang-toggle__cutout" viewBox="0 0 58 30" width="58" height="30" aria-hidden="true"><mask id="langMask"><rect width="58" height="30" rx="15" ry="15" fill="#fff"/><text x="15" y="16" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="0.5" fill="#000">DE</text><text x="43" y="16" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="10" letter-spacing="0.5" fill="#000">EN</text></mask><rect width="58" height="30" rx="15" ry="15" fill="rgba(255,255,255,0.4)" mask="url(#langMask)"/></svg>
+        <button type="button" data-set-lang="de" aria-label="Deutsch"></button>
+        <button type="button" data-set-lang="en" aria-label="English"></button>
       </div>
       <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel" aria-label="Menü">
         <span class="menu-btn__cutout" data-lang="de">
@@ -98,6 +99,6 @@
   </div>
 </footer>
 
-<script src="../../js/main.js?v=102"></script>
+<script src="../../js/main.js?v=103"></script>
 </body>
 </html>
