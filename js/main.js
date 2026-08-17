@@ -1439,6 +1439,37 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 50);
     }
 
+    // Turning scroll-snap off on mobile (above) fixed the hard scroll
+    // lock, but a follow-up report showed a *different* WebKit quirk in
+    // the same spot: touch-driven scroll momentum can get fully absorbed
+    // right at the handoff between two stacked position:sticky panels —
+    // manually swiping stops dead exactly at the About/Awards boundary
+    // and no further swipe/wipe carries it across, even though the
+    // arrow button (a plain, non-gesture scrollTo) crosses it instantly.
+    // Rebuilding the old "any partial scroll completes the transition"
+    // feel in JS instead of CSS sidesteps that: this only ever fires
+    // once a scroll has fully *settled* (150ms of no new scroll events),
+    // never while a touch is still moving, so — unlike scroll-snap-type
+    // being armed mid-gesture — there's no window for it to fight an
+    // in-progress native scroll, only to nudge the rest of the way once
+    // the visitor's own gesture has already stopped short of the edge.
+    var settleTimer = null;
+    var prevScrollY = window.scrollY;
+    var scrollDir = 0;
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY;
+      if (y !== prevScrollY) scrollDir = y > prevScrollY ? 1 : -1;
+      prevScrollY = y;
+      if (!narrowMq.matches) return;
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(function () {
+        var yy = window.scrollY;
+        if (yy > 4 && yy < armedThreshold - 4) {
+          window.scrollTo({ top: scrollDir >= 0 ? armedThreshold : 0, behavior: 'instant' });
+        }
+      }, 150);
+    }, { passive: true });
+
     // behavior:'smooth' here also risked being that same stuck-mid-
     // transition state: if a real touch interrupts an in-flight
     // programmatic smooth scroll (easy to do by accident right after
