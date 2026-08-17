@@ -961,10 +961,36 @@ document.addEventListener('DOMContentLoaded', function () {
               allPagesLoaded = true; // a genuine 1-page PDF -- nothing else to load
               updateUi();
             });
+        // sizeBook() reads the section's own rendered width plus
+        // visualViewport.height (see its own comment on why) — both can
+        // still be mid-settle at this exact point on a real device under
+        // a slow/variable connection, giving a real but tiny/degenerate
+        // frameW instead of an error. The resettle listeners further down
+        // do eventually catch and fix that, but only *after* the spinner
+        // is already gone — which is exactly what got reported: the cover
+        // renders as a thin cropped sliver for a second or two, then
+        // "fixes itself". Retrying sizeBook a few times up front, and not
+        // revealing anything until it comes back with a plausible size,
+        // means that in-between state is never actually shown.
+        function waitForSaneSize() {
+          return new Promise(function (resolve) {
+            var attempts = 0;
+            function check() {
+              sizeBook(result.pageAspect);
+              attempts++;
+              if (frameW > 200 || attempts >= 30) { resolve(); return; }
+              setTimeout(check, 100);
+            }
+            check();
+          });
+        }
         return Promise.all([imageReady, allImagesReady]).then(function () {
+          return waitForSaneSize();
+        }).then(function () {
           // Only remove the spinner once StPageFlip's own cover image has
-          // actually loaded (see watchLibraryImageLoad above) *and* every
-          // other page has too — not before either one.
+          // actually loaded (see watchLibraryImageLoad above), every
+          // other page has too, and the book's own container has settled
+          // to a plausible size — not before all three.
           if (loaderEl) loaderEl.remove();
           // bookWrap's width and bookShift's transform (the -50% shift
           // that keeps a lone cover centred — see updateUi() below) were
