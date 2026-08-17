@@ -806,7 +806,22 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('flip', updateUi);
         pageFlip.on('init', updateUi);
         updateUi();
-        window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
+        // ResizeObserver on the section itself, not a window 'resize'
+        // listener — on mobile Safari the section is sized with 100dvh,
+        // which shrinks/grows as the address bar collapses or reappears
+        // during scroll, but that alone does not reliably fire a window
+        // 'resize' event (the layout viewport window.innerHeight reads
+        // off doesn't change, only the dynamic one CSS is tracking does).
+        // Without this, the book stayed sized to whatever viewport
+        // happened to be current the one time it was first measured,
+        // fine on desktop (no dynamic toolbar) but silently wrong on
+        // phones — undersized in what became a taller box, or clipped in
+        // a shorter one, depending on scroll state when it first ran.
+        if (window.ResizeObserver) {
+          new ResizeObserver(function () { sizeBook(result.pageAspect); updateUi(); }).observe(section);
+        } else {
+          window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
+        }
       }).catch(function (err) {
         console.error('PDF viewer failed to initialize:', err);
         section.remove();
@@ -833,7 +848,14 @@ document.addEventListener('DOMContentLoaded', function () {
       // size the *visible* window onto it (.pdfv__book-wrap) separately.
       var frameW = 0, frameH = 0;
       function sizeBook(pageAspect) {
-        var maxW = window.innerWidth * 0.86, maxH = window.innerHeight * 0.82;
+        // Measured against the section's own rendered box, not
+        // window.innerWidth/innerHeight — the section is sized with CSS
+        // 100dvh, which mobile Safari's collapsing address bar moves
+        // independently of window.innerHeight (see the ResizeObserver
+        // comment above). Reading the real box keeps this correct no
+        // matter which viewport unit ends up bigger at any given moment.
+        var rect = section.getBoundingClientRect();
+        var maxW = rect.width * 0.86, maxH = rect.height * 0.82;
         frameW = Math.min(maxW, maxH * 2 * pageAspect);
         frameH = frameW / (2 * pageAspect);
         // bookShift is sized in real (on-screen) CSS pixels — everything
