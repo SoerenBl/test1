@@ -992,6 +992,12 @@ document.addEventListener('DOMContentLoaded', function () {
         window.scrollTo({ top: firstPanel.offsetHeight, behavior: 'smooth' });
       });
     }
+    var scrollCueBtnUp = document.getElementById('scrollCueBtnUp');
+    if (scrollCueBtnUp) {
+      scrollCueBtnUp.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
   })();
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroNav = document.querySelector('.nav__mark');
