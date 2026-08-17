@@ -1011,28 +1011,37 @@ document.addEventListener('DOMContentLoaded', function () {
         // do eventually catch and fix that, but only *after* the spinner
         // is already gone — which is exactly what got reported: the cover
         // renders as a thin cropped sliver for a second or two, then
-        // "fixes itself". Retrying sizeBook a few times up front, and not
-        // revealing anything until it comes back with a plausible size,
-        // means that in-between state is never actually shown.
-        function waitForSaneSize() {
+        // "fixes itself" once the page reflows again in the background.
+        // A single "is it bigger than some fixed number" check (the
+        // first version of this) turned out not to be enough — a layout
+        // still mid-reflow can clear a fixed floor with a value that's
+        // still wrong, revealing early with the same bug just less
+        // severe. This instead waits for two consecutive reads, spaced
+        // apart, to land on essentially the same width — actual
+        // confirmation the layout has stopped moving, not just that a
+        // number crossed some line — before ever revealing anything.
+        function waitForStableSize() {
           return new Promise(function (resolve) {
-            var attempts = 0;
+            var attempts = 0, lastW = -1, stableCount = 0;
             function check() {
               sizeBook(result.pageAspect);
               attempts++;
-              if (frameW > 200 || attempts >= 30) { resolve(); return; }
-              setTimeout(check, 100);
+              if (frameW > 100 && Math.abs(frameW - lastW) < 2) stableCount++;
+              else stableCount = 0;
+              lastW = frameW;
+              if (stableCount >= 2 || attempts >= 30) { resolve(); return; }
+              setTimeout(check, 120);
             }
             check();
           });
         }
         return Promise.all([imageReady, allImagesReady]).then(function () {
-          return waitForSaneSize();
+          return waitForStableSize();
         }).then(function () {
           // Only remove the spinner once StPageFlip's own cover image has
           // actually loaded (see watchLibraryImageLoad above), every
           // other page has too, and the book's own container has settled
-          // to a plausible size — not before all three.
+          // to a stable size — not before all three.
           if (loaderEl) loaderEl.remove();
           // bookWrap's width and bookShift's transform (the -50% shift
           // that keeps a lone cover centred — see updateUi() below) were
