@@ -1047,15 +1047,32 @@ document.addEventListener('DOMContentLoaded', function () {
   var projectHeroNav = document.querySelector('.nav__mark');
   // Distance over which the big overlay title docks into the nav bar — a
   // fixed value (not tied to the title's own height) so the motion feels
-  // the same regardless of how long the title text is.
-  var PROJECT_DOCK_RANGE = 200;
+  // the same regardless of how long the title text is. Deliberately short
+  // (rather than the old 200px): below this, the title sits in a single
+  // static docked state the whole time you're scrolling the rest of the
+  // page (see is-docked-static below) — scrolling up from deep in the
+  // page doesn't grow it back until you're nearly at the very top.
+  var PROJECT_DOCK_RANGE = 120;
   var projectHeroNatural = null;
   var projectHeroDock = null;
   var projectHeroTitleEl = projectHero ? projectHero.querySelector('.project-hero__title') : null;
+  // Once fully docked, the title is switched to position:fixed at the
+  // exact on-screen spot the live transform would otherwise keep
+  // recomputing every frame to hold it at — mathematically identical
+  // (verified below), but static, so it stops touching the DOM for
+  // the entire rest of the scroll range instead of updating (and
+  // fighting the compositor's own smooth native scroll) on every frame.
+  // That per-frame churn while "parked" was the remaining source of the
+  // reported jitter even after the docking math itself was correct.
+  var projectHeroDockedStatic = null;
   function measureProjectHero() {
     if (!projectHero || !projectHeroTitleEl) return;
     var prevTransform = projectHeroTitleEl.style.transform;
+    projectHeroTitleEl.style.position = '';
+    projectHeroTitleEl.style.top = '';
+    projectHeroTitleEl.style.left = '';
     projectHeroTitleEl.style.transform = 'none';
+    projectHeroDockedStatic = null;
     // Measured on the title element itself, not the padded wrapper around
     // it — the wrapper's padding-top is what pushes the big title down
     // from the very top of the section, but transforming the wrapper
@@ -1181,19 +1198,44 @@ document.addEventListener('DOMContentLoaded', function () {
         heroContent.style.transform = 'scale(' + scale.toFixed(3) + ')';
       }
       if (projectHero && projectHeroNatural && projectHeroDock) {
-        var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
-        // Kept position:absolute the whole time (see CSS) — this transform
-        // both slides/shrinks it toward the docked spot AND cancels the
-        // element's own natural scroll-away drift once fully docked
-        // (translateY grows 1:1 with scrollY beyond that point), which is
-        // what makes it read as "pinned in the nav" without ever switching
-        // position modes. translateX has no such drift to cancel (the page
-        // never scrolls horizontally) — it just slides left→right toward
-        // the docked spot, same as translateY does top→bottom.
-        var translateX = dockProgress * (projectHeroDock.left - projectHeroNatural.left);
-        var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
-        var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
-        projectHeroTitleEl.style.transform = 'translate(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+        if (window.scrollY >= PROJECT_DOCK_RANGE) {
+          // Fully docked and staying that way for the entire rest of the
+          // scroll range below — park it as position:fixed at exactly
+          // where the live transform (dockProgress === 1 case, below)
+          // would otherwise keep landing it every single frame: dock.top/
+          // left directly, scale(dock.scale), no translateY/scrollY term
+          // needed at all since position:fixed already tracks the
+          // viewport on its own. Written once per docked "session"
+          // (guarded on the flag), not every frame.
+          if (projectHeroDockedStatic !== true) {
+            projectHeroTitleEl.style.position = 'fixed';
+            projectHeroTitleEl.style.top = projectHeroDock.top.toFixed(1) + 'px';
+            projectHeroTitleEl.style.left = projectHeroDock.left.toFixed(1) + 'px';
+            projectHeroTitleEl.style.transform = 'scale(' + projectHeroDock.scale.toFixed(3) + ')';
+            projectHeroDockedStatic = true;
+          }
+        } else {
+          if (projectHeroDockedStatic !== false) {
+            projectHeroTitleEl.style.position = '';
+            projectHeroTitleEl.style.top = '';
+            projectHeroTitleEl.style.left = '';
+            projectHeroDockedStatic = false;
+          }
+          var dockProgress = Math.max(0, Math.min(1, window.scrollY / PROJECT_DOCK_RANGE));
+          // Kept position:static (normal flow) the whole time this branch
+          // runs — this transform both slides/shrinks it toward the
+          // docked spot AND cancels the element's own natural scroll-away
+          // drift as it approaches fully docked (translateY grows 1:1
+          // with scrollY), which is what makes the handoff to the fixed
+          // branch above seamless at dockProgress === 1. translateX has
+          // no such drift to cancel (the page never scrolls horizontally)
+          // — it just slides left→right toward the docked spot, same as
+          // translateY does top→bottom.
+          var translateX = dockProgress * (projectHeroDock.left - projectHeroNatural.left);
+          var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
+          var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
+          projectHeroTitleEl.style.transform = 'translate(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+        }
       }
       window.requestAnimationFrame(updateParallax);
     }
