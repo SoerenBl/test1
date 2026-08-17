@@ -337,10 +337,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }));
     }).then(function (resolved) {
       if (!resolved || !resolved.length) return;
-      // A single leftover photo spans full width — otherwise it would sit
-      // alone in one column, leaving the other half of that row blank.
+      // A single leftover landscape photo spans full width — cropping it
+      // to a 2:1 strip via object-fit: cover still shows essentially the
+      // whole frame. A square/portrait photo forced into that same wide
+      // strip would instead lose most of its height to the crop, so it
+      // keeps its own upright shape in one column and leaves the other
+      // column blank rather than mangling the photo to fill it.
       if (resolved.length === 1) {
-        grid.innerHTML = '<div class="tile tile--full"><div class="tile__media"><img src="' + resolved[0].url + '" alt=""></div></div>';
+        var only = resolved[0];
+        var soleClass = only.span === 1 ? 'tile--full' : (only.span === 2 ? 'tile--tall' : 'tile--portrait');
+        grid.innerHTML = '<div class="tile ' + soleClass + '"><div class="tile__media"><img src="' + only.url + '" alt=""></div></div>';
         return;
       }
       var html = resolved.map(function (r) {
