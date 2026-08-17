@@ -1265,9 +1265,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .contact-list li span { color: var(--color-text-muted); }
 /* Label spans (Kategorie, Land, Jahr, and on project pages Material,
    Fertigungstechniken, Besonderheiten, …) get a light touch of extra
-   weight to read as the heading of their row — same family, size and
-   color as the rest of the list, just a little bolder. */
-.contact-list li > span:not(:last-child) { font-weight: 600; }
+   weight and a touch darker grey to read as the heading of their row —
+   same family and size as the rest of the list, just a subtle step up.
+   Targeted by position (always the first two children — one per
+   data-lang) rather than :not(:last-child): Kategorie's value is itself
+   split into two data-lang siblings (unlike Land/Jahr, whose value is
+   the same in both languages and needs only one), which made the last
+   child a label-language-pair away from the actual last element and
+   caught the visible value span too. */
+.contact-list li > span:nth-child(1),
+.contact-list li > span:nth-child(2) {
+  font-weight: 500;
+  color: #58575c;
+}
 
 /* Longer info rows (Material, Fertigungstechniken, Besonderheiten on
    project pages) — a full sentence or bullet list doesn't fit pinned to
