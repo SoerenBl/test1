@@ -1328,19 +1328,27 @@ body.lightbox-open { overflow: hidden; }
   background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 72%);
   pointer-events: none;
 }
-/* .pdfv__book is the element StPageFlip mounts into — the library adds
-   its own "stf__parent" class straight onto it (not a wrapped child), so
-   the shift/zoom transform and shadow live on this same element directly.
-   Shift (recto/verso) and zoom are two independent things that both need
-   to end up in the one "transform" property, hence the custom properties
-   instead of two classes fighting over the same declaration. */
-.pdfv__book {
+/* Carries the recto/verso shift + zoom transform (set by main.js) — kept
+   separate from .pdfv__book itself, which has its own transform for the
+   devicePixelRatio fix below and can't share a single "transform"
+   declaration with this one since they're independent concerns animated
+   independently. */
+.pdfv__book-shift {
+  position: relative;
   cursor: zoom-in;
   filter: drop-shadow(0 26px 46px rgba(0,0,0,0.35));
   transition: transform 0.5s ease;
   transform-origin: 50% 50%;
 }
-.pdfv__book.is-zoomed { cursor: zoom-out; }
+.pdfv__book-shift.is-zoomed { cursor: zoom-out; }
+/* .pdfv__book is the element StPageFlip mounts into — the library adds
+   its own "stf__parent" class straight onto it (not a wrapped child).
+   It's sized dpr times larger than it should visually occupy (main.js)
+   and scaled back down here, purely so its internal canvas — which the
+   library sizes 1:1 with this element's own CSS pixels, with no
+   devicePixelRatio awareness of its own — actually has enough pixels to
+   render sharp on a retina screen instead of blurry. */
+.pdfv__book { position: absolute; top: 0; left: 0; }
 
 /* --- Vendored from StPageFlip's stPageFlip.css (page-flip npm package). --- */
 .pdfv__book.stf__parent { position: relative; display: block; box-sizing: border-box; touch-action: pan-y; }

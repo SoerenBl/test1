@@ -685,7 +685,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '<div class="pdfv">' +
           '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
           '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
-          '<div class="pdfv__book-wrap"><div class="pdfv__book"></div></div>' +
+          '<div class="pdfv__book-wrap"><div class="pdfv__book-shift"><div class="pdfv__book"></div></div></div>' +
           '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
           '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
           '<div class="pdfv__count"></div>' +
@@ -695,14 +695,29 @@ document.addEventListener('DOMContentLoaded', function () {
       var zonePrev = section.querySelector('.pdfv__zone--prev');
       var zoneNext = section.querySelector('.pdfv__zone--next');
       var bookWrap = section.querySelector('.pdfv__book-wrap');
+      var bookShift = section.querySelector('.pdfv__book-shift');
       var bookEl = section.querySelector('.pdfv__book');
       var arrowPrev = section.querySelector('.pdfv__arrow--prev');
       var arrowNext = section.querySelector('.pdfv__arrow--next');
       var countEl = section.querySelector('.pdfv__count');
 
+      // StPageFlip sizes its internal canvas's drawing buffer 1:1 with its
+      // CSS pixel size (no devicePixelRatio awareness of its own — the
+      // library reads getComputedStyle(canvas).width straight into
+      // canvas.width), so on any retina/high-DPI screen it was rendering
+      // at half resolution or worse. Fix: give .pdfv__book itself a CSS
+      // size dpr times larger than it should visually occupy (so its
+      // canvas buffer actually has that many pixels), then scale it back
+      // down by 1/dpr so it still displays at the right size — the
+      // standard high-DPI canvas trick, just via a wrapping transform
+      // since this library gives no direct hook into its canvas sizing.
+      var dpr = window.devicePixelRatio || 1;
+      bookEl.style.transformOrigin = 'top left';
+      bookEl.style.transform = 'scale(' + (1 / dpr) + ')';
+
       var pageFlip = null, numPages = 0, isZoomed = false, currentShift = 0;
       function applyBookTransform() {
-        bookEl.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
+        bookShift.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
       }
 
       pdfjsLib.getDocument(url).promise.then(function (doc) {
@@ -724,13 +739,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }).then(function (result) {
         sizeBook(result.pageAspect);
         pageFlip = new PageFlip(bookEl, {
-          width: 800,
-          height: Math.round(800 / result.pageAspect),
+          width: Math.round(800 * dpr),
+          height: Math.round((800 / result.pageAspect) * dpr),
           size: 'stretch',
-          minWidth: 260,
-          maxWidth: 900,
-          minHeight: 260,
-          maxHeight: 1200,
+          // Bounds are in the same (dpr-inflated) CSS-pixel space as
+          // .pdfv__book's own size now, since the library reads its block
+          // size straight off the DOM — see the dpr comment above.
+          minWidth: Math.round(260 * dpr),
+          maxWidth: Math.round(900 * dpr),
+          minHeight: Math.round(260 * dpr),
+          maxHeight: Math.round(1200 * dpr),
           autoSize: false,
           showCover: true,
           useMouseEvents: false,
@@ -749,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
       function renderPageToImage(doc, n) {
         return doc.getPage(n).then(function (page) {
           var baseViewport = page.getViewport({ scale: 1 });
-          var targetWidth = 1100 * (window.devicePixelRatio || 1);
+          var targetWidth = 1400 * dpr;
           var viewport = page.getViewport({ scale: targetWidth / baseViewport.width });
           var canvas = document.createElement('canvas');
           canvas.width = viewport.width;
@@ -770,8 +788,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var maxW = window.innerWidth * 0.86, maxH = window.innerHeight * 0.82;
         frameW = Math.min(maxW, maxH * 2 * pageAspect);
         frameH = frameW / (2 * pageAspect);
-        bookEl.style.width = frameW + 'px';
-        bookEl.style.height = frameH + 'px';
+        // bookShift is sized in real (on-screen) CSS pixels — everything
+        // else (.pdfv__book-wrap clipping, the shift/zoom transform) keys
+        // off this, same as before. .pdfv__book itself is dpr times
+        // bigger and scaled back down (see the dpr comment above), so it
+        // always displays at exactly this size too, just at full
+        // resolution underneath.
+        bookShift.style.width = frameW + 'px';
+        bookShift.style.height = frameH + 'px';
+        bookEl.style.width = (frameW * dpr) + 'px';
+        bookEl.style.height = (frameH * dpr) + 'px';
       }
 
       function updateUi() {
@@ -819,25 +845,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
       function setZoomOrigin(e) {
         // Origin is computed against .pdfv__book-wrap (the visible,
-        // clipped window), not .pdfv__book itself — .pdfv__book keeps its
+        // clipped window), not .pdfv__book-shift itself — that keeps its
         // full spread-width box even on a single page, so using its own
-        // rect would measure against width that's half off-screen.
+        // rect would measure against width that's half off-screen. The
+        // zoom scale itself lives on .pdfv__book-shift (see
+        // applyBookTransform), so that's what the origin has to be set on.
         var rect = bookWrap.getBoundingClientRect();
-        bookEl.style.transformOrigin =
+        bookShift.style.transformOrigin =
           (((e.clientX - rect.left) / rect.width) * 100) + '% ' + (((e.clientY - rect.top) / rect.height) * 100) + '%';
       }
       bookEl.addEventListener('click', function (e) {
         e.stopPropagation();
         isZoomed = !isZoomed;
         if (isZoomed) setZoomOrigin(e);
-        bookEl.classList.toggle('is-zoomed', isZoomed);
+        bookShift.classList.toggle('is-zoomed', isZoomed);
         applyBookTransform();
       });
       bookEl.addEventListener('mousemove', function (e) { if (isZoomed) setZoomOrigin(e); });
       bookEl.addEventListener('mouseleave', function () {
         if (!isZoomed) return;
         isZoomed = false;
-        bookEl.classList.remove('is-zoomed');
+        bookShift.classList.remove('is-zoomed');
         applyBookTransform();
       });
 
