@@ -848,20 +848,27 @@ document.addEventListener('DOMContentLoaded', function () {
         // — which is what was showing, easy to read as "just blank").
         // Removed that guess entirely: this instead patches window.Image
         // for the single synchronous instant it takes PageFlip's
-        // constructor below to create its own Image object (every Page
-        // does so synchronously, right in its own constructor), and
-        // listens directly on *that* object's real load/error event —
-        // the exact same signal StPageFlip itself waits on internally.
-        // No color/pixel guessing, no cross-object caching assumptions.
-        function watchLibraryImageLoad(timeoutMs) {
+        // constructor below to create its Page objects (every Page does
+        // so synchronously, right in its own constructor — and now that
+        // loadFromImages() gets the real page count from the very first
+        // call, padded with placeholders, that's not just 1 Image object
+        // anymore but the full 24, all constructed in this same tick), and
+        // listens directly on the *cover's own* object's real load/error
+        // event — the exact same signal StPageFlip itself waits on
+        // internally, filtered to the one image whose src actually
+        // matches the real cover (targetSrc) so a placeholder's near-
+        // instant decode can't resolve this early and undo the whole
+        // point of waiting.
+        function watchLibraryImageLoad(targetSrc, timeoutMs) {
           return new Promise(function (resolve) {
             var settled = false;
             function settle() { if (!settled) { settled = true; resolve(); } }
+            function onLoadOrError() { if (this.src === targetSrc) settle(); }
             var OrigImage = window.Image;
             window.Image = function () {
               var img = new OrigImage();
-              img.addEventListener('load', settle);
-              img.addEventListener('error', settle);
+              img.addEventListener('load', onLoadOrError);
+              img.addEventListener('error', onLoadOrError);
               return img;
             };
             window.Image.prototype = OrigImage.prototype;
@@ -885,7 +892,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(tick);
           });
         }
-        var imageReady = watchLibraryImageLoad(15000).then(function () { return nextFrames(4); });
+        var imageReady = watchLibraryImageLoad(result.images[0], 15000).then(function () { return nextFrames(4); });
         pageFlip = new PageFlip(bookEl, {
           width: Math.round(800 * dpr),
           height: Math.round((800 / result.pageAspect) * dpr),
