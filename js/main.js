@@ -668,23 +668,56 @@ document.addEventListener('DOMContentLoaded', function () {
     var pdfSlug = pathParts[pathParts.length - 1];
     if (pdfCategory !== 'editorial' || !pdfSlug) return;
 
-    var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + pdfCategory + '/' + encodeURIComponent(pdfSlug) + '?ref=' + GH_BRANCH;
-    fetch(apiUrl).then(function (res) {
-      if (!res.ok) throw new Error('GitHub API ' + res.status);
-      return res.json();
-    }).then(function (entries) {
-      var pdfEntry = entries.filter(function (e) { return e.type === 'file' && /\.pdf$/i.test(e.name); })[0];
-      if (!pdfEntry) return;
+    // Unlike discoverCategoryProjects (used on category pages), this
+    // fetch had no cache at all — every single visit to this project
+    // page, including repeat visits by the same person within the same
+    // session, spent one of GitHub's 60-per-hour unauthenticated API
+    // calls (that quota is per visitor IP, not shared site-wide, but a
+    // single person reloading/re-checking a page repeatedly can still
+    // burn through their own quota fast). Cached the same way and for
+    // the same window as discoverCategoryProjects, including the
+    // (far more common) "this project has no PDF" case, so it's not
+    // just re-fetched and discarded on every load either.
+    var pdfCacheKey = 'pdfcheck:' + pdfCategory + '/' + pdfSlug;
+    var cachedPdfUrl;
+    try {
+      var cachedPdf = JSON.parse(localStorage.getItem(pdfCacheKey) || 'null');
+      if (cachedPdf && (Date.now() - cachedPdf.at) < DISCOVER_CACHE_MS) cachedPdfUrl = cachedPdf.url;
+    } catch (e) { /* ignore bad cache */ }
+
+    function setupViewerFromUrl(url) {
+      if (!url) return;
       return Promise.all([loadPdfJs(), loadPageFlip()]).then(function (libs) {
-        initPdfViewer(libs[0], libs[1], pdfEntry.download_url);
+        initPdfViewer(libs[0], libs[1], url);
       });
-    }).catch(function (err) {
-      // Not necessarily worth logging — 404/network errors here are the
-      // normal case for every project that simply has no PDF — but do
-      // log anything past a plain "not found" so a genuine failure (e.g.
-      // the vendored libraries failing to load) doesn't vanish silently.
-      if (err && !/GitHub API 404/.test(err.message || '')) console.error('PDF viewer setup failed:', err);
-    });
+    }
+
+    if (cachedPdfUrl !== undefined) {
+      setupViewerFromUrl(cachedPdfUrl);
+    } else {
+      var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + pdfCategory + '/' + encodeURIComponent(pdfSlug) + '?ref=' + GH_BRANCH;
+      fetch(apiUrl).then(function (res) {
+        // A 404 here is the normal, expected case for every project that
+        // simply has no PDF (most of them) — cached as null right away
+        // rather than thrown into the catch below, which only sees a
+        // plain Error with no res.status left on it by that point and so
+        // could never write the cache entry this whole path exists for.
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error('GitHub API ' + res.status);
+        return res.json();
+      }).then(function (entries) {
+        var pdfEntry = entries && entries.filter(function (e) { return e.type === 'file' && /\.pdf$/i.test(e.name); })[0];
+        var url = pdfEntry ? pdfEntry.download_url : null;
+        try { localStorage.setItem(pdfCacheKey, JSON.stringify({ at: Date.now(), url: url })); } catch (e) { /* storage full/disabled */ }
+        return setupViewerFromUrl(url);
+      }).catch(function (err) {
+        // Genuine failures past a 404 (network errors, the vendored
+        // libraries failing to load, etc.) — not cached, so the next
+        // visit gets a fresh attempt instead of being stuck on a
+        // transient failure for the rest of the cache window.
+        console.error('PDF viewer setup failed:', err);
+      });
+    }
 
     // Both libraries are vendored locally (js/vendor/) rather than pulled
     // from a CDN — no runtime dependency on a third-party host. Resolved as
