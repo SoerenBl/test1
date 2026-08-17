@@ -903,71 +903,48 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__body .timeline__row { border-top-color: rgba(255,255,255,0.25); }
 
 /* ---------- Stacking full-screen panels (About) ----------
-   Each panel is full-viewport and position:sticky at the same top:0 —
-   later panels sit at a higher stacking order, so as you scroll past one
-   the next slides up from below and covers it, like turning a page. */
-
-/* scroll-snap-type on <html> is toggled dynamically by js/main.js, not
-   set statically here — see why below.
-   Two different scroll feels are wanted back to back: About→Awards should
-   auto-complete on a partial scroll (a crisp "cover" snap), but Awards→
-   footer needs to scroll naturally/proportionally — Awards has no trailing
-   spacer of its own any more (see .stack__panel below), so it releases
-   and flows straight into the footer with a normal, ordinary scroll.
-   A single static scroll-snap-type can't give both feels at once: with
-   only two reachable rest points on this page (Awards' own start, and the
-   footer's — which sits so close to the end of the document that its
-   nominal snap position is unreachable and gets coerced to max-scroll),
-   any snap-type active for the WHOLE page picks whichever of those two is
-   nearest after every scroll input — including the first tick off Awards'
-   start, which is already closer to the coerced footer point than back to
-   Awards. That teleports the view straight to the bottom in one jump
-   (confirmed in both engines). Dropping snapping for the whole page fixes
-   that jump but also kills the wanted About→Awards auto-complete, and
-   reintroduces the older problem in reverse if a snap target is kept on
-   the footer without one on Awards: mandatory snapping with nowhere to go
-   traps scrolling on Awards forever. So js/main.js now arms
-   scroll-snap-type:mandatory only while scrollY is still short of Awards'
-   start (where the About→Awards transition needs the assist), and
-   switches it off once Awards is reached (where natural, unassisted
-   scrolling is what's wanted for the rest of the page). */
+   Rebuilt from an earlier position:sticky "cover slides over the
+   previous panel" version, which relied on two entangled scroll
+   mechanisms at once: the outer page scroll (driven by sticky + a
+   dynamically toggled scroll-snap-type) *and* an inner overflow-y:auto
+   scrollbar on .stack__content so panels with more copy than fits in
+   one screen were still readable. Nested scroll regions like that are
+   exactly the kind of thing mobile WebKit handles unreliably -- the
+   whole string of reports (hard scroll lock, swipe stopping dead at the
+   panel boundary, cover rendering cropped) trace back to the hand-off
+   between those two contexts, not to any one of the individual fixes
+   layered on top of it.
+   This version drops both: each panel is normal, ordinary block-flow
+   content with min-height (not height) covering at least one screen and
+   growing taller on its own if the content needs more room, exactly the
+   same self-sizing pattern .page-hero--photo (Service) already uses
+   without issue. There's only one scroll context on the whole page,
+   same as everywhere else on the site. The remaining "About -> Awards
+   auto-completes on a scroll past the end" flourish is done in JS (see
+   the .stack IIFE in main.js) purely by nudging the *resting* scroll
+   position once a gesture has settled, never by touching native scroll
+   machinery -- so there's nothing left for a real device to get stuck
+   fighting. */
 
 .stack { position: relative; }
 .stack__panel {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
-  scroll-snap-align: start;
 }
-.stack__panel:nth-of-type(1) { z-index: 1; }
-.stack__panel:nth-of-type(2) { z-index: 2; }
-.stack__panel:nth-of-type(3) { z-index: 3; }
+@media (max-width: 760px) {
+  .stack__panel { min-height: 100svh; }
+}
 
 .stack__bg {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 100vh;
-  height: 100dvh;
+  inset: 0;
+  z-index: 0;
   will-change: transform;
 }
-/* dvh recalculates continuously as the mobile address bar shows/hides --
-   including mid-gesture, while a finger is still on the screen. That
-   keeps reflowing these panels' height (and so the page's total scroll
-   range) *during* an active swipe, which is what was still making swipe
-   scrolling feel like it randomly stopped working even after disarming
-   the CSS scroll-snap assist in js/main.js. svh is fixed at the browser
-   chrome's expanded size and never changes mid-scroll, trading a sliver
-   of unfilled space at the very bottom of the stack once the address bar
-   auto-hides for a scroll gesture that never gets reflowed out from
-   under itself. */
-@media (max-width: 760px) {
-  .stack__panel, .stack__bg { height: 100svh; }
-}
-.stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
 .stack__panel img {
   position: absolute;
@@ -1038,10 +1015,8 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .scroll-cue--up span:nth-child(3) { animation-delay: 0s; }
 
 .stack__content {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1054,7 +1029,10 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      Service/Contact sit under a solid nav that pushes content down by
      --nav-h (body.nav-pad); this page's nav floats over the photo
      instead, so --nav-h is added back in here to land at the same
-     spot regardless. */
+     spot regardless. Plain in-flow content now (see the .stack__panel
+     comment above) — this is what actually determines each panel's
+     rendered height, growing past min-height on its own if the title
+     and body need more than one screen. */
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   padding-bottom: clamp(50px, 8vh, 90px);
 }
@@ -1080,7 +1058,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
 @media (max-width: 760px) {
-  .stack__content { padding-top: calc(clamp(90px, 18vh, 140px) + var(--nav-h)); }
+  /* No + var(--nav-h) here (unlike the desktop rule and Service/Contact's
+     .page-hero--photo) — matches .project-hero__overlay's mobile spacing
+     instead, at the user's request, so the title sits noticeably higher
+     on this narrower layout than the extra nav-height offset gave it. */
+  .stack__content { padding-top: clamp(90px, 18vh, 140px); }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
      don't collide between lines. */

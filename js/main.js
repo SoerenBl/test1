@@ -1386,82 +1386,46 @@ document.addEventListener('DOMContentLoaded', function () {
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
 
-  // --- Stack pages (About/Awards): arm scroll-snap only for the
-  // About→Awards "cover" transition, disarm it once Awards is reached, so
-  // that transition still auto-completes on a partial scroll while the
-  // rest of the page (Awards→footer) scrolls naturally, same as anywhere
-  // else. See the CSS comment above .stack__panel for why a single static
-  // scroll-snap-type can't give both behaviours at once. ---
+  // --- Stack pages (About/Awards) ---
+  // Rebuilt from an earlier position:sticky version whose "cover slides
+  // over the previous panel" illusion needed a second, inner scroll
+  // context (.stack__content's own overflow-y:auto) for panels with more
+  // copy than one screen — see the CSS comment above .stack__panel for
+  // why that combination was the real root cause of the whole run of
+  // mobile scroll reports (hard lock, swipe stopping dead at the panel
+  // boundary, a cropped cover). The panels are now plain block-flow
+  // content (CSS handles the "grow past one screen if needed" part) and
+  // there's only the one, single, ordinary page scroll — same as
+  // everywhere else on the site. The one flourish worth keeping, "scroll
+  // to the end of About and one more scroll carries you onto Awards", is
+  // rebuilt here purely by nudging the *resting* scroll position once a
+  // gesture has fully settled — it never touches native scroll machinery
+  // itself, so there's nothing left for a real device to get stuck
+  // fighting the way scroll-snap-type or position:sticky could.
   (function () {
     var stackEl = document.querySelector('.stack');
     if (!stackEl) return;
     var firstPanel = stackEl.querySelector(':scope > .stack__panel');
     if (!firstPanel) return;
-    // Mobile-only: the address bar showing/hiding mid-scroll resizes the
-    // panel's 100dvh height (and so armedThreshold) *while* a touch-scroll
-    // gesture is still in flight. WebKit/Blink can lose track of a valid
-    // snap point when that happens under an active "mandatory" snap-type
-    // and lock the page's scroll entirely -- no wheel/touch/swipe input
-    // moves it afterwards, in either direction, until reload. Desktop
-    // wheel-scrolling never hits that path (no dvh churn mid-gesture), so
-    // the snap-assist stays there; on mobile the arrow buttons below
-    // already cover the "jump to the next panel" case, so plain
-    // unassisted swipe-scrolling is what's used instead.
-    var narrowMq = window.matchMedia('(max-width: 760px)');
-    var armedThreshold = 0;
-    function measureThreshold() { armedThreshold = firstPanel.offsetHeight; }
-    measureThreshold();
-    window.addEventListener('resize', measureThreshold);
-    var snapTicking = false;
-    function updateStackSnap() {
-      var armed = !narrowMq.matches && window.scrollY < armedThreshold - 2;
-      document.documentElement.style.scrollSnapType = armed ? 'y mandatory' : '';
-      snapTicking = false;
-    }
-    window.addEventListener('scroll', function () {
-      if (!snapTicking) {
-        window.requestAnimationFrame(updateStackSnap);
-        snapTicking = true;
-      }
-    }, { passive: true });
-    updateStackSnap();
-    if (narrowMq.addEventListener) narrowMq.addEventListener('change', updateStackSnap);
 
-    // Reported on real mobile devices: manual swipe scrolling didn't move
-    // the page at all until the down-arrow button had been tapped once —
-    // after that, swiping worked, but the page could also be left stuck
-    // mid-transition (title overlapping the content below it, matching
-    // an interrupted programmatic scroll). Both point the same way: a
-    // stacked position:sticky layout is one of the specific cases WebKit
-    // is known to sometimes not hand touch-scroll control over to
-    // correctly on the very first gesture after a fresh page load (no
-    // repro available in this Chromium-only sandbox — WebKit-specific).
-    // A zero-distance scroll nudge shortly after load is the standard
-    // workaround: it forces the engine to actually initialize its scroll
-    // machinery on this page before the visitor's first real touch, at a
-    // moment with nothing on screen to visibly jump.
-    if (narrowMq.matches) {
-      setTimeout(function () {
-        if (window.scrollY > 1) return; // only nudge a genuinely fresh load at the top
-        window.scrollTo({ top: 1, behavior: 'instant' });
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }, 50);
-    }
+    // Document-Y where panel 1 ends and panel 2 begins. Re-measured on
+    // resize since panel 1's own height is now content-driven (can be
+    // taller than one screen) rather than a fixed viewport unit.
+    var boundaryY = 0;
+    function measureBoundary() { boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight; }
+    measureBoundary();
+    window.addEventListener('resize', measureBoundary);
 
-    // Turning scroll-snap off on mobile (above) fixed the hard scroll
-    // lock, but a follow-up report showed a *different* WebKit quirk in
-    // the same spot: touch-driven scroll momentum can get fully absorbed
-    // right at the handoff between two stacked position:sticky panels —
-    // manually swiping stops dead exactly at the About/Awards boundary
-    // and no further swipe/wipe carries it across, even though the
-    // arrow button (a plain, non-gesture scrollTo) crosses it instantly.
-    // Rebuilding the old "any partial scroll completes the transition"
-    // feel in JS instead of CSS sidesteps that: this only ever fires
-    // once a scroll has fully *settled* (150ms of no new scroll events),
-    // never while a touch is still moving, so — unlike scroll-snap-type
-    // being armed mid-gesture — there's no window for it to fight an
-    // in-progress native scroll, only to nudge the rest of the way once
-    // the visitor's own gesture has already stopped short of the edge.
+    // The "dead zone" is the last viewport-height's worth of panel 1's
+    // own range — i.e. exactly the part where its content has already
+    // scrolled out the top and Awards is starting to peek in from the
+    // bottom. Settling inside it completes the move onto whichever panel
+    // the scroll was already heading toward. For a short panel 1 (fits
+    // in one screen, the common case) the dead zone covers its *entire*
+    // range, so any partial scroll anywhere in it auto-completes —
+    // matching the original design's "any partial scroll" feel exactly
+    // in that case, and only requiring "scroll to the actual end" once
+    // panel 1 genuinely has more than one screen of content.
     var settleTimer = null;
     var prevScrollY = window.scrollY;
     var scrollDir = 0;
@@ -1469,33 +1433,26 @@ document.addEventListener('DOMContentLoaded', function () {
       var y = window.scrollY;
       if (y !== prevScrollY) scrollDir = y > prevScrollY ? 1 : -1;
       prevScrollY = y;
-      if (!narrowMq.matches) return;
       clearTimeout(settleTimer);
       settleTimer = setTimeout(function () {
         var yy = window.scrollY;
-        if (yy > 4 && yy < armedThreshold - 4) {
-          window.scrollTo({ top: scrollDir >= 0 ? armedThreshold : 0, behavior: 'instant' });
+        var zoneStart = boundaryY - window.innerHeight;
+        if (yy > zoneStart + 4 && yy < boundaryY - 4) {
+          window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'instant' });
         }
       }, 150);
     }, { passive: true });
 
-    // behavior:'smooth' here also risked being that same stuck-mid-
-    // transition state: if a real touch interrupts an in-flight
-    // programmatic smooth scroll (easy to do by accident right after
-    // tapping the arrow), WebKit can leave the sticky panel parked at
-    // whatever midpoint it had reached instead of either finishing or
-    // cancelling cleanly. An instant jump has no such window on mobile;
-    // desktop (where this wasn't reported) keeps the smooth animation.
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {
-        window.scrollTo({ top: firstPanel.offsetHeight, behavior: narrowMq.matches ? 'instant' : 'smooth' });
+        window.scrollTo({ top: boundaryY, behavior: 'smooth' });
       });
     }
     var scrollCueBtnUp = document.getElementById('scrollCueBtnUp');
     if (scrollCueBtnUp) {
       scrollCueBtnUp.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: narrowMq.matches ? 'instant' : 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
   })();
