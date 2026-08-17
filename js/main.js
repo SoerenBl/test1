@@ -1378,13 +1378,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // far as the About section. Checked as a separate candidate rather
   // than folded into getContentAfterHero(), since which one is actually
   // on screen (if either) depends on how far scrolled.
-  function getOverlapCandidates() {
-    var candidates = [];
-    var pdfHeading = document.querySelector('.pdfv__heading');
-    if (pdfHeading) candidates.push(pdfHeading);
+  function getOverlapSections() {
+    var sections = [];
+    var pdfSection = document.querySelector('.pdfv-section');
+    if (pdfSection) sections.push(pdfSection);
     var afterHero = getContentAfterHero();
-    if (afterHero) candidates.push(afterHero.querySelector('h2') || afterHero);
-    return candidates;
+    if (afterHero) sections.push(afterHero);
+    return sections;
   }
   var projectHeroNav = document.querySelector('.nav__mark');
   // Distance over which the big overlay title docks into the nav bar — a
@@ -1566,24 +1566,37 @@ document.addEventListener('DOMContentLoaded', function () {
           // The one thing a parked position:fixed title can't do on its
           // own is get out of the way of content scrolling up underneath
           // it, so this checks for it directly every frame while docked
-          // — a couple of read-only getBoundingClientRect() calls, cheap
-          // next to the per-element work already happening above in this
-          // same function. Candidates are resolved lazily (not cached at
-          // setup), since the PDF viewer section one of them lives in
-          // isn't in the DOM yet until its own async fetch resolves.
-          // Checked against the actual headings, not their containing
-          // sections — a section's own top edge includes its top padding
-          // (empty space), which would fade the title the moment that
-          // padding alone reaches the dock zone, well before any real
-          // text does. And against the title's own current rendered box
-          // (not a re-derived estimate from natural size × dock scale,
-          // which doesn't hold for every title — a longer one can wrap
+          // — a couple of read-only getBoundingClientRect() calls per
+          // section, cheap next to the per-element work already
+          // happening above in this same function. Sections are resolved
+          // lazily (not cached at setup), since the PDF viewer section
+          // one of them lives in isn't in the DOM yet until its own
+          // async fetch resolves.
+          //
+          // Checked against a section's *content* range (its own top
+          // edge plus its own padding-top, through to its bottom), not
+          // just its first heading — an earlier version only checked the
+          // first heading (e.g. "Über das Projekt") and un-faded the
+          // title again as soon as that heading scrolled past, even
+          // though later content in the very same section (a Kategorie/
+          // Land/Jahr list, further paragraphs) could still be sitting
+          // right under it. Skipping the section's own padding-top
+          // specifically (rather than using its raw top edge) is what
+          // avoids the *opposite* mistake: without that, the title would
+          // fade the moment that top padding — empty space, no visible
+          // text — alone reached the dock zone, well before anything
+          // real did. And against the title's own current rendered box,
+          // not a re-derived estimate from natural size × dock scale
+          // (which doesn't hold for every title — a longer one can wrap
           // to a different number of lines at the docked size than at
-          // full size); opacity doesn't affect layout, so this stays
-          // accurate even while already faded out.
-          var dockBottom = projectHeroTitleEl.getBoundingClientRect().bottom + 8;
-          var overlapping = getOverlapCandidates().some(function (el) {
-            return el.getBoundingClientRect().top < dockBottom;
+          // full size); opacity doesn't affect layout, so reading it
+          // directly stays accurate even while already faded out.
+          var titleRect = projectHeroTitleEl.getBoundingClientRect();
+          var dockBottom = titleRect.bottom + 8;
+          var overlapping = getOverlapSections().some(function (sec) {
+            var rect = sec.getBoundingClientRect();
+            var contentTop = rect.top + (parseFloat(getComputedStyle(sec).paddingTop) || 0);
+            return contentTop < dockBottom && rect.bottom > titleRect.top;
           });
           projectHeroTitleEl.style.opacity = overlapping ? '0' : '';
           projectHeroTitleEl.style.pointerEvents = overlapping ? 'none' : '';

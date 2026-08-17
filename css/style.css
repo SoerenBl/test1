@@ -1261,6 +1261,15 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   gap: 8px;
 }
 .contact-list li.row-detail > span:last-child { color: var(--color-text-muted); max-width: 46ch; }
+/* The label (Material, Fertigungstechniken, Besonderheiten, …) sits
+   directly above its own value in this stacked layout, with nothing
+   else to set it apart from being read as just the first line of body
+   text — bold and a touch larger marks it as the heading it is,
+   same family/color as everything else in this list. */
+.contact-list li.row-detail > span:not(:last-child) {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
 .contact-list li.row-detail ul {
   list-style: disc;
   padding-left: 1.2em;
