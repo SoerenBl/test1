@@ -1407,18 +1407,45 @@ body.lightbox-open { overflow: hidden; }
    false) specifically so those two click areas never overlap. */
 .pdfv-section {
   position: relative;
-  height: 100vh;
-  height: 100dvh;
   background: var(--color-bg);
   overflow: hidden;
+  /* Content-hugging, not a forced 100dvh slide — the book used to sit
+     centred in a full-viewport box regardless of its own size, which read
+     as "far from the hero photo above" and "far from the page counter
+     below" (pinned to the section's bottom edge, not the book's). Sizing
+     to content and keeping the counter in normal flow right after the
+     book fixes both at once, on any breakpoint. */
+  padding: 20px 0 32px;
 }
 .pdfv {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pdfv__heading {
+  margin: 0 0 18px;
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  text-align: center;
+}
+/* Hugs the book's own size (main.js sizes .pdfv__book-wrap directly,
+   against the viewport — see sizeBook()'s comment — not against this
+   element), so there's never dead space between the book and the
+   counter below it, whatever the book's computed aspect ends up being.
+   Only while still loading does it need an explicit size of its own —
+   .pdfv__book-wrap has no size yet at that point, so without one the
+   loading spinner below would collapse to nothing and never appear. */
+.pdfv__stage {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.pdfv__stage.is-loading { min-height: min(46vh, 420px); }
 .pdfv__zone {
   position: absolute;
   top: 0;
@@ -1430,6 +1457,26 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__zone--prev { left: 0; }
 .pdfv__zone--next { right: 0; }
 .pdfv__zone[data-disabled="true"] { cursor: default; }
+
+.pdfv__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.pdfv__loader::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--color-accent);
+  animation: pdfv-spin 0.85s linear infinite;
+}
+@keyframes pdfv-spin { to { transform: rotate(360deg); } }
 
 /* .pdfv__book (StPageFlip's own mount point) always stays sized for a
    full two-page spread — that's what StPageFlip's internal page-pairing
@@ -1521,11 +1568,7 @@ body.lightbox-open { overflow: hidden; }
 .pdfv__zone--next:hover .pdfv__arrow--next { opacity: 0.85; }
 
 .pdfv__count {
-  position: absolute;
-  left: 50%;
-  bottom: clamp(18px, 4vh, 36px);
-  transform: translateX(-50%);
-  z-index: 4;
+  margin-top: 14px;
   color: var(--color-text-muted);
   font-family: var(--font-heading);
   font-size: 0.78rem;

@@ -720,15 +720,24 @@ document.addEventListener('DOMContentLoaded', function () {
       section.className = 'section--flush pdfv-section';
       section.innerHTML =
         '<div class="pdfv">' +
-          '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
-          '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
-          '<div class="pdfv__book-wrap"><div class="pdfv__book-shift"><div class="pdfv__book"></div></div></div>' +
-          '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
-          '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
+          '<h2 class="pdfv__heading">' +
+            '<span data-lang="de">Wirf einen Blick hinein!</span>' +
+            '<span data-lang="en">Take a look!</span>' +
+          '</h2>' +
+          '<div class="pdfv__stage is-loading">' +
+            '<div class="pdfv__zone pdfv__zone--prev" data-disabled="true"></div>' +
+            '<div class="pdfv__zone pdfv__zone--next" data-disabled="true"></div>' +
+            '<div class="pdfv__loader" aria-hidden="true"></div>' +
+            '<div class="pdfv__book-wrap"><div class="pdfv__book-shift"><div class="pdfv__book"></div></div></div>' +
+            '<div class="pdfv__arrow pdfv__arrow--prev"></div>' +
+            '<div class="pdfv__arrow pdfv__arrow--next"></div>' +
+          '</div>' +
           '<div class="pdfv__count"></div>' +
         '</div>';
       heroSection.insertAdjacentElement('afterend', section);
 
+      var stageEl = section.querySelector('.pdfv__stage');
+      var loaderEl = section.querySelector('.pdfv__loader');
       var zonePrev = section.querySelector('.pdfv__zone--prev');
       var zoneNext = section.querySelector('.pdfv__zone--next');
       var bookWrap = section.querySelector('.pdfv__book-wrap');
@@ -830,6 +839,13 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('flip', updateUi);
         pageFlip.on('init', updateUi);
         updateUi();
+        var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
+        // The cover's a data: URL (already decoded in memory, from the
+        // canvas render above), not a network request, so it's safe to
+        // consider the spinner's job done the moment we hand it over —
+        // no meaningful decode delay left to cover for.
+        if (loaderEl) loaderEl.remove();
+        stageEl.classList.remove('is-loading');
         // Only the cover image is loaded so far — the viewer is visible
         // and already navigable as soon as this first page has rendered,
         // instead of waiting for all of them. The rest render now, in the
@@ -848,34 +864,26 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('PDF viewer: failed to load remaining pages:', err);
           });
         }
-        // ResizeObserver on the section itself, not a window 'resize'
-        // listener — on mobile Safari the section is sized with 100dvh,
-        // which shrinks/grows as the address bar collapses or reappears
-        // during scroll, but that alone does not reliably fire a window
-        // 'resize' event (the layout viewport window.innerHeight reads
-        // off doesn't change, only the dynamic one CSS is tracking does).
-        // Without this, the book stayed sized to whatever viewport
-        // happened to be current the one time it was first measured,
-        // fine on desktop (no dynamic toolbar) but silently wrong on
-        // phones — undersized in what became a taller box, or clipped in
-        // a shorter one, depending on scroll state when it first ran.
-        if (window.ResizeObserver) {
-          new ResizeObserver(function () { sizeBook(result.pageAspect); updateUi(); }).observe(section);
-        } else {
-          window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
-        }
+        // .pdfv__stage now hugs the book's own size (see the CSS comment
+        // on .pdfv__stage) instead of claiming a fixed chunk of the
+        // viewport, so it can no longer double as "the available area" for
+        // sizeBook to measure — that's circular (the book's size would
+        // depend on a box whose own size depends on the book). sizeBook
+        // uses visualViewport.height / window.innerHeight for that instead
+        // (see its own comment). visualViewport's own 'resize' event is
+        // the most reliable signal there is for mobile Safari's collapsing
+        // address bar specifically — it's what dvh itself is defined
+        // against — so that's the primary trigger; window 'resize' covers
+        // real resizes/rotations on everything else.
+        window.addEventListener('resize', resettle);
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', resettle);
         // Real-device reports (book renders tiny on first paint, but full
         // size again as soon as the visitor navigates a page or rotates)
-        // point at a specific iOS Safari quirk: 100dvh can briefly resolve
-        // against the wrong viewport on first paint and only self-correct
-        // once a genuine interaction happens — and critically, that
-        // self-correction doesn't necessarily change what
-        // getBoundingClientRect()/ResizeObserver report in the meantime,
-        // so the fix above alone doesn't catch it. Belt and braces: force
-        // one fresh re-measure shortly after load regardless of whether
-        // anything reports having changed, plus on the interactions most
-        // likely to coincide with the browser settling the real viewport.
-        var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
+        // showed even that isn't fully reliable by itself on iOS Safari —
+        // belt and braces: force one fresh re-measure shortly after load
+        // regardless of whether anything reports having changed, plus on
+        // the interactions most likely to coincide with the browser
+        // settling the real viewport.
         ['scroll', 'orientationchange', 'touchend', 'pageshow'].forEach(function (evt) {
           window.addEventListener(evt, function once() {
             window.removeEventListener(evt, once);
@@ -950,14 +958,23 @@ document.addEventListener('DOMContentLoaded', function () {
       // size the *visible* window onto it (.pdfv__book-wrap) separately.
       var frameW = 0, frameH = 0;
       function sizeBook(pageAspect) {
-        // Measured against the section's own rendered box, not
-        // window.innerWidth/innerHeight — the section is sized with CSS
-        // 100dvh, which mobile Safari's collapsing address bar moves
-        // independently of window.innerHeight (see the ResizeObserver
-        // comment above). Reading the real box keeps this correct no
-        // matter which viewport unit ends up bigger at any given moment.
+        // Width comes from the section's own rendered box — safe to
+        // measure directly, width isn't affected by mobile Safari's
+        // address bar. Height can't be measured the same way anymore:
+        // .pdfv-section and .pdfv__stage both now hug their own content
+        // (see their CSS) rather than claiming a fixed slice of the
+        // screen, so there's no longer an independent box to read a
+        // height off of — the book's size would depend on a box whose own
+        // size depends on the book. visualViewport.height is the
+        // intentional stand-in: it's the one API purpose-built to track
+        // exactly what dvh tracks (the collapsing address bar), so it's
+        // right at least as often as reading a dvh-sized box would've
+        // been, and its own 'resize' event plus the interaction-based
+        // resettle listeners below correct anything it gets wrong at the
+        // moment this first runs.
         var rect = section.getBoundingClientRect();
-        var maxW = rect.width * 0.86, maxH = rect.height * 0.82;
+        var vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        var maxW = rect.width * 0.86, maxH = vh * 0.72;
         frameW = Math.min(maxW, maxH * 2 * pageAspect);
         frameH = frameW / (2 * pageAspect);
         // bookShift is sized in real (on-screen) CSS pixels — everything
