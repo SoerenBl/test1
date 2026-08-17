@@ -765,20 +765,25 @@ document.addEventListener('DOMContentLoaded', function () {
         bookShift.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
       }
 
+      var pdfDoc = null;
       pdfjsLib.getDocument(url).promise.then(function (doc) {
         numPages = doc.numPages;
-        // Render every page once, up front, to its own image — StPageFlip
-        // draws pages from plain image URLs, not from a PDF renderer of
-        // its own. A page's pixel size is read from the PDF's own first
-        // page, so the mockup's proportions always match the uploaded
-        // format instead of a fixed ratio.
-        var pages = [];
-        for (var i = 1; i <= doc.numPages; i++) pages.push(i);
+        pdfDoc = doc;
+        // Only the cover (page 1) is rendered before the viewer appears —
+        // rendering all of them up front (the previous approach) meant a
+        // 24-page booklet stayed completely invisible until every single
+        // page had been decoded, rasterised to a canvas and re-encoded as
+        // a JPEG, which on a phone's CPU was slow enough to read as "does
+        // this even work". The rest load in the background right below,
+        // via StPageFlip's own updateFromImages once they're ready. A
+        // page's pixel size is read from the PDF's own first page, so the
+        // mockup's proportions always match the uploaded format instead
+        // of a fixed ratio.
         return doc.getPage(1).then(function (firstPage) {
           var baseViewport = firstPage.getViewport({ scale: 1 });
           var pageAspect = baseViewport.width / baseViewport.height;
-          return Promise.all(pages.map(function (n) { return renderPageToImage(doc, n); })).then(function (images) {
-            return { images: images, pageAspect: pageAspect };
+          return renderPageToImage(doc, 1).then(function (firstImage) {
+            return { images: [firstImage], pageAspect: pageAspect };
           });
         });
       }).then(function (result) {
@@ -789,10 +794,16 @@ document.addEventListener('DOMContentLoaded', function () {
           size: 'stretch',
           // Bounds are in the same (dpr-inflated) CSS-pixel space as
           // .pdfv__book's own size now, since the library reads its block
-          // size straight off the DOM — see the dpr comment above.
-          minWidth: Math.round(260 * dpr),
+          // size straight off the DOM — see the dpr comment above. Kept
+          // small on purpose (was 260) — with usePortrait:false below this
+          // no longer feeds the library's own single/spread decision, it's
+          // only a floor against a literally-zero box, and a small value
+          // avoids it fighting our own width via a "min-width" CSS rule
+          // the library sets on .pdfv__book itself (double this value,
+          // since usePortrait:false makes it use its "2x" multiplier).
+          minWidth: Math.round(50 * dpr),
           maxWidth: Math.round(900 * dpr),
-          minHeight: Math.round(260 * dpr),
+          minHeight: Math.round(50 * dpr),
           maxHeight: Math.round(1200 * dpr),
           autoSize: false,
           showCover: true,
@@ -800,12 +811,43 @@ document.addEventListener('DOMContentLoaded', function () {
           drawShadow: true,
           maxShadowOpacity: 0.5,
           flippingTime: 700,
-          mobileScrollSupport: true
+          mobileScrollSupport: true,
+          // StPageFlip decides for itself whether to show a single page or
+          // a spread, based purely on .pdfv__book's own rendered width
+          // (single-page mode below 2x its minWidth) — completely separate
+          // from, and blind to, our own isSingle logic in updateUi() below
+          // (which is driven by which PAGE is current: only the literal
+          // cover/back-cover should ever be single). On a landscape phone
+          // .pdfv__book's own width regularly fell under that internal
+          // threshold, so the library silently rendered interior pages as
+          // a single page too — visually, one page of what should've been
+          // a spread, with the other half just blank. usePortrait:false
+          // turns that whole internal decision off, leaving our own
+          // isSingle as the one and only authority on single vs. spread.
+          usePortrait: false
         });
         pageFlip.loadFromImages(result.images);
         pageFlip.on('flip', updateUi);
         pageFlip.on('init', updateUi);
         updateUi();
+        // Only the cover image is loaded so far — the viewer is visible
+        // and already navigable as soon as this first page has rendered,
+        // instead of waiting for all of them. The rest render now, in the
+        // background, and get swapped in via updateFromImages (StPageFlip's
+        // own API for this — it preserves the current page position)
+        // without disturbing anything the visitor's already doing;
+        // zoneNext/arrowNext stay correctly disabled until then since
+        // pageFlip's own getPageCount() is still just 1.
+        var pages = [];
+        for (var i = 2; i <= numPages; i++) pages.push(i);
+        if (pages.length) {
+          Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
+            pageFlip.updateFromImages(result.images.concat(restImages));
+            updateUi();
+          }).catch(function (err) {
+            console.error('PDF viewer: failed to load remaining pages:', err);
+          });
+        }
         // ResizeObserver on the section itself, not a window 'resize'
         // listener — on mobile Safari the section is sized with 100dvh,
         // which shrinks/grows as the address bar collapses or reappears
@@ -884,7 +926,13 @@ document.addEventListener('DOMContentLoaded', function () {
       function renderPageToImage(doc, n) {
         return doc.getPage(n).then(function (page) {
           var baseViewport = page.getViewport({ scale: 1 });
-          var targetWidth = 1400 * dpr;
+          // The book itself never displays wider than ~900px (maxWidth
+          // above) even on desktop, so 1400 (2800 actual px at dpr 2) was
+          // rendering roughly 3x more pixels than the page ever shows —
+          // most of the per-page cost (decode + canvas paint + JPEG
+          // encode) for no visible sharpness gain. 1000 (2000px at dpr 2)
+          // still comfortably covers it with margin.
+          var targetWidth = 1000 * dpr;
           var viewport = page.getViewport({ scale: targetWidth / baseViewport.width });
           var canvas = document.createElement('canvas');
           canvas.width = viewport.width;
