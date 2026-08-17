@@ -707,6 +707,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initPdfViewer(pdfjsLib, PageFlip, url) {
+      // Guards against ever ending up with two stacked 100dvh sections —
+      // each 100vh tall, each showing one small centered page with huge
+      // empty space above/below it, and pushing everything after it
+      // (including the footer) far down the page. Shouldn't normally be
+      // possible (this only runs once per successful fetch), but iOS
+      // Safari's aggressive back/forward cache can occasionally leave a
+      // page's script state resumed in ways that re-trigger setup code;
+      // cheap enough to guard against unconditionally.
+      if (document.querySelector('.pdfv-section')) return;
       var section = document.createElement('section');
       section.className = 'section--flush pdfv-section';
       section.innerHTML =
