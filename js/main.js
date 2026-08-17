@@ -1626,8 +1626,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Small fixed margin right at the true boundary, not the whole
     // panel-1 range — a touch-scroll's own first-frame jump already
     // covers 100-200px, so a full-range zone here made any small swipe
-    // auto-complete instantly (reported previously).
-    var MOBILE_DEAD_ZONE_PX = 100;
+    // auto-complete instantly (reported previously). 100px (tried first)
+    // then turned out too narrow the other way: reported as not doing
+    // anything at all, and a realistic swipe-with-momentum test (several
+    // wheel ticks decelerating, mirroring an actual finger swipe) landed
+    // ~120px past the boundary -- comfortably outside a 100px zone,
+    // meaning real momentum could clear it in a single swipe and this
+    // never got a chance to fire. Widened, still nowhere near the whole
+    // panel range (typically 700px+), so a small deliberate scroll from
+    // well within About still won't auto-complete.
+    var MOBILE_DEAD_ZONE_PX = 240;
     var settleTimer = null;
     var prevScrollY = window.scrollY;
     var scrollDir = 0;

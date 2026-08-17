@@ -133,19 +133,6 @@ p { margin: 0 0 1em; }
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  /* Above .menu-scrim (290) and .menu-panel (300) — needed everywhere
-     else so the floating nav stays above ordinary page content. While
-     the menu is open, though, .nav__mark and .nav__right (see their own
-     is-menu-open rules) are both hidden, so nothing inside .nav is
-     meant to be interactive any more — but .nav itself, being fixed and
-     spanning the full top strip at a z-index above the panel, was still
-     silently intercepting clicks meant for .menu-panel__close sitting
-     in that same corner underneath it (confirmed via elementFromPoint:
-     it resolved to .nav__inner, not the close button). Was previously
-     masked by the nav's own hamburger-turned-X button winning that same
-     click anyway; hiding it surfaced the block on the *actual* close
-     button. Disabled below so clicks pass straight through to whatever
-     the (fully visible) panel actually has there. */
   z-index: 310;
   --nav-fg: #fff;
   --nav-fg-muted: rgba(255,255,255,0.78);
@@ -154,7 +141,23 @@ p { margin: 0 0 1em; }
   border: none;
   color: var(--nav-fg);
 }
-body.is-menu-open .nav { pointer-events: none; }
+/* Desktop only. While the menu is open, .nav__mark and .nav__right (see
+   their own is-menu-open rules further down) are both hidden there — the
+   panel has its own dedicated close (X) button, .menu-panel__close — so
+   .nav itself, being fixed and spanning the full top strip at a z-index
+   above the panel, was still silently intercepting clicks meant for that
+   close button sitting in the same corner underneath it (confirmed via
+   elementFromPoint: it resolved to .nav__inner, not the close button).
+   Disabled here so clicks pass straight through to the panel's own X.
+   Mobile does NOT get this: .menu-panel__close is deliberately hidden
+   there (redundant with the hamburger, which morphs into an X in place)
+   -- so the hamburger-turned-X inside .nav__right, un-hidden by scoping
+   this rule to desktop, stays the *only* close control mobile has.
+   Disabling pointer-events sitewide had silently taken that away too,
+   leaving mobile with no way to close the panel at all. */
+@media (min-width: 761px) {
+  body.is-menu-open .nav { pointer-events: none; }
+}
 /* Mobile only: nav slides away on scroll-down, back on scroll-up (see
    js/main.js). Desktop keeps it always visible. */
 @media (max-width: 760px) {
@@ -335,13 +338,19 @@ body.is-menu-open .project-hero__overlay {
 }
 
 .nav__right { display: flex; align-items: center; gap: 20px; transition: opacity 0.2s ease; }
-/* .menu-panel has its own dedicated close (X) button, so hiding the
-   nav's own menu button too (along with the language toggle) while
-   open isn't a usability regression -- both otherwise kept bleeding
-   through the panel's own transparency, cluttering it. */
-body.is-menu-open .nav__right {
-  opacity: 0;
-  pointer-events: none;
+/* Desktop only -- see the matching .nav rule above for why. .menu-panel
+   has its own dedicated close (X) button there, so hiding the nav's own
+   menu button too (along with the language toggle) while open isn't a
+   usability regression on desktop, and stops both bleeding through the
+   panel's own transparency. Mobile has no such second close button: the
+   hamburger inside here IS the close control (it morphs into an X), so
+   hiding it left mobile with literally nothing to tap to get out of the
+   open panel -- reported as "no X, doesn't close". */
+@media (min-width: 761px) {
+  body.is-menu-open .nav__right {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 /* iOS-style switch: a pill track with a round thumb sliding between DE
