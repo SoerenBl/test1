@@ -945,11 +945,53 @@ document.addEventListener('DOMContentLoaded', function () {
         // worth less than one that's actually ready to use — this was a
         // deliberate call after the first version worked but couldn't be
         // flipped through immediately).
+        // updateFromImages() below doesn't just hand StPageFlip our
+        // already-rendered data URLs to display — it throws away its
+        // current internal Page objects and builds brand new ones (see
+        // the vendored source: class n's load() does `new Image; e.src=t`
+        // for every entry, cover included) that each stay in the
+        // library's own "not loaded yet" placeholder state until *their*
+        // load event fires. Watching our own renderPageToImage() finish
+        // (as this used to) only confirms we've produced the JPEGs — it
+        // says nothing about whether the library has actually finished
+        // loading them into its own fresh Image objects. Without waiting
+        // for that too, allPagesLoaded could flip true (and the spinner
+        // disappear) while flipping to page 2 still showed the library's
+        // own built-in loading spinner for a moment: "the cover's there,
+        // but you still have to wait before you can actually turn the
+        // page". Same watch-window.Image trick as watchLibraryImageLoad
+        // above, just collecting every image constructed in the tick
+        // instead of filtering to one.
+        function watchAllLibraryImagesLoad(timeoutMs) {
+          return new Promise(function (resolve) {
+            var remaining = 0, anyCreated = false, settled = false;
+            function settle() { if (!settled) { settled = true; resolve(); } }
+            function onOne() { if (--remaining <= 0) settle(); }
+            var OrigImage = window.Image;
+            window.Image = function () {
+              var img = new OrigImage();
+              anyCreated = true;
+              remaining++;
+              img.addEventListener('load', onOne);
+              img.addEventListener('error', onOne);
+              return img;
+            };
+            window.Image.prototype = OrigImage.prototype;
+            setTimeout(function () {
+              window.Image = OrigImage;
+              if (!anyCreated) settle();
+            }, 0);
+            setTimeout(settle, timeoutMs);
+          });
+        }
         var pages = [];
         for (var i = 2; i <= numPages; i++) pages.push(i);
         var allImagesReady = pages.length
           ? Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
+              var libraryImagesReady = watchAllLibraryImagesLoad(15000);
               pageFlip.updateFromImages([result.images[0]].concat(restImages));
+              return libraryImagesReady.then(function () { return nextFrames(4); });
+            }).then(function () {
               allPagesLoaded = true;
               updateUi();
             }).catch(function (err) {
