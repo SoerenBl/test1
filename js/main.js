@@ -770,6 +770,15 @@ document.addEventListener('DOMContentLoaded', function () {
       bookEl.style.transform = 'scale(' + (1 / dpr) + ')';
 
       var pageFlip = null, numPages = 0, isZoomed = false, currentShift = 0;
+      // The initial loadFromImages() call is padded with placeholder
+      // images out to the real page count (see the comment where it's
+      // built) so StPageFlip's page count — and with it, which half of
+      // the canvas it draws a lone cover/back-cover into — never changes
+      // once the real pages load in behind it. That means pageFlip's own
+      // getPageCount()/getCurrentPageIndex() can no longer tell updateUi()
+      // whether forward navigation would actually land on real content or
+      // a still-blank placeholder — this flag is what does instead.
+      var allPagesLoaded = false;
       function applyBookTransform() {
         bookShift.style.transform = 'translateX(' + currentShift + '%) scale(' + (isZoomed ? 2.1 : 1) + ')';
       }
@@ -792,7 +801,23 @@ document.addEventListener('DOMContentLoaded', function () {
           var baseViewport = firstPage.getViewport({ scale: 1 });
           var pageAspect = baseViewport.width / baseViewport.height;
           return renderPageToImage(doc, 1).then(function (firstImage) {
-            return { images: [firstImage], pageAspect: pageAspect };
+            // StPageFlip positions a lone cover into a *different* half
+            // of its canvas depending on whether it knows about 1 page
+            // or the full collection — confirmed directly by sampling
+            // canvas pixels: with only the cover loaded, it drew into the
+            // half our fixed shift clips OUT of view; once the real
+            // 24-page set replaced it, it redrew into the correct half.
+            // Our own shift/clip math has no way to know which mode the
+            // library is in, so instead of starting the book with a
+            // *different* page count than it'll end up with (1, then 24),
+            // it starts at the real count from this very first call —
+            // padded with cheap 1x1 placeholders for the pages still
+            // rendering — so that positioning decision never needs to
+            // change out from under us at all.
+            var blank = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+            var images = [firstImage];
+            for (var p = 1; p < doc.numPages; p++) images.push(blank);
+            return { images: images, pageAspect: pageAspect };
           });
         });
       }).then(function (result) {
@@ -831,7 +856,23 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(settle, timeoutMs);
           });
         }
-        var imageReady = watchLibraryImageLoad(15000);
+        // The image's load event firing doesn't mean StPageFlip has
+        // actually drawn it yet — that still happens on its own next
+        // render pass. Diagnosed directly: right as the spinner was
+        // removed on imageReady alone, the canvas sampled as completely
+        // untouched (not even StPageFlip's own placeholder), painting
+        // only becoming visible ~1-1.5s later under a throttled CPU —
+        // which is exactly what a "the cover disappears, then reappears
+        // by itself a few seconds later" report looks like from the
+        // outside. A few animation frames of margin after the image
+        // loads is enough to let that render pass actually happen first.
+        function nextFrames(n) {
+          return new Promise(function (resolve) {
+            function tick() { if (--n <= 0) resolve(); else requestAnimationFrame(tick); }
+            requestAnimationFrame(tick);
+          });
+        }
+        var imageReady = watchLibraryImageLoad(15000).then(function () { return nextFrames(4); });
         pageFlip = new PageFlip(bookEl, {
           width: Math.round(800 * dpr),
           height: Math.round((800 / result.pageAspect) * dpr),
@@ -897,23 +938,30 @@ document.addEventListener('DOMContentLoaded', function () {
           bookShift.style.transition = '';
           stageEl.classList.remove('is-loading');
           var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
-          // Only the cover image is loaded so far — the viewer is visible
-          // and already navigable as soon as this first page has rendered,
-          // instead of waiting for all of them. The rest render now, in
-          // the background, and get swapped in via updateFromImages
-          // (StPageFlip's own API for this — it preserves the current
-          // page position) without disturbing anything the visitor's
-          // already doing; zoneNext/arrowNext stay correctly disabled
-          // until then since pageFlip's own getPageCount() is still just 1.
+          // Only the cover image is real so far — the rest of
+          // result.images are the 1x1 placeholders it was padded out
+          // with (see where it's built) purely so StPageFlip's page
+          // count, and the cover-positioning decision that comes with
+          // it, never has to change later. The real pages render now, in
+          // the background, and get swapped in for those placeholders via
+          // updateFromImages (StPageFlip's own API for this — it
+          // preserves the current page position) without disturbing
+          // anything the visitor's already doing; allPagesLoaded is what
+          // actually keeps forward navigation from landing on a
+          // placeholder in the meantime (see updateUi() above).
           var pages = [];
           for (var i = 2; i <= numPages; i++) pages.push(i);
           if (pages.length) {
             Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
-              pageFlip.updateFromImages(result.images.concat(restImages));
+              pageFlip.updateFromImages([result.images[0]].concat(restImages));
+              allPagesLoaded = true;
               updateUi();
             }).catch(function (err) {
               console.error('PDF viewer: failed to load remaining pages:', err);
             });
+          } else {
+            allPagesLoaded = true; // a genuine 1-page PDF -- nothing else to load
+            updateUi();
           }
           // .pdfv__stage now hugs the book's own size (see the CSS comment
           // on .pdfv__stage) instead of claiming a fixed chunk of the
@@ -1046,10 +1094,16 @@ document.addEventListener('DOMContentLoaded', function () {
       function updateUi() {
         var current = pageFlip.getCurrentPageIndex();
         var last = pageFlip.getPageCount() - 1;
+        // current >= last would normally be the only thing gating
+        // "next", but pageFlip's own getPageCount() reflects the padded
+        // (placeholder-filled) total from the very first load — not how
+        // many pages actually have real content yet — so it alone can't
+        // tell a genuine last page apart from a still-blank placeholder.
+        var nextDisabled = current >= last || !allPagesLoaded;
         zonePrev.setAttribute('data-disabled', current <= 0 ? 'true' : 'false');
-        zoneNext.setAttribute('data-disabled', current >= last ? 'true' : 'false');
+        zoneNext.setAttribute('data-disabled', nextDisabled ? 'true' : 'false');
         arrowPrev.style.display = current <= 0 ? 'none' : '';
-        arrowNext.style.display = current >= last ? 'none' : '';
+        arrowNext.style.display = nextDisabled ? 'none' : '';
         var orientation = pageFlip.getOrientation();
         var label;
         if (orientation === 'landscape' && current > 0 && current < last) {
@@ -1081,6 +1135,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       function turn(dir) {
         if (!pageFlip || isZoomed) return;
+        // data-disabled on the zones/arrows is purely visual (cursor,
+        // arrow visibility) — nothing about a click, wheel swipe or touch
+        // swipe reaching this function actually checked it, so the real
+        // gate against navigating forward into a still-blank placeholder
+        // page (see allPagesLoaded above) has to live here instead.
+        if (dir > 0 && !allPagesLoaded) return;
         if (dir > 0) pageFlip.flipNext(); else pageFlip.flipPrev();
       }
       zonePrev.addEventListener('click', function () { turn(-1); });
