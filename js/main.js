@@ -796,27 +796,42 @@ document.addEventListener('DOMContentLoaded', function () {
           });
         });
       }).then(function (result) {
-        // Rendering the canvas above only produces the image bytes —
-        // decoding a ~2000px-wide JPEG back out of a data: URL is its own
-        // real, sometimes multi-second cost on a phone CPU, and it was
-        // happening invisibly *after* the spinner had already been
-        // removed (the loader was hidden as soon as loadFromImages() was
-        // *called*, not once anything had actually decoded and painted —
-        // StPageFlip loads its own Image object asynchronously). Decoding
-        // it ourselves first and waiting for that here means the spinner
-        // now covers that whole cost; StPageFlip's own Image object below
-        // uses the identical data: URL, so browsers reuse this same
-        // already-decoded bitmap from their image cache instead of
-        // decoding it a second time — the cover should then appear
-        // essentially the instant the spinner disappears, not some
-        // seconds later.
-        var coverImg = new Image();
-        coverImg.src = result.images[0];
-        var decoded = coverImg.decode ? coverImg.decode().catch(function () {}) :
-          new Promise(function (resolve) { coverImg.onload = coverImg.onerror = resolve; });
-        return decoded.then(function () { return result; });
-      }).then(function (result) {
         sizeBook(result.pageAspect);
+        // StPageFlip loads its cover through its own, separate Image
+        // object (new Image(); img.src = dataUrl; draws once img.onload
+        // fires) — a first attempt at this waited on a *different* Image
+        // object of our own with the identical data: URL, betting that
+        // the browser would reuse the already-decoded bitmap for it. On
+        // at least one real device that bet was wrong: StPageFlip's own
+        // image still had to decode independently, taking its own real
+        // time, so the spinner still vanished well before anything was
+        // actually drawn (StPageFlip has its own tiny built-in "not
+        // loaded yet" placeholder — a plain white box with a grey border
+        // — which is what was showing, easy to read as "just blank").
+        // Removed that guess entirely: this instead patches window.Image
+        // for the single synchronous instant it takes PageFlip's
+        // constructor below to create its own Image object (every Page
+        // does so synchronously, right in its own constructor), and
+        // listens directly on *that* object's real load/error event —
+        // the exact same signal StPageFlip itself waits on internally.
+        // No color/pixel guessing, no cross-object caching assumptions.
+        function watchLibraryImageLoad(timeoutMs) {
+          return new Promise(function (resolve) {
+            var settled = false;
+            function settle() { if (!settled) { settled = true; resolve(); } }
+            var OrigImage = window.Image;
+            window.Image = function () {
+              var img = new OrigImage();
+              img.addEventListener('load', settle);
+              img.addEventListener('error', settle);
+              return img;
+            };
+            window.Image.prototype = OrigImage.prototype;
+            setTimeout(function () { window.Image = OrigImage; }, 0);
+            setTimeout(settle, timeoutMs);
+          });
+        }
+        var imageReady = watchLibraryImageLoad(15000);
         pageFlip = new PageFlip(bookEl, {
           width: Math.round(800 * dpr),
           height: Math.round((800 / result.pageAspect) * dpr),
@@ -859,93 +874,95 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('flip', updateUi);
         pageFlip.on('init', updateUi);
         updateUi();
-        var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
-        // Safe to remove the spinner now — the .decode() wait two steps
-        // up already covered the real cost (JPEG decode), so the cover
-        // StPageFlip is about to draw is already sitting decoded in the
-        // browser's image cache under this identical data: URL.
-        if (loaderEl) loaderEl.remove();
-        stageEl.classList.remove('is-loading');
-        // Only the cover image is loaded so far — the viewer is visible
-        // and already navigable as soon as this first page has rendered,
-        // instead of waiting for all of them. The rest render now, in the
-        // background, and get swapped in via updateFromImages (StPageFlip's
-        // own API for this — it preserves the current page position)
-        // without disturbing anything the visitor's already doing;
-        // zoneNext/arrowNext stay correctly disabled until then since
-        // pageFlip's own getPageCount() is still just 1.
-        var pages = [];
-        for (var i = 2; i <= numPages; i++) pages.push(i);
-        if (pages.length) {
-          Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
-            pageFlip.updateFromImages(result.images.concat(restImages));
-            updateUi();
-          }).catch(function (err) {
-            console.error('PDF viewer: failed to load remaining pages:', err);
+        return imageReady.then(function () {
+          // Only remove the spinner once StPageFlip's own image has
+          // actually loaded (see watchLibraryImageLoad above) — not before.
+          if (loaderEl) loaderEl.remove();
+          stageEl.classList.remove('is-loading');
+          var resettle = function () { sizeBook(result.pageAspect); updateUi(); };
+          // Only the cover image is loaded so far — the viewer is visible
+          // and already navigable as soon as this first page has rendered,
+          // instead of waiting for all of them. The rest render now, in
+          // the background, and get swapped in via updateFromImages
+          // (StPageFlip's own API for this — it preserves the current
+          // page position) without disturbing anything the visitor's
+          // already doing; zoneNext/arrowNext stay correctly disabled
+          // until then since pageFlip's own getPageCount() is still just 1.
+          var pages = [];
+          for (var i = 2; i <= numPages; i++) pages.push(i);
+          if (pages.length) {
+            Promise.all(pages.map(function (n) { return renderPageToImage(pdfDoc, n); })).then(function (restImages) {
+              pageFlip.updateFromImages(result.images.concat(restImages));
+              updateUi();
+            }).catch(function (err) {
+              console.error('PDF viewer: failed to load remaining pages:', err);
+            });
+          }
+          // .pdfv__stage now hugs the book's own size (see the CSS comment
+          // on .pdfv__stage) instead of claiming a fixed chunk of the
+          // viewport, so it can no longer double as "the available area"
+          // for sizeBook to measure — that's circular (the book's size
+          // would depend on a box whose own size depends on the book).
+          // sizeBook uses visualViewport.height / window.innerHeight for
+          // that instead (see its own comment). visualViewport's own
+          // 'resize' event is the most reliable signal there is for
+          // mobile Safari's collapsing address bar specifically — it's
+          // what dvh itself is defined against — so that's the primary
+          // trigger; window 'resize' covers real resizes/rotations on
+          // everything else.
+          window.addEventListener('resize', resettle);
+          if (window.visualViewport) window.visualViewport.addEventListener('resize', resettle);
+          // Real-device reports (book renders tiny on first paint, but
+          // full size again as soon as the visitor navigates a page or
+          // rotates) showed even that isn't fully reliable by itself on
+          // iOS Safari — belt and braces: force one fresh re-measure
+          // shortly after load regardless of whether anything reports
+          // having changed, plus on the interactions most likely to
+          // coincide with the browser settling the real viewport.
+          ['scroll', 'orientationchange', 'touchend', 'pageshow'].forEach(function (evt) {
+            window.addEventListener(evt, function once() {
+              window.removeEventListener(evt, once);
+              resettle();
+            }, { passive: true });
           });
-        }
-        // .pdfv__stage now hugs the book's own size (see the CSS comment
-        // on .pdfv__stage) instead of claiming a fixed chunk of the
-        // viewport, so it can no longer double as "the available area" for
-        // sizeBook to measure — that's circular (the book's size would
-        // depend on a box whose own size depends on the book). sizeBook
-        // uses visualViewport.height / window.innerHeight for that instead
-        // (see its own comment). visualViewport's own 'resize' event is
-        // the most reliable signal there is for mobile Safari's collapsing
-        // address bar specifically — it's what dvh itself is defined
-        // against — so that's the primary trigger; window 'resize' covers
-        // real resizes/rotations on everything else.
-        window.addEventListener('resize', resettle);
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', resettle);
-        // Real-device reports (book renders tiny on first paint, but full
-        // size again as soon as the visitor navigates a page or rotates)
-        // showed even that isn't fully reliable by itself on iOS Safari —
-        // belt and braces: force one fresh re-measure shortly after load
-        // regardless of whether anything reports having changed, plus on
-        // the interactions most likely to coincide with the browser
-        // settling the real viewport.
-        ['scroll', 'orientationchange', 'touchend', 'pageshow'].forEach(function (evt) {
-          window.addEventListener(evt, function once() {
-            window.removeEventListener(evt, once);
-            resettle();
-          }, { passive: true });
+          setTimeout(resettle, 400);
+          setTimeout(resettle, 1200);
+          // Opt-in on-screen debug readout (?debug=1 in the URL) — no
+          // WebKit/real-device testing is available in the environment
+          // this was built in, so this turns the visitor's own phone into
+          // the test rig: append ?debug=1 to a project URL with a PDF,
+          // scroll to the viewer, and screenshot the numbers in both
+          // orientations. Safe to leave in — invisible unless that query
+          // param is present.
+          if (/[?&]debug=1(&|$)/.test(location.search)) {
+            var dbg = document.createElement('div');
+            dbg.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,0.85);' +
+              'color:#7CFC7C;font:11px/1.5 monospace;padding:8px 10px;max-width:100vw;white-space:pre;pointer-events:none;';
+            document.body.appendChild(dbg);
+            var renderDbg = function () {
+              var sRect = section.getBoundingClientRect();
+              var wRect = bookWrap.getBoundingClientRect();
+              var vv = window.visualViewport;
+              dbg.textContent =
+                'PDFV DEBUG\n' +
+                'window.innerWidth/Height: ' + window.innerWidth + ' / ' + window.innerHeight + '\n' +
+                'visualViewport w/h: ' + (vv ? Math.round(vv.width) + ' / ' + Math.round(vv.height) : 'n/a') + '\n' +
+                'section rect w/h: ' + Math.round(sRect.width) + ' / ' + Math.round(sRect.height) + '\n' +
+                'bookWrap rect w/h: ' + Math.round(wRect.width) + ' / ' + Math.round(wRect.height) + '\n' +
+                'frameW/frameH: ' + Math.round(frameW) + ' / ' + Math.round(frameH) + '\n' +
+                'devicePixelRatio raw/capped: ' + (window.devicePixelRatio || 1) + ' / ' + dpr + '\n' +
+                'orientation: ' + (pageFlip ? pageFlip.getOrientation() : 'n/a') + '\n' +
+                'scrollY: ' + Math.round(window.scrollY) + '\n' +
+                'docScrollHeight: ' + document.documentElement.scrollHeight;
+            };
+            renderDbg();
+            if (window.ResizeObserver) new ResizeObserver(renderDbg).observe(section);
+            window.addEventListener('resize', renderDbg);
+            window.addEventListener('scroll', renderDbg, { passive: true });
+            if (window.visualViewport) window.visualViewport.addEventListener('resize', renderDbg);
+            setInterval(renderDbg, 500);
+          }
         });
-        setTimeout(resettle, 400);
-        setTimeout(resettle, 1200);
-        // Opt-in on-screen debug readout (?debug=1 in the URL) — no
-        // WebKit/real-device testing is available in the environment this
-        // was built in, so this turns the visitor's own phone into the
-        // test rig: append ?debug=1 to a project URL with a PDF, scroll to
-        // the viewer, and screenshot the numbers in both orientations.
-        // Safe to leave in — invisible unless that query param is present.
-        if (/[?&]debug=1(&|$)/.test(location.search)) {
-          var dbg = document.createElement('div');
-          dbg.style.cssText = 'position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,0.85);' +
-            'color:#7CFC7C;font:11px/1.5 monospace;padding:8px 10px;max-width:100vw;white-space:pre;pointer-events:none;';
-          document.body.appendChild(dbg);
-          var renderDbg = function () {
-            var sRect = section.getBoundingClientRect();
-            var wRect = bookWrap.getBoundingClientRect();
-            var vv = window.visualViewport;
-            dbg.textContent =
-              'PDFV DEBUG\n' +
-              'window.innerWidth/Height: ' + window.innerWidth + ' / ' + window.innerHeight + '\n' +
-              'visualViewport w/h: ' + (vv ? Math.round(vv.width) + ' / ' + Math.round(vv.height) : 'n/a') + '\n' +
-              'section rect w/h: ' + Math.round(sRect.width) + ' / ' + Math.round(sRect.height) + '\n' +
-              'bookWrap rect w/h: ' + Math.round(wRect.width) + ' / ' + Math.round(wRect.height) + '\n' +
-              'frameW/frameH: ' + Math.round(frameW) + ' / ' + Math.round(frameH) + '\n' +
-              'devicePixelRatio raw/capped: ' + (window.devicePixelRatio || 1) + ' / ' + dpr + '\n' +
-              'orientation: ' + (pageFlip ? pageFlip.getOrientation() : 'n/a') + '\n' +
-              'scrollY: ' + Math.round(window.scrollY) + '\n' +
-              'docScrollHeight: ' + document.documentElement.scrollHeight;
-          };
-          renderDbg();
-          if (window.ResizeObserver) new ResizeObserver(renderDbg).observe(section);
-          window.addEventListener('resize', renderDbg);
-          window.addEventListener('scroll', renderDbg, { passive: true });
-          if (window.visualViewport) window.visualViewport.addEventListener('resize', renderDbg);
-          setInterval(renderDbg, 500);
-        }
       }).catch(function (err) {
         console.error('PDF viewer failed to initialize:', err);
         section.remove();
