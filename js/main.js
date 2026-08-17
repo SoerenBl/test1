@@ -939,6 +939,28 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // --- Service tile's chair blueprint: draws itself once, the first time
+  // it scrolls into view (unlike the photo fade above, it doesn't replay
+  // on every re-entry — a several-second multi-stage draw-in is a once-off
+  // flourish, not something that should re-run every time you scroll past
+  // it again). ---
+  var sketchEl = document.querySelector('.tile__sketch');
+  if (sketchEl) {
+    if ('IntersectionObserver' in window) {
+      var sketchObserver = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            sketchEl.classList.add('is-drawn');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.4 });
+      sketchObserver.observe(sketchEl);
+    } else {
+      sketchEl.classList.add('is-drawn');
+    }
+  }
+
   // --- Mobile: nav bar slides away on scroll-down, back on scroll-up ---
   (function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;

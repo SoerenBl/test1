@@ -7,7 +7,7 @@
 <meta name="description" content="Sören Bläcker - Produktdesigner. Entwurf und Umsetzung individueller Möbel, Produkte und Räume.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="favicon.svg" id="faviconLink" data-favicon-fallback="logo2">
-<link rel="stylesheet" href="css/style.css?v=51">
+<link rel="stylesheet" href="css/style.css?v=52">
 </head>
 <body>
 
@@ -156,13 +156,40 @@
       <a class="tile tile--full tile--cta" href="services/">
         <div class="tile__media">
           <svg class="tile__sketch" viewBox="0 0 400 260" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <g class="tile__sketch-base">
-              <path d="M120,40 L280,40 M120,40 L100,150 M280,40 L290,145 M90,150 L310,145 M90,150 L90,162 L310,157 L310,145 M95,160 L70,230 M305,155 L330,228 M130,148 L120,215 M270,144 L282,213" />
+            <!-- Drafting corner guide: left-to-right along the top, then
+                 top-to-bottom down the right edge, one continuous stroke. -->
+            <g class="tile__sketch-guide">
+              <path pathLength="1" d="M20,15 L380,15 L380,245" />
             </g>
-            <g class="tile__sketch-extra">
-              <path pathLength="1" d="M60,240 L60,250 M60,245 L340,245 M340,240 L340,250" />
-              <path pathLength="1" d="M120,40 L290,145" />
-              <circle pathLength="1" cx="100" cy="150" r="4" />
+            <!-- Angle/protractor: a small recline-angle diagram, drawn
+                 like a note in the margin rather than pinned to one exact
+                 joint on the chair. -->
+            <g class="tile__sketch-angle">
+              <circle pathLength="1" cx="55" cy="195" r="20" />
+              <path pathLength="1" d="M55,195 L75,195" />
+              <path pathLength="1" d="M55,195 L71.4,183.5" />
+              <path pathLength="1" d="M65,195 A10,10 0 0,0 63.2,189.3" />
+              <text x="80" y="184">35°</text>
+            </g>
+            <!-- The chair itself: back rail, seat plane and four legs. -->
+            <g class="tile__sketch-base">
+              <path pathLength="1" d="M120,40 L280,40 M120,40 L100,150 M280,40 L290,145 M90,150 L310,145 M90,150 L90,162 L310,157 L310,145 M95,160 L70,230 M305,155 L330,228 M130,148 L120,215 M270,144 L282,213" />
+            </g>
+            <!-- Dimension lines: overall width and height. -->
+            <g class="tile__sketch-dims">
+              <path pathLength="1" d="M60,242 L60,250 M60,246 L340,246 M340,242 L340,250" />
+              <text x="200" y="238" text-anchor="middle">560</text>
+              <path pathLength="1" d="M352,38 L362,38 M357,38 L357,230 M352,230 L362,230" />
+              <text x="372" y="138" transform="rotate(-90 372 138)" text-anchor="middle">810</text>
+            </g>
+            <!-- Handwritten margin notes, each with its own leader line. -->
+            <g class="tile__sketch-notes">
+              <path pathLength="1" d="M18,222 L68,208" />
+              <text x="14" y="221" transform="rotate(-3 14 221)">solid oak</text>
+              <path pathLength="1" d="M335,95 L302,148" />
+              <text x="338" y="92" text-anchor="end" transform="rotate(2 338 92)">seat h. 450</text>
+              <path pathLength="1" d="M45,238 L68,229" />
+              <text x="10" y="243">r 6</text>
             </g>
           </svg>
           <div class="tile__scrim"></div>
@@ -188,6 +215,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=51"></script>
+<script src="js/main.js?v=52"></script>
 </body>
 </html>
