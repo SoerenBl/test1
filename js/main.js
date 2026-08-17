@@ -16,7 +16,11 @@ document.addEventListener('DOMContentLoaded', function () {
     menuBtn.setAttribute('aria-expanded', 'false');
   }
 
-  if (menuBtn) menuBtn.addEventListener('click', openMenu);
+  if (menuBtn) {
+    menuBtn.addEventListener('click', function () {
+      if (menuPanel.classList.contains('is-open')) closeMenu(); else openMenu();
+    });
+  }
   if (menuClose) menuClose.addEventListener('click', closeMenu);
   if (menuScrim) menuScrim.addEventListener('click', closeMenu);
   document.addEventListener('keydown', function (e) {
