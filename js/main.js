@@ -1449,20 +1449,43 @@ document.addEventListener('DOMContentLoaded', function () {
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
-    // Mobile and desktop need genuinely different dead-zone sizes, not
-    // just different input methods on the same logic. Desktop's "any
-    // partial scroll completes" feel was the original, always-working
-    // reference behaviour (a mouse wheel tick is a small, deliberate
-    // increment) — treating the *entire* panel 1 range as the dead zone
-    // reproduces that. Mobile is different: a touch-scroll can easily
-    // move 100-200px on the first frame of a single continuous swipe
-    // before your thumb has even finished moving, so that same
-    // full-range zone made *any* small swipe auto-complete instantly
-    // (reported: a small scroll jumped straight to Awards, and letting
-    // go bounced back to the top) — mobile instead only treats a small
-    // fixed margin right at the true boundary as the dead zone, so About
-    // and Awards read and scroll as two separate, ordinary pages first.
     var narrowMq = window.matchMedia('(max-width: 760px)');
+
+    // Desktop: a mouse wheel tick is a small, deliberate input (unlike a
+    // touch swipe, which can already cover 100-200px before the gesture
+    // has even finished) — letting native scroll run, waiting for it to
+    // settle, and only *then* silently snapping read as two disconnected
+    // motions: a scroll, a pause, then a sudden unexplained jump.
+    // Intercepting the wheel event itself instead — the same pattern
+    // already used for the PDF viewer's own wheel-driven page turns —
+    // means a single short scroll reads as one continuous "push" straight
+    // onto Awards instead, no separate jump afterwards. Only engages
+    // while still short of the boundary (anywhere in panel 1, matching
+    // the original always-working desktop reference behaviour); once at
+    // or past it, wheel scrolling is left completely alone.
+    var wheelCooldown = false;
+    window.addEventListener('wheel', function (e) {
+      if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
+      if (e.deltaY <= 4 || window.scrollY >= boundaryY) return;
+      e.preventDefault();
+      if (wheelCooldown) return;
+      wheelCooldown = true;
+      window.scrollTo({ top: boundaryY, behavior: 'smooth' });
+      setTimeout(function () { wheelCooldown = false; }, 700);
+    }, { passive: false });
+
+    // Mobile: touch scroll momentum is too unpredictable to safely
+    // intercept mid-gesture the same way (this is exactly the class of
+    // thing that caused the earlier position:sticky/scroll-snap WebKit
+    // bugs on this same page) — kept as a settle-based nudge instead,
+    // reacting only once a gesture has fully stopped. Only the *final*
+    // jump itself was upgraded here, from an instant teleport to the
+    // same smooth "push" animation the wheel case above uses, so it
+    // still reads as one motion rather than a scroll-then-teleport.
+    // Small fixed margin right at the true boundary, not the whole
+    // panel-1 range — a touch-scroll's own first-frame jump already
+    // covers 100-200px, so a full-range zone here made any small swipe
+    // auto-complete instantly (reported previously).
     var MOBILE_DEAD_ZONE_PX = 100;
     var settleTimer = null;
     var prevScrollY = window.scrollY;
@@ -1471,12 +1494,13 @@ document.addEventListener('DOMContentLoaded', function () {
       var y = window.scrollY;
       if (y !== prevScrollY) scrollDir = y > prevScrollY ? 1 : -1;
       prevScrollY = y;
+      if (!narrowMq.matches) return;
       clearTimeout(settleTimer);
       settleTimer = setTimeout(function () {
         var yy = window.scrollY;
-        var zoneStart = narrowMq.matches ? boundaryY - MOBILE_DEAD_ZONE_PX : 0;
+        var zoneStart = boundaryY - MOBILE_DEAD_ZONE_PX;
         if (yy > zoneStart + 4 && yy < boundaryY - 4) {
-          window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'instant' });
+          window.scrollTo({ top: scrollDir >= 0 ? boundaryY : zoneStart, behavior: 'smooth' });
         }
       }, 150);
     }, { passive: true });
