@@ -1414,9 +1414,27 @@ body.lightbox-open { overflow: hidden; }
      as "far from the hero photo above" and "far from the page counter
      below" (pinned to the section's bottom edge, not the book's). Sizing
      to content and keeping the counter in normal flow right after the
-     book fixes both at once, on any breakpoint. */
-  padding: 20px 0 32px;
+     book fixes both at once, on any breakpoint. Equal top/bottom padding
+     on purpose — see the ".pdfv-section + section" override below, which
+     is what actually makes the space above and below the book match; on
+     its own this side alone wouldn't be enough, since the plain <section>
+     that follows normally brings its own much larger top padding too. */
+  padding: 32px 0;
 }
+/* The next section's own top padding (section{padding:clamp(50px,9vh,
+   100px) 0}) would otherwise stack on top of .pdfv-section's own bottom
+   padding above, making the gap below the book roughly 3-4x the gap
+   above it. Zeroed here, specifically only right after the viewer, so
+   .pdfv-section's padding-bottom is the entire visible gap on both
+   sides — everywhere else this rule doesn't touch, sections keep their
+   normal spacing. */
+.pdfv-section + section { padding-top: 0; }
+/* .about-grid (the "About the project" layout that normally follows)
+   carries its own margin-top, which — with the next section's own
+   padding-top now zeroed above — collapses straight through it and
+   silently adds back part of the gap this whole rule exists to remove.
+   Zeroed here too, scoped to just this position. */
+.pdfv-section + section .about-grid { margin-top: 0; }
 .pdfv {
   position: relative;
   display: flex;
@@ -1428,7 +1446,7 @@ body.lightbox-open { overflow: hidden; }
   font-size: clamp(1rem, 1.6vw, 1.3rem);
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: var(--color-text);
+  color: var(--color-text-muted);
   text-align: center;
 }
 /* Hugs the book's own size (main.js sizes .pdfv__book-wrap directly,
