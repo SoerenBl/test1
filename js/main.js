@@ -1352,6 +1352,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })();
   var projectHero = document.querySelector('.project-hero__overlay');
+  var projectHeroSection = projectHero ? projectHero.closest('.project-hero') : null;
+  // The docked title stays position:fixed for the *entire* rest of the
+  // scroll range by design (a persistent page label, not just a docking
+  // animation) — fine as long as whatever comes after the hero has
+  // enough distance to never reach the same on-screen band the title
+  // occupies. That held as long as the hero (and, on editorial projects,
+  // the old full-viewport PDF-viewer section) was tall enough on its
+  // own; once the PDF viewer was shrunk to hug its own content, "Über
+  // das Projekt" could end up scrolling into view directly underneath —
+  // and unlike a normal in-flow element, a position:fixed one has no
+  // way to be pushed out of the way by layout, so it just sat on top of
+  // the heading. getContentAfterHero() + the check in updateParallax
+  // below fade the title out once that actually happens, instead of
+  // assuming there's always going to be enough distance.
+  function getContentAfterHero() {
+    var el = projectHeroSection && projectHeroSection.nextElementSibling;
+    while (el && el.classList.contains('pdfv-section')) el = el.nextElementSibling;
+    return el;
+  }
+  // Editorial projects insert a .pdfv-section between the hero and the
+  // real "About" section (see initPdfViewer) — its own heading
+  // ("Wirf einen Blick hinein!") is a second, independent thing the
+  // docked title can end up sitting on top of, well before scrolling as
+  // far as the About section. Checked as a separate candidate rather
+  // than folded into getContentAfterHero(), since which one is actually
+  // on screen (if either) depends on how far scrolled.
+  function getOverlapCandidates() {
+    var candidates = [];
+    var pdfHeading = document.querySelector('.pdfv__heading');
+    if (pdfHeading) candidates.push(pdfHeading);
+    var afterHero = getContentAfterHero();
+    if (afterHero) candidates.push(afterHero.querySelector('h2') || afterHero);
+    return candidates;
+  }
   var projectHeroNav = document.querySelector('.nav__mark');
   // Distance over which the big overlay title docks into the nav bar — a
   // fixed value (not tied to the title's own height) so the motion feels
@@ -1529,7 +1563,33 @@ document.addEventListener('DOMContentLoaded', function () {
             projectHeroTitleEl.style.transform = 'scale(' + projectHeroDock.scale.toFixed(3) + ')';
             projectHeroDockedStatic = true;
           }
+          // The one thing a parked position:fixed title can't do on its
+          // own is get out of the way of content scrolling up underneath
+          // it, so this checks for it directly every frame while docked
+          // — a couple of read-only getBoundingClientRect() calls, cheap
+          // next to the per-element work already happening above in this
+          // same function. Candidates are resolved lazily (not cached at
+          // setup), since the PDF viewer section one of them lives in
+          // isn't in the DOM yet until its own async fetch resolves.
+          // Checked against the actual headings, not their containing
+          // sections — a section's own top edge includes its top padding
+          // (empty space), which would fade the title the moment that
+          // padding alone reaches the dock zone, well before any real
+          // text does. And against the title's own current rendered box
+          // (not a re-derived estimate from natural size × dock scale,
+          // which doesn't hold for every title — a longer one can wrap
+          // to a different number of lines at the docked size than at
+          // full size); opacity doesn't affect layout, so this stays
+          // accurate even while already faded out.
+          var dockBottom = projectHeroTitleEl.getBoundingClientRect().bottom + 8;
+          var overlapping = getOverlapCandidates().some(function (el) {
+            return el.getBoundingClientRect().top < dockBottom;
+          });
+          projectHeroTitleEl.style.opacity = overlapping ? '0' : '';
+          projectHeroTitleEl.style.pointerEvents = overlapping ? 'none' : '';
         } else {
+          projectHeroTitleEl.style.opacity = '';
+          projectHeroTitleEl.style.pointerEvents = '';
           if (projectHeroDockedStatic !== false) {
             projectHeroTitleEl.style.position = '';
             projectHeroTitleEl.style.top = '';
