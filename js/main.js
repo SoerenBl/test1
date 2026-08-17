@@ -557,7 +557,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function openLightbox(media) {
       lbMedia.innerHTML = '';
-      lbMedia.appendChild(media.cloneNode(true));
+      // Clone just the <img> itself, not the surrounding .tile__media —
+      // that wrapper's grid-tile CSS (absolute position, 100%/100%,
+      // object-fit: cover) would otherwise still apply here too (classes
+      // aren't scoped to their original container) and force every photo
+      // to stretch/crop into a fixed box instead of showing at its own
+      // real aspect ratio.
+      var img = media.querySelector('img');
+      if (img) {
+        var clone = img.cloneNode(true);
+        clone.className = '';
+        clone.removeAttribute('style');
+        lbMedia.appendChild(clone);
+      }
       lightbox.classList.add('is-open');
       document.body.classList.add('lightbox-open');
     }
