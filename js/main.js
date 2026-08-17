@@ -1418,16 +1418,44 @@ document.addEventListener('DOMContentLoaded', function () {
     updateStackSnap();
     if (narrowMq.addEventListener) narrowMq.addEventListener('change', updateStackSnap);
 
+    // Reported on real mobile devices: manual swipe scrolling didn't move
+    // the page at all until the down-arrow button had been tapped once —
+    // after that, swiping worked, but the page could also be left stuck
+    // mid-transition (title overlapping the content below it, matching
+    // an interrupted programmatic scroll). Both point the same way: a
+    // stacked position:sticky layout is one of the specific cases WebKit
+    // is known to sometimes not hand touch-scroll control over to
+    // correctly on the very first gesture after a fresh page load (no
+    // repro available in this Chromium-only sandbox — WebKit-specific).
+    // A zero-distance scroll nudge shortly after load is the standard
+    // workaround: it forces the engine to actually initialize its scroll
+    // machinery on this page before the visitor's first real touch, at a
+    // moment with nothing on screen to visibly jump.
+    if (narrowMq.matches) {
+      setTimeout(function () {
+        if (window.scrollY > 1) return; // only nudge a genuinely fresh load at the top
+        window.scrollTo({ top: 1, behavior: 'instant' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
+    }
+
+    // behavior:'smooth' here also risked being that same stuck-mid-
+    // transition state: if a real touch interrupts an in-flight
+    // programmatic smooth scroll (easy to do by accident right after
+    // tapping the arrow), WebKit can leave the sticky panel parked at
+    // whatever midpoint it had reached instead of either finishing or
+    // cancelling cleanly. An instant jump has no such window on mobile;
+    // desktop (where this wasn't reported) keeps the smooth animation.
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {
-        window.scrollTo({ top: firstPanel.offsetHeight, behavior: 'smooth' });
+        window.scrollTo({ top: firstPanel.offsetHeight, behavior: narrowMq.matches ? 'instant' : 'smooth' });
       });
     }
     var scrollCueBtnUp = document.getElementById('scrollCueBtnUp');
     if (scrollCueBtnUp) {
       scrollCueBtnUp.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: narrowMq.matches ? 'instant' : 'smooth' });
       });
     }
   })();
