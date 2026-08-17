@@ -1104,19 +1104,26 @@ document.addEventListener('DOMContentLoaded', function () {
       var navFontPx = parseFloat(getComputedStyle(projectHeroNav).fontSize) || 24;
       var targetFontPx = navFontPx * 2;
       var minScale = Math.min(1, targetFontPx / projectHeroNatural.fontSize);
-      // Desktop only: docks to the right of the nav name instead of the
-      // title's own natural left gutter, which would otherwise land both
-      // at the same x position and read as overlapping/smashed-together
-      // text. Mobile is deferred to a separate pass — .nav__mark wraps to
-      // two shorter lines there and the lang toggle/menu button sit much
-      // closer in, so the same fixed offset runs straight into them
-      // instead; natural-left keeps mobile at its prior (already known,
-      // not-yet-addressed) behaviour rather than trading one overlap for
-      // a worse one against the actually-clickable menu button.
+      // Desktop docks to the right of the nav name instead of the title's
+      // own natural left gutter, which would otherwise land both at the
+      // same x position and read as overlapping/smashed-together text.
+      // Mobile can't do the same thing — .nav__mark wraps to two shorter
+      // lines there and the lang toggle/menu button sit much closer in,
+      // so the same fixed offset runs straight into them — so instead it
+      // docks in the clear band directly below the whole nav row (not
+      // beside the name at all), using --nav-h as the row's real height
+      // rather than nav__mark's own (shorter) box. That clear separation
+      // is what actually matters: nav's own show/hide is driven by scroll
+      // direction while the title's dock/undock is driven by scroll
+      // position, so they can briefly disagree (e.g. a small scroll-up
+      // deep in the page re-shows nav immediately but doesn't undock the
+      // title) — docking beside the name meant that disagreement showed
+      // up as the title sitting right on top of it.
       var isDesktop = window.matchMedia('(min-width: 761px)').matches;
+      var navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 92;
       projectHeroDock = {
         // Top edges of both text boxes flush, not vertically centred.
-        top: navRect.top,
+        top: isDesktop ? navRect.top : navH + 12,
         left: isDesktop ? navRect.right + 24 : projectHeroNatural.left,
         scale: minScale
       };
