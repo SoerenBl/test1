@@ -1250,6 +1250,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   font-size: 0.95rem;
 }
 .contact-list li span { color: var(--color-text-muted); }
+/* Label spans (Kategorie, Land, Jahr, and on project pages Material,
+   Fertigungstechniken, Besonderheiten, …) get a light touch of extra
+   weight to read as the heading of their row — same family, size and
+   color as the rest of the list, just a little bolder. */
+.contact-list li > span:not(:last-child) { font-weight: 600; }
 
 /* Longer info rows (Material, Fertigungstechniken, Besonderheiten on
    project pages) — a full sentence or bullet list doesn't fit pinned to
@@ -1261,15 +1266,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   gap: 8px;
 }
 .contact-list li.row-detail > span:last-child { color: var(--color-text-muted); max-width: 46ch; }
-/* The label (Material, Fertigungstechniken, Besonderheiten, …) sits
-   directly above its own value in this stacked layout, with nothing
-   else to set it apart from being read as just the first line of body
-   text — bold and a touch larger marks it as the heading it is,
-   same family/color as everything else in this list. */
-.contact-list li.row-detail > span:not(:last-child) {
-  font-weight: 700;
-  font-size: 1.05rem;
-}
 .contact-list li.row-detail ul {
   list-style: disc;
   padding-left: 1.2em;
