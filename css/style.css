@@ -501,6 +501,13 @@ p { margin: 0 0 1em; }
 .hero-tile__content .eyebrow { color: #fff; opacity: 0.85; }
 .hero-tile__content h1 { color: #fff; font-size: clamp(2.4rem, 7vw, 5.2rem); margin-bottom: 0.2em; }
 .hero-tile__content p { color: rgba(250,248,245,0.85); max-width: 46ch; margin-bottom: 1.3em; }
+@media (max-width: 760px) {
+  /* .display's 0.86 line-height is tuned for a single line — at this
+     width the headline reliably wraps to two, and the lines nearly
+     touch with no gap (same issue already fixed for the other big
+     titles above). */
+  .hero-tile__content h1 { line-height: 1.05; }
+}
 .hero-tile__actions { display: flex; gap: 28px; flex-wrap: wrap; }
 
 /* ---------- Sections ---------- */
