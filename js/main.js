@@ -665,7 +665,13 @@ document.addEventListener('DOMContentLoaded', function () {
       return Promise.all([loadPdfJs(), loadPageFlip()]).then(function (libs) {
         initPdfViewer(libs[0], libs[1], pdfEntry.download_url);
       });
-    }).catch(function () { /* no PDF in this project's folder, or offline — leave the page as-is */ });
+    }).catch(function (err) {
+      // Not necessarily worth logging — 404/network errors here are the
+      // normal case for every project that simply has no PDF — but do
+      // log anything past a plain "not found" so a genuine failure (e.g.
+      // the vendored libraries failing to load) doesn't vanish silently.
+      if (err && !/GitHub API 404/.test(err.message || '')) console.error('PDF viewer setup failed:', err);
+    });
 
     // Both libraries are vendored locally (js/vendor/) rather than pulled
     // from a CDN — no runtime dependency on a third-party host. Resolved as
@@ -733,7 +739,15 @@ document.addEventListener('DOMContentLoaded', function () {
       // down by 1/dpr so it still displays at the right size — the
       // standard high-DPI canvas trick, just via a wrapping transform
       // since this library gives no direct hook into its canvas sizing.
-      var dpr = window.devicePixelRatio || 1;
+      // Capped at 2 rather than the full devicePixelRatio (3 on most
+      // current iPhones) — every dimension below is multiplied by dpr, so
+      // going from 2 to 3 nearly doubles total canvas/image memory for a
+      // barely-perceptible sharpness gain on a page-flip mockup, which on
+      // a memory-constrained phone rendering every page at once (see
+      // renderPageToImage below) risked silently exhausting memory and
+      // tripping the catch-all below — the whole section just never
+      // appearing, with nothing in the console to explain why.
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
       bookEl.style.transformOrigin = 'top left';
       bookEl.style.transform = 'scale(' + (1 / dpr) + ')';
 
@@ -784,7 +798,10 @@ document.addEventListener('DOMContentLoaded', function () {
         pageFlip.on('init', updateUi);
         updateUi();
         window.addEventListener('resize', function () { sizeBook(result.pageAspect); updateUi(); });
-      }).catch(function () { section.remove(); }); // unreadable PDF — don't leave a broken tile
+      }).catch(function (err) {
+        console.error('PDF viewer failed to initialize:', err);
+        section.remove();
+      }); // unreadable PDF, or the render pipeline ran out of memory — don't leave a broken tile
 
       function renderPageToImage(doc, n) {
         return doc.getPage(n).then(function (page) {

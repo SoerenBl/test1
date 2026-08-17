@@ -378,8 +378,23 @@ p { margin: 0 0 1em; }
   transition: transform 0.45s cubic-bezier(.16,.84,.44,1);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   padding: var(--gutter);
+  /* Vertically centered nav+footer normally fit with room to spare, but
+     on a short viewport (mobile landscape) they can be taller than the
+     panel itself. overflow-y:auto alone doesn't fix that with
+     justify-content:center — browsers park the initial scroll position
+     at the visual centre, and the "before centre" overflow (the top
+     items) stays unreachable no matter how you scroll, so the classic
+     fix is used instead: flexible ::before/::after spacers with
+     margin:auto centre the content when there's room to spare and
+     shrink to zero when there isn't, which keeps the whole thing
+     reachable by scrolling either way. */
+  overflow-y: auto;
+}
+.menu-panel::before,
+.menu-panel::after {
+  content: '';
+  margin: auto 0;
 }
 .menu-panel.is-open { transform: translateX(0); }
 
