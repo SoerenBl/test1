@@ -954,6 +954,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   height: 100dvh;
   will-change: transform;
 }
+/* dvh recalculates continuously as the mobile address bar shows/hides --
+   including mid-gesture, while a finger is still on the screen. That
+   keeps reflowing these panels' height (and so the page's total scroll
+   range) *during* an active swipe, which is what was still making swipe
+   scrolling feel like it randomly stopped working even after disarming
+   the CSS scroll-snap assist in js/main.js. svh is fixed at the browser
+   chrome's expanded size and never changes mid-scroll, trading a sliver
+   of unfilled space at the very bottom of the stack once the address bar
+   auto-hides for a scroll gesture that never gets reflowed out from
+   under itself. */
+@media (max-width: 760px) {
+  .stack__panel, .stack__bg { height: 100svh; }
+}
 .stack__panel:nth-of-type(4) { z-index: 4; }
 .stack__panel .ph { border: none; min-height: 100%; margin: 0; }
 .stack__panel img {
