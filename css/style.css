@@ -203,7 +203,10 @@ p { margin: 0 0 1em; }
 .project-hero__overlay {
   position: absolute;
   top: 0; left: 0; right: 0;
-  z-index: 105;
+  /* Above .nav (310) so the docking title still slides over/into the
+     nav bar as it lands, same as before .nav was raised above the
+     menu panel for the mobile hamburger button. */
+  z-index: 315;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   pointer-events: none;
 }
@@ -223,6 +226,13 @@ p { margin: 0 0 1em; }
   margin: 0;
   overflow-wrap: anywhere;
   transform-origin: left top;
+  /* js/main.js rewrites this element's transform on every scroll frame
+     (docking animation) — without will-change the browser re-rasterizes
+     the text (plus its blurred text-shadow) at the new scale each frame
+     instead of just transforming one cached layer, which is what reads
+     as the title shimmering/jittering while scrolling, worst on fast
+     scroll-up. */
+  will-change: transform;
 }
 .project-hero__title a {
   color: inherit;
