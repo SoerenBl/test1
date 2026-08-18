@@ -1,0 +1,9 @@
+--- DEUTSCH ---
+Eyebrow: Produktdesigner
+Titel: Gestaltung, die man anfassen kann.
+Text: Ich entwerfe Möbel und Produkte — von der ersten Skizze bis zur Umsetzung in Zusammenarbeit mit ausgewählten Werkstätten.
+
+--- ENGLISH ---
+Eyebrow: Product Designer
+Titel: Design you can touch.
+Text: I design furniture and products — from the first sketch to production, in collaboration with selected workshops.

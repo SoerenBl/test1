@@ -1,20 +1,31 @@
-name: Projektseiten aus content.txt aktualisieren
+name: Website-Inhalte aus content.txt aktualisieren
 
 # Läuft bei jedem Push auf main, der mindestens eine content.txt
 # berührt -- neu angelegt, bearbeitet oder gelöscht. Braucht keinerlei
 # Secret/API-Key: die Übersetzung liefert die content.txt selbst
 # (Deutsch und Englisch stehen schon drin), dieser Workflow baut daraus
-# nur die HTML-Seite. Verarbeitet bei jedem Lauf alle content.txt im
-# Repo, nicht nur die geänderten -- bei der überschaubaren Projektzahl
+# nur die HTML-Seiten. Verarbeitet bei jedem Lauf alle content.txt im
+# Repo, nicht nur die geänderten -- bei der überschaubaren Seitenzahl
 # hier kostet das nichts Nennenswertes, macht dafür den ganzen Ablauf
 # robuster (keine Diff-Logik, die im Kantenfall danebenliegen könnte)
 # und selbstheilend, falls eine Seite je von Hand aus dem Takt geraten
 # sein sollte.
+#
+# Zwei Arten von Seiten, zwei Skripte:
+# - Projektseiten (update-project-content.js): 27 strukturell identische
+#   Seiten, werden komplett aus einem Template neu erzeugt.
+# - Die sechs Einzelseiten About/Kontakt/Startseite/Service/Impressum/
+#   Datenschutz (update-page-content.js): jede davon einzigartig, daher
+#   gezielte Textersetzung an festen Ankerpunkten statt kompletter
+#   Neuerzeugung -- sicherer gerade für die rechtlichen Texte.
 on:
   push:
     branches: [main]
     paths:
       - '**/content.txt'
+      - 'about-content.txt'
+      - 'contact-content.txt'
+      - 'home-content.txt'
 
 permissions:
   contents: write
@@ -25,19 +36,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Alle Projektseiten aus ihrer content.txt neu erzeugen
+      - name: Projektseiten aus ihrer content.txt neu erzeugen
         run: |
-          find . -name content.txt -not -path './node_modules/*' -print0 \
-            | xargs -0 -r node scripts/update-project-content.js
+          find . -name content.txt -not -path './node_modules/*' \
+            -not -path './services/*' -not -path './impressum/*' -not -path './datenschutz/*' \
+            -print0 | xargs -0 -r node scripts/update-project-content.js
+
+      - name: Feste Seiten (About, Kontakt, Startseite, Service, Impressum, Datenschutz) aktualisieren
+        run: node scripts/update-page-content.js
 
       - name: Ergebnis committen und pushen, falls sich etwas geändert hat
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A -- '*/index.html'
+          git add -A -- '*/index.html' about.html contact.html index.html
           if git diff --cached --quiet; then
             echo "Keine Änderungen an den generierten Seiten."
           else
-            git commit -m "Projektseiten automatisch aus content.txt aktualisiert"
+            git commit -m "Seiten automatisch aus content.txt aktualisiert"
             git push
           fi
