@@ -1,0 +1,23 @@
+Titel: BMW K100 Aero
+Land: DE
+Jahr: 2024
+
+--- DEUTSCH ---
+Beschreibung: Die BMW K100 Aero verschmilzt die unverwüstliche Mechanik der legendären „Flying Brick“ aus den 1980er-Jahren mit einer zukunftsweisenden, radikalen Formsprache. Ausgehend von Inspirationen der Luftfahrt fängt das Design die Dynamik von Flugzeugturbinen in der Frontmaske auf und lässt das schlanke Heck wie einen Nachbrenner auslaufen. Durch eigens konstruierte Geometrien, präzise gefertigte Edelstahlbauteile und eine kompromisslos reduzierte Elektronik erwacht der Klassiker als straßenzugelassener Café Racer zu einem zweiten Leben.
+Material: Edelstahl, Aluminium, Kohlefaser / Carbon, Leder, Kunststoffe wie ASA oder PP/PE
+Fertigungstechniken: Laserschneiden/Gravieren, Fräsen/Drehen von Aluminium, Rahmenschweißen & -anpassung, 3D-Modellierung und 3D-Druck, digitale Fahrzeugelektrik, CNC-Fräsen
+Besonderheiten:
+- Award-Winning: Ausgezeichnet als Best Café Racer – European Custombike Championship 2024 (Bad Salzuflen)
+- Aerodynamische Formsprache mit integriertem Hauptscheinwerfer in Turbinenoptik und Nachbrenner-Rücklicht
+- Reduktion des Kabelbaums um ca. 70 % durch die Installation des Motogadget mo.unit Blue Steuerungssystems inkl. Keyless-Go und App-Diagnose
+- Integration des YSS Sidewinder Federbeinsystems
+
+--- ENGLISH ---
+Beschreibung: The BMW K100 Aero fuses the indestructible mechanics of the legendary 1980s “Flying Brick” with a forward-looking, radical design language. Drawing inspiration from aviation, the design captures the dynamism of jet turbines in its front mask and lets the slender tail taper off like an afterburner. Through purpose-built geometries, precision-machined stainless steel components, and uncompromisingly reduced electronics, the classic is reawakened as a street-legal café racer for a second life.
+Material: Stainless steel, aluminium, carbon fibre, leather, plastics such as ASA or PP/PE
+Fertigungstechniken: Laser cutting/engraving, milling/turning aluminium, frame welding & fitting, 3D modelling and 3D printing, digital vehicle electrics, CNC milling
+Besonderheiten:
+- Award-winning: named Best Café Racer at the European Custombike Championship 2024 (Bad Salzuflen)
+- Aerodynamic design language with a turbine-styled integrated headlight and afterburner-style tail light
+- Wiring harness reduced by roughly 70% through the Motogadget mo.unit Blue control system, including keyless-go and app diagnostics
+- Integration of the YSS Sidewinder rear shock system
