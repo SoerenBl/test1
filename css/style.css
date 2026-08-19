@@ -406,20 +406,23 @@ body.is-menu-open .project-hero__overlay {
   width: 24px;
   height: 24px;
   transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+  /* Shadow lives here (a plain box-shadow, rimming the thumb's own round
+     edge) rather than as a filter:drop-shadow on the cutout SVG below --
+     drop-shadow follows alpha edges, which would rim the letter-hole's
+     inner edge too and read as a shadow bleeding through the cutout
+     letter itself. box-shadow only ever looks at this element's own box,
+     so it can't do that. */
+  border-radius: 50%;
+  box-shadow: 0 0 0.6px rgba(0,0,0,0.55), 0 0 1.2px rgba(0,0,0,0.35);
 }
 .lang-toggle--en .lang-toggle__thumb { transform: translateX(28px); }
 .lang-toggle__thumb-cutout {
   position: absolute;
   inset: 0;
   display: block;
-  /* Same problem, same fix as before: a mask hole is fully transparent,
-     not tinted, so it shows exactly whatever sits behind the thumb --
-     the track's own near-white fill -- and the letter disappears
-     without this. drop-shadow follows the shape's alpha edges,
-     including a hole's inner edge, rimming the letterform with a faint
-     dark edge regardless of what's behind it. */
-  filter: drop-shadow(0 0 0.6px rgba(0,0,0,0.55)) drop-shadow(0 0 1.2px rgba(0,0,0,0.35));
-  border-radius: 50%;
+  /* A mask hole is fully transparent, not tinted, so it shows exactly
+     whatever sits behind the thumb -- the track's own near-white fill --
+     which is what makes the letter cutout read at all. */
 }
 
 /* Menu button: solid white shape with the label knocked out of it,
