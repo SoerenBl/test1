@@ -45,6 +45,8 @@ mobil/contact-cover.jpg                                 → mobile Version von c
 mobil/kategorien/mobility/bmw-k100-aero-de-2024/1.jpg   → mobile Version des Projekt-Hero-Fotos dieses Projekts
 ```
 
+Wichtig beim Anlegen über GitHub im Browser ("Add file" → "Create new file"): dort muss beim Dateinamen ein **Schrägstrich `/`** stehen, kein Doppelpunkt — also `mobil/hero.jpg` eintippen (das legt automatisch den Unterordner an), nicht `mobil:hero.jpg`. Mit einem Doppelpunkt landet die Datei nicht am richtigen Ort und wird nicht gefunden.
+
 Also: gleicher Unterpfad wie das Originalfoto, nur einmal komplett unter `mobil/` gespiegelt. Existiert unter `mobil/...` keine Datei, wird automatisch das normale Foto verwendet — nichts anzulegen ist also immer eine gültige, sichere Option.
 
 ## Wichtig für Claude (mich)
