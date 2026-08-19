@@ -240,7 +240,7 @@ function patchServiceRow(html, precedingHrefAnchor, deTitle, enTitle, deText, en
 }
 
 function updateServices(html, data) {
-  html = patchBilingual(html, '<h1 class="page-hero__title hover-letters">\n      ', '\n    </h1>', data.de.Titel, data.en.Titel, 'Titel');
+  html = patchBilingual(html, '<h1 class="page-hero__title hover-letters page-hero__title--tight">\n      ', '\n    </h1>', data.de.Titel, data.en.Titel, 'Titel');
   html = patchBilingual(html, '<p class="lede">\n      ', '\n    </p>', data.de.Untertitel, data.en.Untertitel, 'Untertitel');
   html = patchServiceRow(html, '<p class="lede">',
     data.de.Abschnitt1Titel, data.en.Abschnitt1Titel, data.de.Abschnitt1Text, data.en.Abschnitt1Text, 'Abschnitt1');

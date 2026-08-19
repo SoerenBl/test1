@@ -25,7 +25,11 @@
   --color-bg-alt: #ececec;
   --color-text: #17161a;
   --color-text-muted: #6b6a70;
-  --color-accent: #b5502e;
+  /* Same blue family as --color-panel-hover below (the menu/link hover
+     glow), just a darker shade of that hue -- #9fd8ff itself is too light
+     to read as text on the site's near-white background (fails contrast),
+     so this is the "text-safe" version of the one sitewide accent blue. */
+  --color-accent: #1e6fa8;
   --color-line: #dbdbdb;
   --color-panel: #17161a;
   --color-panel-text: #f8f8f8;
@@ -191,6 +195,11 @@ p { margin: 0 0 1em; }
   display: flex;
   align-items: center;
 }
+/* Name reads in the sitewide accent blue rather than plain --nav-fg --
+   plain text, no vector/cutout needed since (unlike the menu button) it's
+   never sitting over content that must show through it. */
+.nav__mark-text { color: var(--color-panel-hover); }
+.nav.nav--solid .nav__mark-text { color: var(--color-accent); }
 .nav__mark:hover { opacity: 0.7; }
 /* .nav sits above the menu panel (310 vs 300) so the hamburger-to-X
    button stays clickable while the panel is open — but that puts the
@@ -1169,6 +1178,10 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    break at, so at the shared editorial size it wraps mid-word wherever it
    happens to fit — this smaller clamp keeps it to one line instead. */
 .page-hero__title--compact { font-size: clamp(2.6rem, 7.2vw, 6rem); }
+/* Service only -- its lede sits noticeably further from the title than on
+   the other page-hero pages, this pulls it in closer underneath "Service"
+   without touching the shared spacing everywhere else. */
+.page-hero__title--tight { margin-bottom: clamp(8px, 1.2vh, 16px); }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
@@ -1314,7 +1327,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 .page-hero--photo .editorial-row p { color: rgba(250,248,245,0.82); text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
-.page-hero--photo .editorial-row__links span { color: rgba(250,248,245,0.55); }
+.page-hero--photo .editorial-row__links span { color: #fff; }
 .page-hero--photo .editorial-row__links a { color: #fff; }
 .page-hero--photo .editorial-row__links a:hover { color: var(--color-panel-hover); }
 
