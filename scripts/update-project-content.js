@@ -174,7 +174,16 @@ function currentAssetVersion() {
 }
 
 function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion) {
+  // Titel: in the header is the default, used for both languages unless
+  // content.txt also has its own "Titel:" line inside --- ENGLISH ---,
+  // in which case that overrides just the English side. Most projects
+  // (proper nouns, model names) never need this; a few descriptive
+  // titles do. <title>/meta stay on the header title either way, same
+  // as every other page's browser-tab title on this site -- none of
+  // them re-render on a language switch.
   const title = escapeHtml(data.titel);
+  const titleDe = data.titel;
+  const titleEn = data.en.Titel || data.titel;
   return `<!DOCTYPE html>
 <html lang="de" data-lang="de">
 <head>
@@ -236,7 +245,7 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 </div>
 
 <section class="section--flush project-hero">
-  <div class="wrap project-hero__overlay"><h1 class="project-hero__title"><a href="../">${title}</a></h1></div>
+  <div class="wrap project-hero__overlay"><h1 class="project-hero__title"><a href="../">${bilingualSpan(titleDe, titleEn)}</a></h1></div>
   <div class="project-stack">
     <div class="project-hero-panel">
       <div class="tile__media">
