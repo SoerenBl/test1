@@ -3,7 +3,7 @@ Land: DE
 Jahr: 2024
 
 --- DEUTSCH ---
-Beschreibung: Die BMW K100 Aero verschmilzt die unverwüstliche Mechanik der legendären „Flying Brick“ aus den 1980er-Jahren mit einer zukunftsweisenden, radikalen Formsprache. Ausgehend von Inspirationen der Luftfahrt fängt das Design die Dynamik von Flugzeugturbinen in der Frontmaske auf und lässt das schlanke Heck wie einen Nachbrenner auslaufen. Durch eigens konstruierte Geometrien, präzise gefertigte Edelstahlbauteile und eine kompromisslos reduzierte Elektronik erwacht der Klassiker als straßenzugelassener Café Racer zu einem zweiten Leben.
+Beschreibung: Die BMW K100 Aero verschmilzt die unverwüstliche Mechanik der legendären „Flying Brick“ aus den 1980er-Jahren mit einer zukunftsweisenden, radikalen Formsprache. Ausgehend von Inspirationen der Luftfahrt fängt das Design die Dynamik von Flugzeugturbinen in der Frontmaske auf und lässt das schlanke Heck wie einen Nachbrenner auslaufen. Um das Design abzurunden, wurden die hinteren Blinker in kleinen Tragflächen am Höcker integriert. Durch eigens konstruierte Geometrien, präzise gefertigte Edelstahlbauteile und einen kompromisslos reduzierten Kabelbaum mit digitaler und state-of-the-art Bordelektronik erwacht der Klassiker als straßenzugelassener Café Racer zu einem zweiten Leben.
 Material: Edelstahl, Aluminium, Kohlefaser / Carbon, Leder, Kunststoffe wie ASA oder PP/PE
 Fertigungstechniken: Laserschneiden/Gravieren, Fräsen/Drehen von Aluminium, Rahmenschweißen & -anpassung, 3D-Modellierung und 3D-Druck, digitale Fahrzeugelektrik, CNC-Fräsen
 Besonderheiten:
@@ -13,7 +13,7 @@ Besonderheiten:
 - Integration des YSS Sidewinder Federbeinsystems
 
 --- ENGLISH ---
-Beschreibung: The BMW K100 Aero fuses the indestructible mechanics of the legendary 1980s “Flying Brick” with a forward-looking, radical design language. Drawing inspiration from aviation, the design captures the dynamism of jet turbines in its front mask and lets the slender tail taper off like an afterburner. Through purpose-built geometries, precision-machined stainless steel components, and uncompromisingly reduced electronics, the classic is reawakened as a street-legal café racer for a second life.
+Beschreibung: The BMW K100 Aero fuses the indestructible mechanics of the legendary 1980s “Flying Brick” with a forward-looking, radical design language. Drawing inspiration from aviation, the design captures the dynamism of jet turbines in its front mask and lets the slender tail taper off like an afterburner. Rounding off the design, the rear turn signals are integrated into small wing-like fins on the tail hump. Through purpose-built geometries, precision-machined stainless steel components, and an uncompromisingly reduced wiring harness with digital, state-of-the-art onboard electronics, the classic is reawakened as a street-legal café racer for a second life.
 Material: Stainless steel, aluminium, carbon fibre, leather, plastics such as ASA or PP/PE
 Fertigungstechniken: Laser cutting/engraving, milling/turning aluminium, frame welding & fitting, 3D modelling and 3D printing, digital vehicle electrics, CNC milling
 Besonderheiten:

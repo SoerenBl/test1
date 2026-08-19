@@ -3,7 +3,7 @@ Land: IT
 Jahr: 2022
 
 --- DEUTSCH ---
-Beschreibung: Gap Sans ist eine grotesk angelegte Hausschrift, entstanden im Rahmen meines Studiums an der Fakultät für Design und Kunst der Freien Universität Bozen. Charakteristisch sind die bewusst offenen Formen und der markante Punkt über dem kleinen i — ein Detail, das der Schrift ihren Namen gibt. Präsentiert wird sie in einem eigens gestalteten Type-Specimen-Booklet mit kräftigem Orange als Leitfarbe.
+Beschreibung: Gap Sans ist eine grotesk angelegte Hausschrift, entstanden im Rahmen meines Studiums an der Fakultät für Design und Kunst der Freien Universität Bozen. Charakteristisch sind die bewusst offenen Formen und gebrochenen Linien — ein Detail, das der Schrift ihren Namen gibt. Präsentiert wird sie in einem eigens gestalteten Type-Specimen-Booklet mit kräftigem Orange als Leitfarbe, dessen Inhalte jeder Teilnehmer des Kurses auf Basis einer einheitlichen Vorlage zu gestalten hatte.
 
 --- ENGLISH ---
-Beschreibung: Gap Sans is a grotesque-style typeface developed during my studies at the Faculty of Design and Art, Free University of Bozen-Bolzano. Its defining trait is a deliberate, open counter-space — most visible in the gap above the lowercase i, which gives the typeface its name. It's presented in a dedicated type-specimen booklet built around a bold orange palette.
+Beschreibung: Gap Sans is a grotesque-style typeface developed during my studies at the Faculty of Design and Art, Free University of Bozen-Bolzano. Its defining traits are deliberately open forms and broken lines — a detail that gives the typeface its name. It's presented in a dedicated type-specimen booklet built around a bold orange palette, whose content every participant on the course had to design based on a shared template.

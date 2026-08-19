@@ -3,7 +3,7 @@ Land: DE
 Jahr: 2023
 
 --- DEUTSCH ---
-Beschreibung: Das Urban Commuter Restomod verwandelt eine historische Fahrradsubstanz in einen puristischen Begleiter für den Stadtverkehr. Durch die gezielte Reduktion auf das Wesentliche, die Erneuerung aller mechanischen Verschleißteile und die Kombination mit zeitgemäßen Komponenten entsteht ein individuelles Stadtfahrrad. Es vereint die Langlebigkeit klassischer Handwerkskunst mit zeitgemäßer urbaner Mobilität im Retro-Stil.
+Beschreibung: Das Urban Commuter Restomod verwandelt eine historische Fahrradsubstanz (einen alten Holland-Herrenrad-Rahmen) in einen puristischen Begleiter für den Stadtverkehr. Durch die gezielte Reduktion auf wesentliche Komponenten, die Erneuerung aller mechanischen Verschleißteile und die Kombination mit zeitgemäßen Komponenten entsteht ein individuelles Stadtfahrrad. Es vereint die Langlebigkeit klassischer Handwerkskunst mit zeitgemäßer urbaner Mobilität im Retro-Stil.
 Material: Aluminium- oder Stahlrahmen, Funktionskomponenten
 Fertigungstechniken: Rahmenrestaurierung, Neumontage, Custom-Anpassungen von Komponenten
 Besonderheiten:
@@ -11,7 +11,7 @@ Besonderheiten:
 - Handgefertigtes Einzelstück mit individuellem Charakter
 
 --- ENGLISH ---
-Beschreibung: The Urban Commuter Restomod turns a historic bicycle frame into a purist companion for city traffic. Through a deliberate reduction to the essentials, the renewal of all mechanical wear parts, and a combination with contemporary components, an individual city bike emerges — one that unites the durability of classic craftsmanship with modern urban mobility in a retro style.
+Beschreibung: The Urban Commuter Restomod turns a historic bicycle frame — an old Dutch men's roadster frame — into a purist companion for city traffic. Through a deliberate reduction to essential components, the renewal of all mechanical wear parts, and a combination with contemporary components, an individual city bike emerges — one that unites the durability of classic craftsmanship with modern urban mobility in a retro style.
 Material: Aluminium or steel frame, functional components
 Fertigungstechniken: Frame restoration, reassembly, custom component fitting
 Besonderheiten:

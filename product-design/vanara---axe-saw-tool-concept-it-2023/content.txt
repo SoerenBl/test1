@@ -1,9 +1,9 @@
-Titel: Axe & Saw Tool Concept
+Titel: Vanara - Axt & Säge Kombiwerkzeug
 Land: DE
 Jahr: 2024
 
 --- DEUTSCH ---
-Beschreibung: Vanara definiert mobiles Outdoor-Werkzeug neu, indem es Survival-Axt und Säge in einem extrem kompakten, ästhetischen Ensemble vereint. Die zweischaligen Aluminiumgriffe mit gebürsteter Eiche oder wahlweise Nussbaum verbergen im Inneren ein unsichtbares Magnetsystem, das beide Werkzeuge nahtlos zusammenhält, bis der Lederverschluss gelöst wird oder man sie einfach voneinander trennt. So entsteht eine Begleitung für die Natur, die funktionale Schärfe mit handwerklicher Raffinesse und modernem Design verbindet.
+Beschreibung: Vanara definiert mobiles Outdoor-Werkzeug neu, indem es eine Survival-Axt und Säge in einem extrem kompakten, ästhetischen Ensemble vereint. Die zweischaligen Aluminiumgriffe mit gebürsteter Eiche oder wahlweise Nussbaum verbergen im Inneren ein unsichtbares Magnetsystem, das beide Werkzeuge nahtlos zusammenhält, bis der Lederverschluss gelöst wird oder man sie einfach voneinander trennt. So entsteht eine Begleitung für die Natur, die funktionale Schärfe mit handwerklicher Raffinesse und industriellem Design verbindet.
 Material: Aluminium, Eichenholz (gebürstet), HPL (für das Funktionsmodell), Leder, Neodym-Magnete
 Fertigungstechniken: CNC-Aluminiumfräsen, Holzbearbeitung, Magnetintegration, Lederverarbeitung
 Besonderheiten:
@@ -11,7 +11,8 @@ Besonderheiten:
 - Modular konzipiertes Gürtel-Tragesystem für maximale Mobilität
 
 --- ENGLISH ---
-Beschreibung: Vanara redefines portable outdoor tools by combining a survival axe and saw into one extremely compact, aesthetic ensemble. The two-shell aluminium handles, finished in brushed oak or optionally walnut, conceal an invisible magnetic system that holds both tools seamlessly together until the leather strap is released or they’re simply pulled apart. The result is a companion for the outdoors that combines functional sharpness with crafted refinement and modern design.
+Titel: Vanara - Axe & Saw Combitool
+Beschreibung: Vanara redefines portable outdoor tools by combining a survival axe and saw into one extremely compact, aesthetic ensemble. The two-shell aluminium handles, finished in brushed oak or optionally walnut, conceal an invisible magnetic system that holds both tools seamlessly together until the leather strap is released or they’re simply pulled apart. The result is a companion for the outdoors that combines functional sharpness with crafted refinement and industrial design.
 Material: Aluminium, oak (brushed), HPL (for the functional model), leather, neodymium magnets
 Fertigungstechniken: CNC aluminium milling, woodworking, magnet integration, leatherworking
 Besonderheiten:

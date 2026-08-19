@@ -1,9 +1,10 @@
-Titel: Design Classic Line Drawing
+Titel: Design Classic Linienzeichnung
 Land: IT
 Jahr: 2022
 
 --- DEUTSCH ---
-Beschreibung: Eine Serie technischer Strichzeichnungen bekannter Designklassiker — reduziert auf ihre Konturen, ganz ohne Farbe oder Schattierung. Jedes Blatt versammelt die Zeichnung mit einer kurzen Werkgeschichte in drei Sprachen, hier am Beispiel der Riva Aquarama von 1962. Entstanden als Übung in Präzision: Jede Linie musste die Form allein tragen.
+Beschreibung: Eine künstlerische Strichzeichnung eines bekannten Designklassikers — dem Riva Aquarama von 1962 — reduziert auf ihre Konturen, ganz ohne Farbe oder Schattierung. Jede Linie akkurat und bedacht gesetzt, demonstriert sie, wie durch Reduktion dennoch ein detailliertes Bild geschaffen werden kann — weniger ist einfach mehr!
 
 --- ENGLISH ---
-Beschreibung: A series of technical line drawings of well-known design classics, reduced to pure contour with no colour or shading. Each sheet pairs the drawing with a short piece of the object's history in three languages — shown here with the 1962 Riva Aquarama. Conceived as an exercise in precision, where every line has to carry the form on its own.
+Titel: Design Classic Line Drawing
+Beschreibung: An artistic line drawing of a well-known design classic — the 1962 Riva Aquarama — reduced to pure contour with no colour or shading. With every line placed accurately and deliberately, it demonstrates how reduction alone can still create a richly detailed image — less really is more!
