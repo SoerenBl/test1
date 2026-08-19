@@ -1,6 +1,6 @@
 Titel: Remissus
-Land: DE
-Jahr: 2025
+Land: IT
+Jahr: 2024
 
 --- DEUTSCH ---
 Beschreibung: Remissus verkörpert gelassene Eleganz und lädt mit seiner tiefen, sanft geneigten Sitzfläche zum verweilenden Lesen und Nachdenken ein. Aus dunkel gebeizter Eiche gefertigt, verzichtet der Lounge-Sessel bewusst auf schwere Polsterungen und vertraut stattdessen auf eine perfekt austarierte Ergonomie. Seine klare Silhouette fügt sich sowohl in private Rückzugsorte als auch in anspruchsvolle Loungebereiche nahtlos ein.
@@ -9,6 +9,8 @@ Fertigungstechniken: CNC-Fräsung der Gestellkomponenten, Festool-Domino-Verbind
 Besonderheiten:
 - Ergonomisch austarierte Neigungswinkel für maximalen Komfort ohne schwere Polsterung
 - Haptisch ansprechende Kantenradien und sichtbare, präzise Fügestellen
+- Leichtes Erscheinungsbild durch geringe Querschnitte und schwebendes Design
+- Materialschonend: Alle Rahmenteile lassen sich aus 60×80mm Kanthölzern fertigen
 
 --- ENGLISH ---
 Beschreibung: Remissus embodies serene elegance, its deep, gently reclined seat inviting long, unhurried reading and reflection. Crafted from dark-stained oak, the lounge chair deliberately forgoes heavy upholstery, relying instead on perfectly balanced ergonomics. Its clear silhouette fits seamlessly into both private retreats and sophisticated lounge settings.
@@ -17,3 +19,5 @@ Fertigungstechniken: CNC milling of the frame components, Festool Domino joinery
 Besonderheiten:
 - Ergonomically balanced recline angles for maximum comfort without heavy upholstery
 - Tactile, inviting edge radii and precise, visible joinery
+- A light overall appearance thanks to slender cross-sections and a floating design
+- Material-efficient: every frame part can be milled from 60×80mm timber

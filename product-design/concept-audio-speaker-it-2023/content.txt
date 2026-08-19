@@ -1,10 +1,22 @@
 Titel: Stereo Standlautsprecher - Konzept
-Land: DE
+Land: IT
 Jahr: 2023
 
 --- DEUTSCH ---
 Beschreibung: Ein konzeptioneller Entwurf für ein Set freistehender Lautsprecher, der Akustiktechnik und Möbeldesign zusammendenkt — nicht als verstecktes Gerät, sondern als eigenständiges, einzigartiges Objekt im Raum. Ein Blickfang, dessen Fokus auf einer extravaganten, maschinellen Formensprache statt kurzlebiger Consumer-Elektronik-Ästhetik liegt. Das Design „umschließt“ den Hauptakteur, den Lautsprecherkorpus. Ein aufregendes Muster im Gitter lässt erst auf den zweiten Blick mehr vermuten.
+Material: Aluminium gefräst, Nussbaumholz, Leder
+Fertigungstechniken: Fräsen, Formverleimung von Holzfurnieren
+Besonderheiten:
+- Massiv gefräster Standfuß aus hochwertigem Flugzeugaluminium
+- Frei hängender/eingespannter Chassiskorpus, damit Körperschall nicht übertragen werden kann
+- Aufwändiger Korpus: aus Aluminium und Echtholz
 
 --- ENGLISH ---
 Titel: Stereo Floorstanding Speaker - Concept
 Beschreibung: A conceptual design for a set of freestanding speakers that treats acoustic technology and furniture design as one problem — not a device to hide, but a standalone, singular object in the room. An eye-catcher whose focus lies on an extravagant, machine-like form language rather than short-lived consumer-electronics styling. The design “encloses” its main actor, the speaker housing. An intriguing pattern in the grille only reveals more on a second look.
+Material: Milled aluminium, walnut wood, leather
+Fertigungstechniken: Milling, press-moulding of wood veneers
+Besonderheiten:
+- A solid milled base made from high-grade aircraft aluminium
+- A freely suspended/clamped chassis body so structure-borne sound can't transfer through it
+- An elaborate housing made from aluminium and solid wood

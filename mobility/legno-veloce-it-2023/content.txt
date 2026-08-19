@@ -4,18 +4,20 @@ Jahr: 2023
 
 --- DEUTSCH ---
 Beschreibung: Legno Veloce reizt die Grenzen des Werkstoffs Holz neu aus und vereint als handgefertigtes Singlespeed traditionelle Handwerkskunst mit moderner CNC-Präzision. Sein hohler Rahmen aus nachhaltiger Esche spart Gewicht, dämpft Vibrationen naturgemäß und garantiert maximale Langlebigkeit wie auch Umweltfreundlichkeit. Ein wartungsarmes, ausdrucksstarkes Bike für die Stadt, das zeigt, wie erneuerbare Materialien eine menschzentrierte Mobilität mit Charakter prägen können.
-Material: Eschenholz, PU-Leim, Aluminium und Stahl
-Fertigungstechniken: Furnier-Formverleimung in CNC-gefrästen Pressformen, CNC-3D-Konturfräsen, traditionelle Holzverbindungstechnik und traditionelle Fertigungs-/Veredelungstechniken
+Material: Eschenholz, PU-Leim, Aluminium und Stahl, Carbon
+Fertigungstechniken: Furnier-Formverleimung in CNC-gefrästen Pressformen, CNC-3D-5-Achs-Fräsen, traditionelle Holzverbindungstechnik und traditionelle Fertigungs-/Veredelungstechniken
 Besonderheiten:
 - Formschöner Tropfenprofil-Querschnitt zur Aufnahme von Zug- und Druckkräften und für Aerodynamik
 - Hohlkammerkonstruktion aus zwei spiegelbildlich verleimten Chassishälften mit Mittelsteg zur Maximierung der Torsionssteifigkeit
 - Punktueller Belastungstest bis 400 kg Druck im Prototypenverfahren
+- Ausgewählte High-End-Komponenten, auf das Design abgestimmt
 
 --- ENGLISH ---
 Beschreibung: Legno Veloce pushes the boundaries of wood as a material, combining traditional craftsmanship with modern CNC precision in a handmade single-speed bike. Its hollow frame of sustainable ash saves weight, naturally dampens vibration, and guarantees maximum durability as well as environmental friendliness. A low-maintenance, expressive city bike that shows how renewable materials can shape human-centred mobility with character.
-Material: Ash wood, PU adhesive, aluminium and steel
-Fertigungstechniken: Veneer press-moulding in CNC-milled forms, CNC 3D contour milling, traditional wood-joinery techniques, and traditional finishing techniques
+Material: Ash wood, PU adhesive, aluminium and steel, carbon
+Fertigungstechniken: Veneer press-moulding in CNC-milled forms, CNC 5-axis 3D milling, traditional wood-joinery techniques, and traditional finishing techniques
 Besonderheiten:
 - Elegant teardrop-profile cross-section for handling tension and compression loads while improving aerodynamics
 - Hollow-chamber construction from two mirror-glued chassis halves with a central web to maximise torsional stiffness
 - Prototype load-tested to a localised 400kg of pressure
+- Selected high-end components matched to the design

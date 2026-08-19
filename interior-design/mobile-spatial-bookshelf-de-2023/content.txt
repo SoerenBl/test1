@@ -1,5 +1,5 @@
 Titel: Roomshelf - Mobiles Bücherregal
-Land: DE
+Land: IT
 Jahr: 2023
 
 --- DEUTSCH ---
@@ -9,6 +9,7 @@ Fertigungstechniken: Modulbauweise, Roll- und Stellmechanismen, integrierte Elek
 Besonderheiten:
 - Kombiniert Bücherregal, Raumtrennung und Rückzugsort (Sitzbank mit Leseleuchte)
 - Flexibel positionierbar für wechselnde Raumanforderungen
+- Interaktion mit Möbel, Umgebung und Menschen
 
 --- ENGLISH ---
 Titel: Roomshelf - Mobile Spatial Bookshelf
@@ -18,3 +19,4 @@ Fertigungstechniken: Modular construction, rolling and positioning mechanisms, i
 Besonderheiten:
 - Combines bookshelf, room divider, and retreat (a bench seat with a reading lamp)
 - Freely repositionable to suit changing spatial needs
+- Interaction between the furniture, its surroundings, and people
