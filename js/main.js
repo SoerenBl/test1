@@ -48,12 +48,33 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Language toggle (DE/EN) ---
   var langButtons = document.querySelectorAll('[data-set-lang]');
   var langToggleTrack = document.querySelector('.lang-toggle');
+  // Anton (the headline font) sets ä/ö/ü's diaeresis dots very close to
+  // cap-height — at the deliberately tight, sub-1em line-heights used for
+  // big titles, those dots can crowd into or clip against the line above
+  // once a title wraps to 2+ lines. Rather than loosening every title's
+  // spacing (losing the tight look titles without umlauts are tuned for),
+  // only the titles that actually contain one get the extra room, and
+  // only for whichever language is currently showing — re-run on every
+  // applyLang() call, which already covers every point a title's text can
+  // change (initial load, language toggle, dynamically discovered project
+  // tiles).
+  var UMLAUT_TITLE_SELECTOR = '.display, .tile__title, .project-hero__title, .stack__title, .page-hero__title';
+  var UMLAUT_RE = /[äöüÄÖÜ]/;
+  function updateUmlautSpacing(lang) {
+    document.querySelectorAll(UMLAUT_TITLE_SELECTOR).forEach(function (el) {
+      var langSpan = el.querySelector('[data-lang="' + lang + '"]');
+      var text = langSpan ? langSpan.textContent : el.textContent;
+      el.classList.toggle('has-umlaut', UMLAUT_RE.test(text));
+    });
+  }
+
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
     langButtons.forEach(function (btn) {
       btn.setAttribute('data-active', String(btn.getAttribute('data-set-lang') === lang));
     });
     if (langToggleTrack) langToggleTrack.classList.toggle('lang-toggle--en', lang === 'en');
+    updateUmlautSpacing(lang);
   }
   langButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -581,7 +602,6 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         var prev = grid.querySelector('.tile.is-tap-focused');
         if (prev) prev.classList.remove('is-tap-focused');
-        grid.classList.add('has-tap-focus');
         tile.classList.add('is-tap-focused');
       });
     });
@@ -589,8 +609,6 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.tile-grid--projects .tile.is-tap-focused').forEach(function (tile) {
         if (tile.contains(e.target)) return;
         tile.classList.remove('is-tap-focused');
-        var grid = tile.closest('.tile-grid--projects');
-        if (grid && !grid.querySelector('.tile.is-tap-focused')) grid.classList.remove('has-tap-focus');
       });
     }, true);
   })();

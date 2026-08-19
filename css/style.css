@@ -95,6 +95,20 @@ h1, h2, h3, h4 {
   line-height: 0.86;
   letter-spacing: -0.01em;
 }
+
+/* .has-umlaut is toggled by js/main.js on whichever titles' currently
+   visible text contains ä/ö/ü — extra room so the diaeresis dots don't
+   crowd into (or clip against) the line above once the title wraps.
+   Two classes each beats every single-class line-height rule above and
+   in the media queries below regardless of source order, so one shared
+   value here reliably overrides every title context. */
+.display.has-umlaut,
+.tile__title.has-umlaut,
+.project-hero__title.has-umlaut,
+.stack__title.has-umlaut,
+.page-hero__title.has-umlaut {
+  line-height: 1.15;
+}
 .page-title { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .page-title--sm { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .lede { max-width: 46ch; color: var(--color-text-muted); }
@@ -876,23 +890,15 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 
 /* Project tiles on a category page: the focused tile (hover on desktop,
    first tap on touch -- see js/main.js for the .is-tap-focused toggle)
-   zooms in slightly, every other tile in the grid blurs, so attention
-   reads as being on the one tile whose title/country/year is showing. */
+   zooms in slightly, same cue as the fixed-layout gallery above. */
 .tile-grid--projects:not([data-fixed-layout]) .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile__media .ph {
-  transition: transform 0.4s ease, filter 0.4s ease;
-}
-.tile-grid--projects:not([data-fixed-layout]):hover .tile__media img,
-.tile-grid--projects:not([data-fixed-layout]):hover .tile__media .ph,
-.tile-grid--projects:not([data-fixed-layout]).has-tap-focus .tile__media img,
-.tile-grid--projects:not([data-fixed-layout]).has-tap-focus .tile__media .ph {
-  filter: blur(6px);
+  transition: transform 0.4s ease;
 }
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media .ph,
 .tile-grid--projects:not([data-fixed-layout]) .tile.is-tap-focused .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile.is-tap-focused .tile__media .ph {
-  filter: none;
   transform: scale(1.06);
 }
 
