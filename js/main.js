@@ -562,6 +562,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Project tiles on a category page (not the fixed-layout photo gallery
+  // inside a project's own detail page): touch has no real hover, so
+  // without help a tap goes straight to the project with no preview at
+  // all. First tap on a tile now only shows the same title/country/year
+  // preview a mouse hover already gives on desktop (see the CSS focus
+  // rules above) instead of navigating; a second tap on that same,
+  // already-previewed tile follows the link. Skipped entirely on
+  // hover-capable pointers (real mice) — there, hover already previews
+  // and a single click can go straight through, same as before.
+  (function () {
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.querySelectorAll('.tile-grid--projects:not([data-fixed-layout])').forEach(function (grid) {
+      grid.addEventListener('click', function (e) {
+        var tile = e.target.closest('.tile');
+        if (!tile || !grid.contains(tile)) return;
+        if (tile.classList.contains('is-tap-focused')) return; // second tap: follow the link
+        e.preventDefault();
+        var prev = grid.querySelector('.tile.is-tap-focused');
+        if (prev) prev.classList.remove('is-tap-focused');
+        grid.classList.add('has-tap-focus');
+        tile.classList.add('is-tap-focused');
+      });
+    });
+    document.addEventListener('click', function (e) {
+      document.querySelectorAll('.tile-grid--projects .tile.is-tap-focused').forEach(function (tile) {
+        if (tile.contains(e.target)) return;
+        tile.classList.remove('is-tap-focused');
+        var grid = tile.closest('.tile-grid--projects');
+        if (grid && !grid.querySelector('.tile.is-tap-focused')) grid.classList.remove('has-tap-focus');
+      });
+    }, true);
+  })();
+
   // --- Homepage category tiles: "N Projekte" is read from the same
   // discovery data instead of being typed in twice (and going stale the
   // moment a project is added or removed). ---

@@ -865,13 +865,36 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   transition: opacity 0.3s ease;
   pointer-events: none;
 }
-.tile-grid--projects .tile:hover .tile__media::after { opacity: 1; }
+.tile-grid--projects .tile:hover .tile__media::after,
+.tile-grid--projects .tile.is-tap-focused .tile__media::after { opacity: 1; }
 /* A project's own photo grid has no caption to reveal — skip the dark hover tint, use a subtle zoom cue instead */
 .tile-grid--projects[data-fixed-layout] .tile__media::after { content: none; }
 .tile-grid--projects[data-fixed-layout] .tile__media img,
 .tile-grid--projects[data-fixed-layout] .tile__media .ph { transition: transform 0.4s ease; }
 .tile-grid--projects[data-fixed-layout] .tile:hover .tile__media img,
 .tile-grid--projects[data-fixed-layout] .tile:hover .tile__media .ph { transform: scale(1.03); }
+
+/* Project tiles on a category page: the focused tile (hover on desktop,
+   first tap on touch -- see js/main.js for the .is-tap-focused toggle)
+   zooms in slightly, every other tile in the grid blurs, so attention
+   reads as being on the one tile whose title/country/year is showing. */
+.tile-grid--projects:not([data-fixed-layout]) .tile__media img,
+.tile-grid--projects:not([data-fixed-layout]) .tile__media .ph {
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.tile-grid--projects:not([data-fixed-layout]):hover .tile__media img,
+.tile-grid--projects:not([data-fixed-layout]):hover .tile__media .ph,
+.tile-grid--projects:not([data-fixed-layout]).has-tap-focus .tile__media img,
+.tile-grid--projects:not([data-fixed-layout]).has-tap-focus .tile__media .ph {
+  filter: blur(6px);
+}
+.tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media img,
+.tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media .ph,
+.tile-grid--projects:not([data-fixed-layout]) .tile.is-tap-focused .tile__media img,
+.tile-grid--projects:not([data-fixed-layout]) .tile.is-tap-focused .tile__media .ph {
+  filter: none;
+  transform: scale(1.06);
+}
 
 .tile__scrim {
   position: absolute;
@@ -906,7 +929,8 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-.tile-grid--projects .tile:hover .tile__caption { opacity: 1; }
+.tile-grid--projects .tile:hover .tile__caption,
+.tile-grid--projects .tile.is-tap-focused .tile__caption { opacity: 1; }
 .tile-grid--projects .tile__title { margin-top: 0; }
 .tile__meta {
   display: block;
