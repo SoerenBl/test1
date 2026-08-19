@@ -394,6 +394,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // A single top-level mobil/ folder mirrors every fixed photo slot's own
+  // path (mobil/hero.jpg for hero.jpg, mobil/kategorien/mobility/cover.jpg
+  // for kategorien/mobility/cover.jpg, and so on) — one place to drop a
+  // narrower, purpose-cropped version of a background photo for phones,
+  // instead of the same landscape crop everywhere getting cropped further
+  // at random by object-fit on a portrait screen. Resolving against
+  // location.href (rather than string-prefixing "mobil/" onto the raw
+  // attribute) is what makes one flat mirror folder work regardless of how
+  // deeply nested the current page's own data-photo path is -- the browser
+  // does the same "how many ../ does this page need" math a hand-written
+  // prefix would otherwise have to duplicate per page depth. Entirely
+  // optional: nothing at the mobil/ path just falls straight through to
+  // the normal photo, same as any other missing file on this site.
+  var MOBILE_PHOTO_MQ = window.matchMedia('(max-width: 760px)');
+  function probePhotoMobileAware(base) {
+    if (!MOBILE_PHOTO_MQ.matches) return probePhoto(base);
+    var mobileBase = '/mobil' + new URL(base, location.href).pathname;
+    return probePhoto(mobileBase).then(function (url) { return url || probePhoto(base); });
+  }
+
   // --- Fixed single photo slots (hero, category covers, listing thumbnails):
   // same format tolerance, applied to a static <img data-photo="path/without/extension">.
   // An optional data-photo-fallback is tried if the primary path has no
@@ -403,9 +423,9 @@ document.addEventListener('DOMContentLoaded', function () {
     (root || document).querySelectorAll('img[data-photo]').forEach(function (img) {
       var primary = img.getAttribute('data-photo');
       var fallback = img.getAttribute('data-photo-fallback');
-      probePhoto(primary).then(function (url) {
+      probePhotoMobileAware(primary).then(function (url) {
         if (url || !fallback) return url;
-        return probePhoto(fallback);
+        return probePhotoMobileAware(fallback);
       }).then(function (url) {
         if (url) {
           img.src = url;
