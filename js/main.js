@@ -1703,63 +1703,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })();
 
-  // Sitewide footer push, mirroring the About/Awards mechanism above as
-  // "one more tile": near the very end of a page's own content, one
-  // wheel tick pushes the rest of the way to reveal the footer fully,
-  // and the same in reverse when scrolling up out of it. Zone-based
-  // rather than full-page-range on purpose -- unlike the About/Awards
-  // seam, which sits early in one short, fixed-length panel, the run of
-  // content above a footer can be an entire long project page, and
-  // triggering from anywhere in that whole range would hijack ordinary
-  // scrolling everywhere on the page. Only engages once already close to
-  // the seam, same zone width both directions.
-  (function () {
-    var footerEl = document.querySelector('footer');
-    if (!footerEl) return;
-    var narrowMq = window.matchMedia('(max-width: 760px)');
-    var ZONE_PX = 220;
-
-    function boundary() {
-      var top = footerEl.getBoundingClientRect().top + window.scrollY;
-      return Math.max(0, top - window.innerHeight);
-    }
-    function maxScroll() {
-      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    }
-    function startTransition(target) {
-      anyPushTransitioning = true;
-      pushScrollTo(target, function () { anyPushTransitioning = false; awaitingFreshGesture = true; });
-    }
-
-    window.addEventListener('wheel', function (e) {
-      if (narrowMq.matches) return;
-      if (anyPushTransitioning) { e.preventDefault(); return; }
-      // Swallow (not just skip) the rest of this gesture's tail --
-      // reported: About->Awards would occasionally keep going "by
-      // itself" and reveal a slice of the footer. Only *skipping* here
-      // still let the same residual wheel events fall through to
-      // ordinary unprevented scrolling, which -- with html's sitewide
-      // scroll-behavior:smooth compounding across several of them in
-      // quick succession -- could carry noticeably further than the one
-      // clean push the user actually made. One push should fully
-      // consume the gesture that triggered it; a genuinely later, fresh
-      // gesture is unaffected since gestureEligible flips back to true
-      // as soon as real silence is observed.
-      if (!gestureEligible) { e.preventDefault(); return; }
-      if (Math.abs(e.deltaY) <= 4) return;
-      var boundaryY = boundary();
-      var openY = maxScroll();
-      if (openY <= boundaryY) return; // footer already fills the rest of the page, nothing to push
-      var y = window.scrollY;
-      if (e.deltaY > 0 && y < boundaryY && y > boundaryY - ZONE_PX) {
-        e.preventDefault();
-        startTransition(openY);
-      } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + ZONE_PX) {
-        e.preventDefault();
-        startTransition(boundaryY);
-      }
-    }, { passive: false });
-  })();
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroSection = projectHero ? projectHero.closest('.project-hero') : null;
   // The docked title stays position:fixed for the *entire* rest of the
