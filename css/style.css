@@ -333,14 +333,17 @@ body.is-menu-open .project-hero__overlay {
   z-index: 2;
 }
 @media (max-width: 760px) {
-  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease; }
+  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease, transform 0.3s ease; }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
   /* Kept in sync with .nav.is-hidden by the same mobile scroll-direction
      check (see js/main.js) — a CSS transition here, rather than chasing
      the nav's live position every scroll frame, is what keeps this from
      lagging while also guaranteeing it hides/shows at the exact same
-     moment as the nav bar it's about to dock into. */
-  .project-hero__overlay.is-nav-hidden { opacity: 0; }
+     moment as the nav bar it's about to dock into. Slides the same
+     translateY(-100%) as .nav.is-hidden itself (not just a fade) so the
+     two read as one connected motion, not two separate effects that
+     happen to line up in time. */
+  .project-hero__overlay.is-nav-hidden { opacity: 0; transform: translateY(-100%); }
 }
 @media (prefers-reduced-motion: reduce) {
   .project-hero__overlay { position: relative; z-index: 5; }

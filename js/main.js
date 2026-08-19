@@ -1930,6 +1930,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Project/category titles keep the grow-and-dock-into-the-nav animation
+  // on desktop only now -- on mobile the title just sits at its natural
+  // size and position, fading/sliding away together with the nav itself
+  // via .project-hero__overlay.is-nav-hidden (plain CSS, driven by the
+  // exact same scroll-direction check as .nav.is-hidden -- see the mobile
+  // rule in style.css), at the user's request to drop the movement effect
+  // there specifically.
+  var projectHeroDockMq = window.matchMedia('(max-width: 760px)');
+
   if (!reduceMotion && (parallaxEls.length || heroContent || projectHero)) {
     // A persistent rAF loop, not 'scroll'-event-triggered — on mobile,
     // 'scroll' events during momentum/inertial scrolling can fire less
@@ -1955,7 +1964,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var scale = 1 - progress * 0.14;
         heroContent.style.transform = 'scale(' + scale.toFixed(3) + ')';
       }
-      if (projectHero && projectHeroNatural && projectHeroDock) {
+      if (projectHero && projectHeroNatural && projectHeroDock && !projectHeroDockMq.matches) {
         if (window.scrollY >= PROJECT_DOCK_RANGE) {
           // Fully docked and staying that way for the entire rest of the
           // scroll range below — park it as position:fixed at exactly
