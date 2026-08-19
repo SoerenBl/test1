@@ -244,9 +244,9 @@ function updateServices(html, data) {
   html = patchBilingual(html, '<p class="lede">\n      ', '\n    </p>', data.de.Untertitel, data.en.Untertitel, 'Untertitel');
   html = patchServiceRow(html, '<p class="lede">',
     data.de.Abschnitt1Titel, data.en.Abschnitt1Titel, data.de.Abschnitt1Text, data.en.Abschnitt1Text, 'Abschnitt1');
-  html = patchServiceRow(html, 'href="../mobility/">',
+  html = patchServiceRow(html, 'href="../kategorien/mobility/">',
     data.de.Abschnitt2Titel, data.en.Abschnitt2Titel, data.de.Abschnitt2Text, data.en.Abschnitt2Text, 'Abschnitt2');
-  html = patchServiceRow(html, 'href="../furniture-lighting/">',
+  html = patchServiceRow(html, 'href="../kategorien/furniture-lighting/">',
     data.de.Abschnitt3Titel, data.en.Abschnitt3Titel, data.de.Abschnitt3Text, data.en.Abschnitt3Text, 'Abschnitt3');
   return html;
 }

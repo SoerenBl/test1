@@ -432,12 +432,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join(' ');
   }
 
+  // title.txt is two lines -- German title, then English title (written
+  // automatically by scripts/update-project-content.js from content.txt,
+  // never hand-edited) -- so a project whose name genuinely differs per
+  // language (e.g. "Schwebender Multiplex Nachttisch" / "Floating Plywood
+  // Nightstand") shows the right one on the category tile too, not just on
+  // its own detail page. A second line missing falls back to the first,
+  // covering the (also auto-written) case where both languages share one
+  // name.
   function fetchTitleOverride(category, slug) {
     var url = 'https://raw.githubusercontent.com/' + GH_REPO + '/' + GH_BRANCH + '/' + category + '/' + slug + '/title.txt';
     return fetch(url).then(function (res) {
       return res.ok ? res.text() : null;
     }).then(function (text) {
-      return text ? text.trim() : null;
+      if (!text) return null;
+      var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+      if (!lines.length) return null;
+      return { de: lines[0], en: lines[1] || lines[0] };
     }).catch(function () { return null; });
   }
 
@@ -460,11 +471,18 @@ document.addEventListener('DOMContentLoaded', function () {
         var m = e.name.match(FOLDER_RE);
         var slug = m[1], country = m[2].toUpperCase(), year = m[3];
         return fetchTitleOverride(category, e.name).then(function (customTitle) {
-          return { slug: e.name, title: customTitle || titleCaseSlug(slug), country: country, year: year };
+          var fallback = titleCaseSlug(slug);
+          return {
+            slug: e.name,
+            titleDe: (customTitle && customTitle.de) || fallback,
+            titleEn: (customTitle && customTitle.en) || fallback,
+            country: country,
+            year: year
+          };
         });
       }));
     }).then(function (projects) {
-      projects.sort(function (a, b) { return b.year - a.year || a.title.localeCompare(b.title); });
+      projects.sort(function (a, b) { return b.year - a.year || a.titleDe.localeCompare(b.titleDe); });
       try { localStorage.setItem(cacheKey, JSON.stringify({ at: Date.now(), projects: projects })); } catch (e) { /* storage full/disabled */ }
       return projects;
     });
@@ -515,10 +533,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var p = r.p;
         return '<a class="tile" href="' + p.slug + '/" data-row-span="' + r.span + '">' +
           '<div class="tile__media">' +
-          '<div class="ph"><span data-lang="de">Projektfoto — ' + p.title + '</span><span data-lang="en">Project photo — ' + p.title + '</span></div>' +
+          '<div class="ph"><span data-lang="de">Projektfoto — ' + p.titleDe + '</span><span data-lang="en">Project photo — ' + p.titleEn + '</span></div>' +
           '<img data-photo="' + p.slug + '/cover" data-photo-fallback="' + p.slug + '/1" alt="">' +
           '<div class="tile__caption">' +
-          '<h3 class="tile__title display">' + p.title + '</h3>' +
+          '<h3 class="tile__title display"><span data-lang="de">' + p.titleDe + '</span><span data-lang="en">' + p.titleEn + '</span></h3>' +
           '<span class="tile__meta">' + p.country + ' · ' + p.year + '</span>' +
           '</div></div></a>';
       }).join('');
@@ -666,9 +684,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!heroSection || !document.querySelector('.project-hero-panel')) return;
     var pathParts = location.pathname.split('/').filter(Boolean);
     if (pathParts.length && pathParts[pathParts.length - 1].indexOf('.html') !== -1) pathParts.pop();
-    var pdfCategory = pathParts[pathParts.length - 2];
     var pdfSlug = pathParts[pathParts.length - 1];
-    if (pdfCategory !== 'editorial' || !pdfSlug) return;
+    // The category name check only ever needs the immediate parent segment
+    // ("editorial"), but the API path needs everything before the slug --
+    // kept separate so this still resolves correctly regardless of how many
+    // directory levels a category folder sits under (e.g. "editorial" today,
+    // "kategorien/editorial" after the category folders moved under one
+    // parent).
+    var pdfCategoryName = pathParts[pathParts.length - 2];
+    var pdfCategoryPath = pathParts.slice(0, -1).join('/');
+    if (pdfCategoryName !== 'editorial' || !pdfSlug) return;
 
     // Repeated real-device reports of the PDF viewer just not showing up,
     // with no way for the person hitting it to open devtools and read the
@@ -693,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // the same window as discoverCategoryProjects, including the
     // (far more common) "this project has no PDF" case, so it's not
     // just re-fetched and discarded on every load either.
-    var pdfCacheKey = 'pdfcheck:' + pdfCategory + '/' + pdfSlug;
+    var pdfCacheKey = 'pdfcheck:' + pdfCategoryPath + '/' + pdfSlug;
     var cachedPdfUrl;
     try {
       var cachedPdf = JSON.parse(localStorage.getItem(pdfCacheKey) || 'null');
@@ -710,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cachedPdfUrl !== undefined) {
       setupViewerFromUrl(cachedPdfUrl);
     } else {
-      var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + pdfCategory + '/' + encodeURIComponent(pdfSlug) + '?ref=' + GH_BRANCH;
+      var apiUrl = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + pdfCategoryPath + '/' + encodeURIComponent(pdfSlug) + '?ref=' + GH_BRANCH;
       fetch(apiUrl).then(function (res) {
         // A 404 here is the normal, expected case for every project that
         // simply has no PDF (most of them) — cached as null right away

@@ -165,7 +165,7 @@ function buildContactList(data, categoryLabelDe, categoryLabelEn) {
 // pages pointing at a stale asset version just because this template
 // wasn't updated too.
 function currentAssetVersion() {
-  const probe = path.join(REPO_ROOT, 'mobility', 'bmw-k100-aero-de-2024', 'index.html');
+  const probe = path.join(REPO_ROOT, 'kategorien', 'mobility', 'bmw-k100-aero-de-2024', 'index.html');
   if (fs.existsSync(probe)) {
     const m = fs.readFileSync(probe, 'utf8').match(/style\.css\?v=(\d+)/);
     if (m) return m[1];
@@ -192,14 +192,14 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 <title>${title} — Sören Bläcker</title>
 <meta name="description" content="${title} — Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
-<link rel="icon" href="../../favicon.svg" id="faviconLink" data-favicon-fallback="../../logo2">
-<link rel="stylesheet" href="../../css/style.css?v=${assetVersion}">
+<link rel="icon" href="../../../favicon.svg" id="faviconLink" data-favicon-fallback="../../../logo2">
+<link rel="stylesheet" href="../../../css/style.css?v=${assetVersion}">
 </head>
 <body>
 
 <header class="nav">
   <div class="nav__inner">
-    <a href="../../index.html" class="nav__mark"><span class="nav__mark-text">Sören Bläcker</span><img class="nav__mark-logo" data-photo="../../logo" alt="Sören Bläcker"></a>
+    <a href="../../../index.html" class="nav__mark"><span class="nav__mark-text">Sören Bläcker</span><img class="nav__mark-logo" data-photo="../../../logo" alt="Sören Bläcker"></a>
     <div class="nav__right">
       <div class="lang-toggle">
         <span class="lang-toggle__thumb" aria-hidden="true">
@@ -226,11 +226,11 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 <div class="menu-panel" id="menuPanel">
   <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen"></button>
   <nav class="menu-panel__nav">
-    <a href="../../index.html"><span data-lang="de">Start</span><span data-lang="en">Home</span></a>
-    <a href="../../index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
-    <a href="../../services/"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
-    <a href="../../about.html"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
-    <a href="../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
+    <a href="../../../index.html"><span data-lang="de">Start</span><span data-lang="en">Home</span></a>
+    <a href="../../../index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
+    <a href="../../../services/"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
+    <a href="../../../about.html"><span data-lang="de">Über mich</span><span data-lang="en">About</span></a>
+    <a href="../../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
   </nav>
   <div class="menu-panel__foot">
     <span data-lang="de">Deutschland — weltweit verfügbar</span>
@@ -238,8 +238,8 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
     <div class="menu-panel__social">
       <a href="https://www.youtube.com/@soerenblaecker.design" target="_blank" rel="noopener">YouTube</a>
       <a href="https://www.linkedin.com/in/soerenblaecker" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="../../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
-      <a href="../../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
+      <a href="../../../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
+      <a href="../../../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
     </div>
   </div>
 </div>
@@ -275,16 +275,16 @@ ${buildContactList(data, categoryLabelDe, categoryLabelEn)}
   <div class="wrap footer__inner">
     <span>&copy; <span id="year">2026</span> Sören Bläcker</span>
     <div class="footer__social">
-      <a href="../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
-      <a href="../../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
-      <a href="../../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
+      <a href="../../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
+      <a href="../../../impressum/"><span data-lang="de">Impressum</span><span data-lang="en">Legal Notice</span></a>
+      <a href="../../../datenschutz/"><span data-lang="de">Datenschutz</span><span data-lang="en">Privacy</span></a>
       <a href="https://www.youtube.com/@soerenblaecker.design" target="_blank" rel="noopener">YouTube</a>
       <a href="https://www.linkedin.com/in/soerenblaecker" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
 </footer>
 
-<script src="../../js/main.js?v=${assetVersion}"></script>
+<script src="../../../js/main.js?v=${assetVersion}"></script>
 </body>
 </html>
 `;
@@ -313,6 +313,15 @@ function main() {
       const data = parseContentTxt(text);
       const isNew = !fs.existsSync(htmlPath);
       fs.writeFileSync(htmlPath, renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion));
+      // Category-page tiles need a title without fetching/parsing this
+      // project's whole content.txt just for that -- title.txt is that
+      // cheap lookup, always written here (never hand-edited) so it can
+      // never drift from what this same content.txt says. Two lines, DE
+      // then EN; a project whose name doesn't differ per language just
+      // gets the same line twice.
+      const titleDe = data.titel;
+      const titleEn = data.en.Titel || data.titel;
+      fs.writeFileSync(path.join(dir, 'title.txt'), `${titleDe}\n${titleEn}\n`);
       console.log(`${isNew ? 'NEU' : 'OK'}: ${file} -> ${path.relative(process.cwd(), htmlPath)}`);
     } catch (err) {
       anyError = true;
