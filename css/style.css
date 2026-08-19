@@ -568,9 +568,15 @@ body.is-menu-open .project-hero__overlay {
   z-index: 290;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+  /* Blurs the rest of the page while the menu is open, so only the (still
+     sharp) menu panel itself stays readable -- opacity alone (above) only
+     dimmed it. backdrop-filter here needs no vendor prefix/fallback: every
+     browser this site otherwise targets already supports it, since
+     .menu-panel a few rules up already relies on the same property. */
+  backdrop-filter: blur(0px);
 }
-.menu-scrim.is-open { opacity: 1; pointer-events: auto; }
+.menu-scrim.is-open { opacity: 1; pointer-events: auto; backdrop-filter: blur(6px); }
 
 /* ---------- Placeholder photo boxes ---------- */
 
