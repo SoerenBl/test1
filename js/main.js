@@ -1666,7 +1666,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // resize since panel 1's own height is now content-driven (can be
     // taller than one screen) rather than a fixed viewport unit.
     var boundaryY = 0;
-    function measureBoundary() { boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight; }
+    // Same idea, one seam further down: where Awards ends and the real
+    // footer begins (reported: continuing to scroll past Awards revealed
+    // a slice of the footer instead of stopping with Awards still filling
+    // the window). In the common case Awards is exactly one viewport
+    // tall, same as About, so footerBoundaryY lands on the exact same
+    // value as boundaryY -- resting at boundaryY already satisfies "Awards
+    // fills the window, no footer" with nothing further to stop at.
+    var footerEl = document.querySelector('footer');
+    var footerBoundaryY = 0;
+    function measureBoundary() {
+      boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight;
+      if (footerEl) {
+        var footerTop = footerEl.getBoundingClientRect().top + window.scrollY;
+        footerBoundaryY = Math.max(boundaryY, footerTop - window.innerHeight);
+      } else {
+        footerBoundaryY = boundaryY;
+      }
+    }
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
@@ -1685,12 +1702,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // means a single short scroll reads as one continuous "push" across
     // the seam instead, no separate jump afterwards. Symmetric: a scroll
     // down while still short of the boundary pushes onto Awards, a
-    // scroll up while just past it pushes back onto About. Left
-    // completely alone everywhere else, in particular anywhere within
-    // Awards' own further content — this is only ever about the one
-    // seam between the two panels, not a general assist, so reaching the
-    // footer still takes its own separate, ordinary scroll like on every
-    // other page.
+    // scroll up while just past it pushes back onto About. One seam
+    // further down, at footerBoundaryY (reported: continuing to scroll
+    // past Awards revealed a slice of the footer instead of stopping with
+    // Awards still filling the window), there's nothing to push *onto* --
+    // a wheel-driven scroll that would carry past it is simply absorbed,
+    // a hard stop rather than another assisted transition. Scrolling up
+    // from there is symmetric with the first seam: it pushes back onto
+    // About. Left completely alone everywhere else, in particular
+    // anywhere within Awards' own further content on a viewport tall
+    // enough to fit more than the panel.
     var REVERSE_ZONE_PX = 200;
     // Previously drove this with native window.scrollTo(...,
     // {behavior:'smooth'}) and had to *guess* when it had actually
@@ -1724,12 +1745,29 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!gestureEligible) { e.preventDefault(); return; }
       if (Math.abs(e.deltaY) <= 4) return;
       var y = window.scrollY;
-      if (e.deltaY > 0 && y < boundaryY) {
-        e.preventDefault();
-        startTransition(boundaryY);
-      } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
-        e.preventDefault();
-        startTransition(0);
+      var hasFooterZone = footerBoundaryY > boundaryY;
+      if (e.deltaY > 0) {
+        if (y < boundaryY) {
+          e.preventDefault();
+          startTransition(boundaryY);
+        } else if (hasFooterZone && y < footerBoundaryY) {
+          e.preventDefault();
+          startTransition(footerBoundaryY);
+        } else if (footerEl && y >= footerBoundaryY - 1) {
+          // Already resting with Awards filling the window (or as close
+          // as the seam above gets it) -- swallow the tick instead of
+          // handing it to native scroll, which is exactly what used to
+          // drift on into the footer.
+          e.preventDefault();
+        }
+      } else if (e.deltaY < 0) {
+        if (hasFooterZone && y > boundaryY && y <= footerBoundaryY + REVERSE_ZONE_PX) {
+          e.preventDefault();
+          startTransition(boundaryY);
+        } else if (y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
+          e.preventDefault();
+          startTransition(0);
+        }
       }
     }, { passive: false });
 
