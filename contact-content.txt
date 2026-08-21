@@ -1,13 +1,13 @@
 --- DEUTSCH ---
 Titel: Lass uns reden.
-Untertitel: Für Anfragen, Auftragsarbeiten oder einfach nur Fragen — melde dich gerne.
-EMail: hallo@soerenblaecker.com
+Untertitel: Für Anfragen, Auftragsarbeiten oder einfach nur Fragen - melde dich gerne.
+EMail: info@soerenblaecker.com
 Telefon: +49 15679825104
 Standort: Deutschland
 
 --- ENGLISH ---
 Titel: Let's talk.
-Untertitel: For inquiries, commissions, or just questions — feel free to reach out.
-EMail: hallo@soerenblaecker.com
+Untertitel: For inquiries, commissions, or just questions - feel free to reach out.
+EMail: info@soerenblaecker.com
 Telefon: +49 15679825104
 Standort: Germany
