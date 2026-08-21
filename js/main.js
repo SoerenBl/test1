@@ -68,12 +68,25 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // The inline bootstrap script in <head> (see any page's own source)
+  // already sets document.title once, synchronously, before first paint,
+  // reading the same data-title-de/en pair off the <title> element itself
+  // -- avoids a flash of the German tab title on a stored 'en' visit. This
+  // just keeps it in sync on every later toggle; storing both languages as
+  // attributes (rather than reading the element's own current text back)
+  // is what lets it flip back and forth indefinitely without ever losing
+  // the original German title once document.title has overwritten it once.
+  var titleEl = document.querySelector('title[data-title-de]');
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
     langButtons.forEach(function (btn) {
       btn.setAttribute('data-active', String(btn.getAttribute('data-set-lang') === lang));
     });
     if (langToggleTrack) langToggleTrack.classList.toggle('lang-toggle--en', lang === 'en');
+    if (titleEl) {
+      var t = titleEl.getAttribute('data-title-' + lang) || titleEl.getAttribute('data-title-de');
+      if (t) document.title = t;
+    }
     updateUmlautSpacing(lang);
   }
   langButtons.forEach(function (btn) {
