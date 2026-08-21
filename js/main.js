@@ -178,12 +178,14 @@ document.addEventListener('DOMContentLoaded', function () {
     opts = opts || {};
     if (!tiles.length) return;
     // Below the 2-column breakpoint the grid is a single full-width
-    // column (see the max-width:760px rules in style.css) — setting an
+    // column (see the matching media query in style.css, also covering a
+    // phone in landscape — often wider than 760px, but still meant to get
+    // the single-column mobile layout, not the desktop grid) — setting an
     // explicit grid-column here would make the browser create a 2nd
-    // implicit column regardless, breaking that. So on narrow viewports
-    // just clear any leftover placement and leave tiles to the normal
-    // single-column flow; there's no 2-column gap to prevent there anyway.
-    var twoCol = window.matchMedia('(min-width: 761px)').matches;
+    // implicit column regardless, breaking that. So there just clear any
+    // leftover placement and leave tiles to the normal single-column
+    // flow; there's no 2-column gap to prevent there anyway.
+    var twoCol = !window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)').matches;
     if (!twoCol) {
       tiles.forEach(function (tile) {
         tile.classList.remove('tile--tall', 'tile--full');
@@ -1513,7 +1515,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var lastY = window.scrollY;
     var navTicking = false;
     function updateNavVisibility() {
-      var isMobile = window.matchMedia('(max-width: 760px)').matches;
+      // Width-only wasn't enough: a phone in landscape is often wider
+      // than 760px (reported: the nav then never hid on scroll there) --
+      // also treated as mobile once the screen is short, regardless of
+      // width, since that's what actually distinguishes a rotated phone
+      // from a real desktop window.
+      var isMobile = window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)').matches;
       var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
       var y = window.scrollY;
       var hide = isMobile && !menuOpen && y > lastY && y > 80;
