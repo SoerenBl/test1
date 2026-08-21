@@ -652,6 +652,20 @@ body.is-menu-open .project-hero__overlay {
      titles above). */
   .hero-tile__content h1 { line-height: 1.05; }
 }
+/* Phone in landscape: .hero-tile is still 100dvh, but that's now a short
+   dimension (~375-430px) rather than a tall one -- the content block
+   (bottom-anchored, sized for a tall portrait screen) no longer fits
+   underneath the fixed nav and rode up into/behind it (reported: the
+   eyebrow line sat under the nav). Trimmed to just title + actions,
+   noticeably smaller, so the whole block comfortably clears the nav
+   instead of needing to be exactly measured against it. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero-tile__content { padding: 12px var(--gutter); }
+  .hero-tile__content .eyebrow { display: none; }
+  .hero-tile__content h1 { font-size: clamp(1.3rem, 4.5vw, 2.1rem); line-height: 1.05; margin-bottom: 0.15em; }
+  .hero-tile__content p { display: none; }
+  .hero-tile__actions { gap: 16px; }
+}
 .hero-tile__actions { display: flex; gap: 28px; flex-wrap: wrap; }
 
 /* ---------- Sections ---------- */
