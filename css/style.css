@@ -187,6 +187,18 @@ p { margin: 0 0 1em; }
   --nav-fg: var(--color-text);
   --nav-fg-muted: var(--color-text-muted);
 }
+/* About page only: the floating white-on-photo nav (needed above the
+   dark stack__bg photos on desktop) has nothing dark to sit over any
+   more once the mobile About/Awards redesign below swaps those photos
+   for plain light cards -- same dark-text treatment as .nav--solid,
+   just scoped to mobile so desktop keeps its white nav untouched. */
+@media (max-width: 760px) {
+  .nav--solid-mobile {
+    --nav-fg: var(--color-text);
+    --nav-fg-muted: var(--color-text-muted);
+  }
+  .nav--solid-mobile .nav__mark-text { color: var(--color-accent); }
+}
 
 .nav__inner {
   position: relative;
@@ -1174,15 +1186,45 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
 @media (max-width: 760px) {
-  /* No + var(--nav-h) here (unlike the desktop rule and Service/Contact's
-     .page-hero--photo) — matches .project-hero__overlay's mobile spacing
-     instead, at the user's request, so the title sits noticeably higher
-     on this narrower layout than the extra nav-height offset gave it. */
-  .stack__content { padding-top: clamp(90px, 18vh, 140px); }
+  /* About/Awards on mobile: two plain light cards on the page's own
+     background, read by scrolling normally, instead of two full-viewport
+     photo panels with a snap assist between them -- the immersive photo
+     hero treatment (built for desktop) didn't hold up ported down to a
+     phone screen (reported: felt broken/disorienting), and every other
+     content page here already reads as plain scrollable cards on a light
+     background, not a special case worth its own animated transition. */
+  .stack__panel {
+    min-height: 0;
+    background: none;
+    overflow: visible;
+    display: block;
+    padding: 0 16px;
+    margin: 0 0 28px;
+  }
+  .stack__panel:last-child { margin-bottom: 0; }
+  .stack__bg { display: none; }
+  .scroll-cue { display: none; }
+  .stack__content {
+    margin: 0;
+    padding: clamp(90px, 22vh, 150px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
+    background: var(--color-bg-alt);
+    border-radius: 20px;
+  }
+  /* First card's title needs real clearance under the floating nav (the
+     desktop padding-top this replaces did too, see above); the second
+     card follows straight after in normal flow, so it only needs enough
+     room to clear its own title comfortably. */
+  .stack__panel:not(:first-child) .stack__content {
+    padding-top: clamp(32px, 8vw, 44px);
+  }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
      don't collide between lines. */
-  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; color: var(--color-text); }
+  .stack__body { color: var(--color-text); }
+  .stack__body .eyebrow { color: var(--color-accent); }
+  .stack__body .timeline__row time { color: var(--color-text-muted); }
+  .stack__body .timeline__row { border-top-color: var(--color-line); }
 }
 
 /* Plain-section counterpart of .stack__content/.stack__title, used by

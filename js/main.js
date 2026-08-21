@@ -1711,55 +1711,12 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }, { passive: false });
 
-    // Mobile: touch scroll momentum is too unpredictable to safely
-    // intercept mid-gesture the same way (this is exactly the class of
-    // thing that caused the earlier position:sticky/scroll-snap WebKit
-    // bugs on this same page) — kept as a settle-based nudge instead,
-    // reacting only once a gesture has fully stopped. Only the *final*
-    // jump itself was upgraded here, from an instant teleport to the
-    // same smooth "push" animation the wheel case above uses, so it
-    // still reads as one motion rather than a scroll-then-teleport.
-    // Small fixed margin right at the true boundary, not the whole
-    // panel-1 range — a touch-scroll's own first-frame jump already
-    // covers 100-200px, so a full-range zone here made any small swipe
-    // auto-complete instantly (reported previously). 100px (tried first)
-    // then 240px both turned out too narrow the other way: reported
-    // repeatedly as not doing anything at all, and testing a realistic
-    // range of swipe strengths confirmed it -- landing short of the
-    // boundary by 300-700px is common with real momentum, well outside
-    // either width, so the assist often never got a chance to fire.
-    //
-    // Only this "landed short" side actually needs catching. Landing
-    // *past* the boundary isn't the same kind of problem: the viewport
-    // is already showing pure Awards content from further down, not a
-    // visible mix of both panels, so there's nothing broken to correct
-    // there -- confirmed by reasoning through what's actually on screen
-    // at rest past boundaryY, not just by re-testing. That asymmetry is
-    // what makes a considerably wider zone here still safe: it only
-    // ever pulls a *short* landing the rest of the way forward, never
-    // yanks a comfortably-past-the-seam position backward. Still well
-    // short of the whole panel range (typically 800px+ on its own), so
-    // a small deliberate scroll from early in About still won't
-    // auto-complete.
-    var MOBILE_DEAD_ZONE_PX = 550;
-    var settleTimer = null;
-    var prevScrollY = window.scrollY;
-    var scrollDir = 0;
-    window.addEventListener('scroll', function () {
-      var y = window.scrollY;
-      if (y !== prevScrollY) scrollDir = y > prevScrollY ? 1 : -1;
-      prevScrollY = y;
-      if (!narrowMq.matches) return;
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(function () {
-        var yy = window.scrollY;
-        var zoneStart = boundaryY - MOBILE_DEAD_ZONE_PX;
-        if (yy > zoneStart + 4 && yy < boundaryY - 4) {
-          pushScrollTo(scrollDir >= 0 ? boundaryY : zoneStart);
-        }
-      }, 150);
-    }, { passive: true });
-
+    // Mobile no longer runs any snap/nudge assist here at all: About and
+    // Awards are two plain cards in normal document flow now (see the
+    // mobile .stack__panel rules in style.css), not two full-viewport
+    // panels with a seam to smooth over, so there's no boundary left to
+    // land short of. The scroll-cue buttons below stay wired up for
+    // desktop; the buttons themselves are hidden on mobile via CSS.
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {
