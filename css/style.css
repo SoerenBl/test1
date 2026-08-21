@@ -1181,8 +1181,14 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__panel--light { background: #f5f5f5; }
 .stack__panel--light .stack__scrim { display: none; }
 
-/* Down-scroll cue (About panel only) — three chevrons pulsing in
-   sequence like a turn signal, hinting that Awards follows below. */
+/* Down-scroll cue (About panel only) — three chevrons hopping in
+   sequence like little footsteps down a staircase, hinting that Awards
+   follows below. Replaces an earlier version that only pulsed opacity
+   in place (no actual movement) -- asked for something more playful;
+   this keeps the same shape, wave direction and blue flash, just adds a
+   real (small, quick) hop to each chevron instead of a static blink, and
+   settles into a pause before repeating rather than looping continuously,
+   so it still reads as restrained rather than distracting. */
 .scroll-cue {
   position: absolute;
   right: clamp(20px, 5vw, 64px);
@@ -1207,16 +1213,24 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   height: 16px;
   border-right: 3px solid #fff;
   border-bottom: 3px solid #fff;
-  transform: rotate(45deg);
+  /* translateY listed before rotate() is load-bearing, not stylistic --
+     transform functions compose left-to-right in the element's own
+     (already-rotated-by-later-functions) space, so translateY *after*
+     rotate would hop diagonally along the chevron's own tilted axis
+     instead of straight down the screen. Listing translateY first keeps
+     the hop vertical regardless of the chevron's own 45deg tilt. */
+  transform: translateY(0) rotate(45deg);
   opacity: 0.3;
-  animation: scrollCuePulse 1.8s ease-in-out infinite;
+  animation: scrollCueHopDown 1.8s ease-in-out infinite;
 }
 .scroll-cue span:nth-child(1) { animation-delay: 0s; }
-.scroll-cue span:nth-child(2) { animation-delay: 0.18s; }
-.scroll-cue span:nth-child(3) { animation-delay: 0.36s; }
-@keyframes scrollCuePulse {
-  0%, 55%, 100% { opacity: 0.28; border-color: #fff; }
-  20% { opacity: 1; border-color: var(--color-panel-hover); }
+.scroll-cue span:nth-child(2) { animation-delay: 0.12s; }
+.scroll-cue span:nth-child(3) { animation-delay: 0.24s; }
+@keyframes scrollCueHopDown {
+  0%, 42%, 100% { transform: translateY(0) rotate(45deg); opacity: 0.3; border-color: #fff; }
+  14% { transform: translateY(7px) rotate(45deg); opacity: 1; border-color: var(--color-panel-hover); }
+  24% { transform: translateY(0) rotate(45deg); opacity: 0.55; border-color: #fff; }
+  32% { transform: translateY(3px) rotate(45deg); opacity: 0.85; border-color: var(--color-panel-hover); }
 }
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue span { animation: none; opacity: 0.6; }
@@ -1224,13 +1238,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 @media (max-width: 760px) {
   .scroll-cue span { width: 13px; height: 13px; border-width: 2.5px; }
 }
-/* Up-pointing variant (Awards panel) — same chevrons, flipped, and the
-   pulse wave reversed (bottom span fires first) so the "flow" still
-   reads in the direction the arrow points. */
-.scroll-cue--up span { transform: rotate(225deg); }
-.scroll-cue--up span:nth-child(1) { animation-delay: 0.36s; }
-.scroll-cue--up span:nth-child(2) { animation-delay: 0.18s; }
+/* Up-pointing variant (Awards panel) — same idea, flipped: chevrons
+   hop upward and the wave runs bottom-to-top, so the motion's direction
+   still matches which way the arrow itself points. */
+.scroll-cue--up span { transform: translateY(0) rotate(225deg); animation-name: scrollCueHopUp; }
+.scroll-cue--up span:nth-child(1) { animation-delay: 0.24s; }
+.scroll-cue--up span:nth-child(2) { animation-delay: 0.12s; }
 .scroll-cue--up span:nth-child(3) { animation-delay: 0s; }
+@keyframes scrollCueHopUp {
+  0%, 42%, 100% { transform: translateY(0) rotate(225deg); opacity: 0.3; border-color: #fff; }
+  14% { transform: translateY(-7px) rotate(225deg); opacity: 1; border-color: var(--color-panel-hover); }
+  24% { transform: translateY(0) rotate(225deg); opacity: 0.55; border-color: #fff; }
+  32% { transform: translateY(-3px) rotate(225deg); opacity: 0.85; border-color: var(--color-panel-hover); }
+}
 
 .stack__content {
   position: relative;
