@@ -225,16 +225,13 @@ body.is-menu-open .nav__mark {
   pointer-events: none;
 }
 /* Swapped in automatically when a logo.* file exists at the repo root
-   (see js/main.js) — its own drop-shadow (unlike the plain-text name,
-   which has none) keeps a cutout/handwritten logo legible over a photo
-   background. */
+   (see js/main.js) — same plain, shadow-free treatment as the text name
+   it replaces. */
 .nav__mark-logo {
   display: none;
   height: 34px;
   width: auto;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.55)) drop-shadow(0 2px 14px rgba(0,0,0,0.35));
 }
-.nav.nav--solid .nav__mark-logo { filter: none; }
 .nav__mark.has-logo .nav__mark-text { display: none; }
 .nav__mark.has-logo .nav__mark-logo { display: block; }
 
