@@ -190,7 +190,6 @@ p { margin: 0 0 1em; }
     --nav-fg: var(--color-text);
     --nav-fg-muted: var(--color-text-muted);
   }
-  .nav--solid-mobile .nav__mark-text { color: var(--color-accent); }
 }
 
 .nav__inner {
@@ -211,11 +210,6 @@ p { margin: 0 0 1em; }
   display: flex;
   align-items: center;
 }
-/* Name reads in the sitewide accent blue rather than plain --nav-fg --
-   plain text, no vector/cutout needed since (unlike the menu button) it's
-   never sitting over content that must show through it. */
-.nav__mark-text { color: var(--color-panel-hover); }
-.nav.nav--solid .nav__mark-text { color: var(--color-accent); }
 .nav__mark:hover { opacity: 0.7; }
 /* .nav sits above the menu panel (310 vs 300) so the hamburger-to-X
    button stays clickable while the panel is open — but that puts the
@@ -229,16 +223,17 @@ body.is-menu-open .nav__mark {
   opacity: 0;
   pointer-events: none;
 }
-/* Swapped in automatically when a logo.* file exists at the repo root
-   (see js/main.js) — same plain, shadow-free treatment as the text name
-   it replaces. */
+/* logo.png loads directly as part of the page itself (a plain <img src>,
+   not the async data-photo probe every other photo on this site uses) --
+   deliberately not going through resolveStaticPhotos()'s
+   fetch-and-swap-in, which needs a round trip through JS before anything
+   appears and briefly showed placeholder text in its place while that
+   was in flight. A static src has nothing to swap and nothing to flash. */
 .nav__mark-logo {
-  display: none;
+  display: block;
   height: 34px;
   width: auto;
 }
-.nav__mark.has-logo .nav__mark-text { display: none; }
-.nav__mark.has-logo .nav__mark-logo { display: block; }
 
 /* ---------- Project/category page hero title ----------
    Hovers large over the first tiles, styled exactly like the Service/

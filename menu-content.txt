@@ -12,7 +12,7 @@ FussDatenschutz: Datenschutz
 NavStart: Home
 NavArbeiten: Work
 NavService: Services
-NavUeberMich: About
+NavUeberMich: About Me
 NavKontakt: Contact
 Fusszeile: Germany — available worldwide
 FussImpressum: Legal Notice

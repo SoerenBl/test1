@@ -444,7 +444,6 @@ document.addEventListener('DOMContentLoaded', function () {
           img.src = url;
           var ph = img.previousElementSibling;
           if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
-          if (img.classList.contains('nav__mark-logo')) img.closest('.nav__mark').classList.add('has-logo');
         } else {
           img.style.display = 'none';
         }
