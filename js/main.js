@@ -98,68 +98,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   applyLang(document.documentElement.getAttribute('data-lang') || 'de');
 
-  // --- Letter-jump hover on select page titles (About, Awards, Service,
-  // Contact) --- Splits each title's text into one span per character so
-  // a hover can bounce them individually via the Web Animations API: a
-  // wave sweeps left to right, each letter hopping up a little and
-  // flashing blue, like the Pixar-lamp bounce. Runs per [data-lang] child
-  // so bilingual titles keep working after a language switch (display
-  // toggling still applies to the whole span, letters and all).
-  function initLetterFx(titleEl) {
-    if (!titleEl || titleEl.dataset.letterFxInit) return;
-    titleEl.dataset.letterFxInit = 'true';
-    var langSpans = titleEl.querySelectorAll(':scope > [data-lang]');
-    var langSpansArr = langSpans.length ? Array.prototype.slice.call(langSpans) : null;
-    var containers;
-    if (langSpansArr) {
-      containers = langSpansArr;
-    } else {
-      // No existing [data-lang] wrapper (e.g. "About", same in both
-      // languages) — make one purely so there's an inline element to hang
-      // the hover listener on (see below for why that matters).
-      var wrap = document.createElement('span');
-      while (titleEl.firstChild) wrap.appendChild(titleEl.firstChild);
-      titleEl.appendChild(wrap);
-      containers = [wrap];
-    }
-    containers.forEach(function (container) {
-      container.style.display = 'inline';
-      var text = container.textContent;
-      container.textContent = '';
-      Array.prototype.forEach.call(text, function (ch) {
-        var span = document.createElement('span');
-        span.className = 'letter-fx__char';
-        span.textContent = ch === ' ' ? ' ' : ch;
-        container.appendChild(span);
-      });
-    });
-    var accent = getComputedStyle(document.documentElement).getPropertyValue('--color-panel-hover').trim() || '#9fd8ff';
-    function bounceLetters() {
-      var chars = titleEl.querySelectorAll('.letter-fx__char');
-      chars.forEach(function (span, i) {
-        var base = getComputedStyle(span).color;
-        if (span.__letterAnim) span.__letterAnim.cancel();
-        span.__letterAnim = span.animate([
-          { transform: 'translateY(0)', color: base, offset: 0 },
-          { transform: 'translateY(-0.22em)', color: accent, offset: 0.4 },
-          { transform: 'translateY(0)', color: base, offset: 1 }
-        ], {
-          duration: 520,
-          delay: i * 26,
-          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-        });
-      });
-    }
-    // Listener lives on the (now inline, tightly-fit) containers rather
-    // than the title element itself, which stays block-level so normal
-    // page layout (spacing before whatever follows the title) is
-    // unaffected — that's the actual point of this whole change.
-    containers.forEach(function (container) {
-      container.addEventListener('mouseenter', bounceLetters);
-    });
-  }
-  document.querySelectorAll('.hover-letters').forEach(initLetterFx);
-
   // --- Footer year ---
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -453,6 +391,55 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
   resolveStaticPhotos();
+
+  // --- Auto text contrast on hero photos (Service/About/Awards/Contact) ---
+  // These sections all assume a dark background photo and set their text
+  // white -- true for every photo the site ships with today, but not
+  // guaranteed for whatever gets uploaded later (a bright, high-key shot
+  // would wash white text out). Once each hero photo has actually loaded,
+  // sample its own average brightness and add/remove .contrast-dark on
+  // the enclosing panel accordingly -- style.css then swaps that panel's
+  // whole text/border palette over to the site's normal dark-on-light
+  // set (see its own comment, right by .contrast-dark) rather than this
+  // touching any colour directly.
+  function applyBgContrast(img) {
+    var panel = img.closest('.stack__panel, .page-hero--photo');
+    if (!panel) return;
+    function sample() {
+      if (!img.naturalWidth) return;
+      try {
+        var w = 24, h = 24;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        // Only the upper half -- the scrim gradient already darkens the
+        // bottom of the photo more than the top (see .stack__scrim), and
+        // the title/lede that actually need to read clearly sit up there,
+        // not down where the photo alone might be much darker anyway.
+        var sourceH = img.naturalHeight * 0.5;
+        ctx.drawImage(img, 0, 0, img.naturalWidth, sourceH, 0, 0, w, h);
+        var data = ctx.getImageData(0, 0, w, h).data;
+        var total = 0;
+        for (var i = 0; i < data.length; i += 4) {
+          total += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        }
+        panel.classList.toggle('contrast-dark', total / (data.length / 4) > 165);
+      } catch (e) {
+        // getImageData can throw on a tainted canvas -- leave the default
+        // (white-text) styling in place rather than guessing.
+      }
+    }
+    // img.complete is true for a src-less <img> too (per spec) -- these
+    // start out that way, since resolveStaticPhotos() above assigns their
+    // real src asynchronously. Checking naturalWidth as well is what
+    // actually distinguishes "genuinely already loaded" from "complete,
+    // but nothing's there yet" -- the latter still needs the listener, or
+    // this would silently never run once the real photo does arrive.
+    if (img.complete && img.naturalWidth) sample();
+    else img.addEventListener('load', sample);
+  }
+  document.querySelectorAll('.stack__bg img[data-photo], .page-hero__bg img[data-photo]').forEach(applyBgContrast);
 
   // --- Favicon: "SB" by default, swapped automatically for logo2.* if
   // that file exists (kept separate from logo.* so the nav mark and the
