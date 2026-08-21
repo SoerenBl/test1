@@ -47,6 +47,15 @@
      the same distance from the top, so all four read as one system. */
   --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
   --editorial-top-pad: clamp(50px, 7vh, 100px);
+  /* Roughly the average title+body height across Service/About/Awards
+     right now (measured ~712/640/365px at a 1440px-wide viewport, title
+     through the end of the body copy) -- used below to centre that block
+     as a whole on tall viewports without each page centring to its own,
+     different content length (which is what used to knock their titles
+     off the same line). Re-measure and update this if any of the three
+     gets substantially more or less copy over time -- Awards in
+     particular, once its placeholder text is replaced with real entries. */
+  --editorial-avg-content-h: 570px;
 
   --font-display: 'Anton', 'Arial Black', 'Helvetica Neue', sans-serif;
   --font-heading: Helvetica, Arial, 'Helvetica Neue', sans-serif;
@@ -1185,8 +1194,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      in-flow content now (see the .stack__panel comment above) — this is
      what actually determines each panel's rendered height, growing past
      min-height on its own if the title and body need more than one
-     screen. */
-  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+     screen. On a tall viewport, the plain nav-clearance offset alone
+     left a lot of empty space below the content — centred around the
+     shared --editorial-avg-content-h guess (its own comment) instead, so
+     the title+body block as a whole sits closer to mid-page the taller
+     the window gets, while staying floored at the nav-clearance minimum
+     so it never creeps up under the floating nav on a short one. Same
+     formula on .page-hero--photo (Service) below, which is what keeps
+     this page's title on the very same line as that one instead of
+     drifting per page the way independently centring each panel did. */
+  padding-top: max(calc(var(--editorial-top-pad) + var(--nav-h)), calc((100vh - var(--editorial-avg-content-h)) / 2));
   padding-bottom: clamp(50px, 8vh, 90px);
 }
 .stack__title {
@@ -1307,17 +1324,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      footer directly, same as the rest of the site. */
   min-height: 100vh;
   min-height: 100dvh;
-  /* Top-packed at the same fixed offset as .stack__content (About/Awards)
-     below — see its own comment for why centring (which this used to do)
-     doesn't actually keep them on the same line: it drifts with content
-     height. This is the page whose line is the reference the others are
-     matched to, so it stays anchored to this exact padding-top. Mobile
-     overrides back to flex-start below (was already the same value,
-     unchanged in effect). */
+  /* Top-packed at the same offset as .stack__content (About/Awards) above
+     it in the file, formula and all — see its own comment for both why
+     plain centring drifted them off the same line, and why this one
+     instead grows on a tall viewport toward roughly centring the
+     title+body block using a shared average across all three, rather
+     than each page's own (differing) content height. Mobile overrides
+     back to flex-start below (was already the same value, unchanged in
+     effect). */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
+  padding-top: max(calc(var(--editorial-top-pad) + var(--nav-h)), calc((100vh - var(--editorial-avg-content-h)) / 2));
   padding-bottom: clamp(30px, 5vh, 60px);
   color: #fff;
 }
