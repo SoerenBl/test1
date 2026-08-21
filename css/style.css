@@ -36,17 +36,17 @@
   --color-panel-hover: #9fd8ff;
   --color-bg-gray: #e2e2e2;
 
-  /* Shared grid for Service/Contact/About/Awards: same title size and
-     the same distance from the top, so all four read as one system. */
-  --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
-  --editorial-top-pad: clamp(50px, 7vh, 100px);
-
   --cat-1: #000000;
   --cat-2: #33538f;
   --cat-3: #d9a12b;
   --cat-4: #b23b3b;
   --cat-5: #cf6a2c;
   --cat-6: #2f9a9a;
+
+  /* Shared grid for Service/Contact/About/Awards: same title size and
+     the same distance from the top, so all four read as one system. */
+  --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
+  --editorial-top-pad: clamp(50px, 7vh, 100px);
 
   --font-display: 'Anton', 'Arial Black', 'Helvetica Neue', sans-serif;
   --font-heading: Helvetica, Arial, 'Helvetica Neue', sans-serif;
@@ -154,7 +154,6 @@ p { margin: 0 0 1em; }
   z-index: 310;
   --nav-fg: #fff;
   --nav-fg-muted: rgba(255,255,255,0.78);
-  --nav-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 2px 14px rgba(0,0,0,0.35);
   background: none;
   border: none;
   color: var(--nav-fg);
@@ -178,7 +177,7 @@ p { margin: 0 0 1em; }
 }
 /* Mobile only: nav slides away on scroll-down, back on scroll-up (see
    js/main.js). Desktop keeps it always visible. */
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .nav {
     transition: transform 0.3s ease;
   }
@@ -187,7 +186,17 @@ p { margin: 0 0 1em; }
 .nav.nav--solid {
   --nav-fg: var(--color-text);
   --nav-fg-muted: var(--color-text-muted);
-  --nav-shadow: none;
+}
+/* About page only: the floating white-on-photo nav (needed above the
+   dark stack__bg photos on desktop) has nothing dark to sit over any
+   more once the mobile About/Awards redesign below swaps those photos
+   for plain light cards -- same dark-text treatment as .nav--solid,
+   just scoped to mobile so desktop keeps its white nav untouched. */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  .nav--solid-mobile {
+    --nav-fg: var(--color-text);
+    --nav-fg-muted: var(--color-text-muted);
+  }
 }
 
 .nav__inner {
@@ -204,16 +213,10 @@ p { margin: 0 0 1em; }
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--nav-fg);
-  text-shadow: var(--nav-shadow);
   transition: opacity 0.2s ease, transform 0.45s cubic-bezier(.16,.84,.44,1);
   display: flex;
   align-items: center;
 }
-/* Name reads in the sitewide accent blue rather than plain --nav-fg --
-   plain text, no vector/cutout needed since (unlike the menu button) it's
-   never sitting over content that must show through it. */
-.nav__mark-text { color: var(--color-panel-hover); }
-.nav.nav--solid .nav__mark-text { color: var(--color-accent); }
 .nav__mark:hover { opacity: 0.7; }
 /* .nav sits above the menu panel (310 vs 300) so the hamburger-to-X
    button stays clickable while the panel is open — but that puts the
@@ -227,18 +230,17 @@ body.is-menu-open .nav__mark {
   opacity: 0;
   pointer-events: none;
 }
-/* Swapped in automatically when a logo.* file exists at the repo root
-   (see js/main.js) — filter:drop-shadow mirrors --nav-shadow so a
-   cutout/handwritten logo stays legible over a photo background too. */
+/* logo.png loads directly as part of the page itself (a plain <img src>,
+   not the async data-photo probe every other photo on this site uses) --
+   deliberately not going through resolveStaticPhotos()'s
+   fetch-and-swap-in, which needs a round trip through JS before anything
+   appears and briefly showed placeholder text in its place while that
+   was in flight. A static src has nothing to swap and nothing to flash. */
 .nav__mark-logo {
-  display: none;
+  display: block;
   height: 34px;
   width: auto;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.55)) drop-shadow(0 2px 14px rgba(0,0,0,0.35));
 }
-.nav.nav--solid .nav__mark-logo { filter: none; }
-.nav__mark.has-logo .nav__mark-text { display: none; }
-.nav__mark.has-logo .nav__mark-logo { display: block; }
 
 /* ---------- Project/category page hero title ----------
    Hovers large over the first tiles, styled exactly like the Service/
@@ -346,7 +348,7 @@ body.is-menu-open .project-hero__overlay {
   position: relative;
   z-index: 2;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease, transform 0.3s ease; }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
   /* Kept in sync with .nav.is-hidden by the same mobile scroll-direction
@@ -460,7 +462,7 @@ body.is-menu-open .project-hero__overlay {
    that morphs into an X in place — same button, same box, no position
    jump between the closed and open state. */
 .menu-btn__burger { display: none; }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .menu-btn__cutout { display: none; }
   .menu-btn__burger {
     position: relative;
@@ -549,7 +551,7 @@ body.is-menu-open .project-hero__overlay {
    as a second, overlapping X. Placed after the base rule above (rather
    than inside the .menu-btn__burger block near the top of this file) so
    it actually wins the cascade — same specificity, source order decides. */
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .menu-panel__close { display: none; }
 }
 
@@ -557,7 +559,14 @@ body.is-menu-open .project-hero__overlay {
 .menu-panel__nav a {
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-size: clamp(2.2rem, 8vw, 3.4rem);
+  /* min(8vw, 6vh): sized off whichever dimension is actually tight. On a
+     normal portrait phone width is the constraint and this behaves just
+     like the old 8vw-only version; on a landscape phone (reported: the
+     five links barely fit, needed scrolling) height is by far the
+     tighter dimension, and 6vh keeps the same five links comfortably
+     within the shorter panel instead of sizing as if it had a portrait
+     phone's full height to spend. */
+  font-size: clamp(2.2rem, min(8vw, 6vh), 3.4rem);
   line-height: 1.02;
   padding: 4px 0;
   transition: color 0.2s ease, transform 0.2s ease;
@@ -650,6 +659,20 @@ body.is-menu-open .project-hero__overlay {
      titles above). */
   .hero-tile__content h1 { line-height: 1.05; }
 }
+/* Phone in landscape: .hero-tile is still 100dvh, but that's now a short
+   dimension (~375-430px) rather than a tall one -- the content block
+   (bottom-anchored, sized for a tall portrait screen) no longer fits
+   underneath the fixed nav and rode up into/behind it (reported: the
+   eyebrow line sat under the nav). Trimmed to just title + actions,
+   noticeably smaller, so the whole block comfortably clears the nav
+   instead of needing to be exactly measured against it. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .hero-tile__content { padding: 12px var(--gutter); }
+  .hero-tile__content .eyebrow { display: none; }
+  .hero-tile__content h1 { font-size: clamp(1.3rem, 4.5vw, 2.1rem); line-height: 1.05; margin-bottom: 0.15em; }
+  .hero-tile__content p { display: none; }
+  .hero-tile__actions { gap: 16px; }
+}
 .hero-tile__actions { display: flex; gap: 28px; flex-wrap: wrap; }
 
 /* ---------- Sections ---------- */
@@ -716,7 +739,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   grid-column: span 1 !important;
   grid-row: 1 / -1 !important;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .tile-grid--duo { grid-template-rows: 1fr 1fr; }
   .tile-grid--duo .tile { grid-column: 1 / -1 !important; grid-row: span 1 !important; }
 }
@@ -731,7 +754,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .tile--tall { grid-row: span 2; }
 .tile--portrait { grid-row: span 3; }
 
-@media (max-width: 760px) {
+/* Also applies to a phone in landscape, not just portrait -- a phone
+   turned sideways is still often wider than 760px, so width alone was
+   letting it fall through to the desktop 2-column grid (reported: no
+   longer edge-to-edge, tiles picked up the desktop grid's side margins). */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .tile-grid { grid-template-columns: 1fr; grid-auto-rows: 300px; }
   .tile { grid-column: span 1 !important; }
   .tile--tall, .tile--portrait { grid-row: span 1; }
@@ -1058,6 +1085,14 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 @media (max-width: 760px) {
   .stack__panel { min-height: 100svh; justify-content: flex-start; }
 }
+/* Awards' own content (title + placeholder text) is shorter than About's
+   bio+timeline, so centring it (like every other panel here) left its
+   title sitting noticeably lower on screen than About's or Service's —
+   reported as not matching. Pins it to the same top offset the others
+   already land near instead of leaving it content-height-dependent. */
+@media (min-width: 761px) {
+  .stack__panel--top { justify-content: flex-start; }
+}
 
 .stack__bg {
   position: absolute;
@@ -1178,16 +1213,46 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__body .eyebrow { color: rgba(255,255,255,0.85); }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
-@media (max-width: 760px) {
-  /* No + var(--nav-h) here (unlike the desktop rule and Service/Contact's
-     .page-hero--photo) — matches .project-hero__overlay's mobile spacing
-     instead, at the user's request, so the title sits noticeably higher
-     on this narrower layout than the extra nav-height offset gave it. */
-  .stack__content { padding-top: clamp(90px, 18vh, 140px); }
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  /* About/Awards on mobile: two plain light cards on the page's own
+     background, read by scrolling normally, instead of two full-viewport
+     photo panels with a snap assist between them -- the immersive photo
+     hero treatment (built for desktop) didn't hold up ported down to a
+     phone screen (reported: felt broken/disorienting), and every other
+     content page here already reads as plain scrollable cards on a light
+     background, not a special case worth its own animated transition. */
+  .stack__panel {
+    min-height: 0;
+    background: none;
+    overflow: visible;
+    display: block;
+    padding: 0 16px;
+    margin: 0 0 28px;
+  }
+  .stack__panel:last-child { margin-bottom: 0; }
+  .stack__bg { display: none; }
+  .scroll-cue { display: none; }
+  .stack__content {
+    margin: 0;
+    padding: clamp(90px, 22vh, 150px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
+    background: var(--color-bg-alt);
+    border-radius: 20px;
+  }
+  /* First card's title needs real clearance under the floating nav (the
+     desktop padding-top this replaces did too, see above); the second
+     card follows straight after in normal flow, so it only needs enough
+     room to clear its own title comfortably. */
+  .stack__panel:not(:first-child) .stack__content {
+    padding-top: clamp(32px, 8vw, 44px);
+  }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
      don't collide between lines. */
-  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
+  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; color: var(--color-text); }
+  .stack__body { color: var(--color-text); }
+  .stack__body .eyebrow { color: var(--color-accent); }
+  .stack__body .timeline__row time { color: var(--color-text-muted); }
+  .stack__body .timeline__row { border-top-color: var(--color-line); }
 }
 
 /* Plain-section counterpart of .stack__content/.stack__title, used by
@@ -1223,7 +1288,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 /* Service only -- its lede sits noticeably further from the title than on
    the other page-hero pages, this pulls it in closer underneath "Service"
    without touching the shared spacing everywhere else. */
-.page-hero__title--tight { margin-bottom: clamp(8px, 1.2vh, 16px); }
+.page-hero__title--tight { margin-bottom: clamp(-2px, 0.3vh, 6px); }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
@@ -1341,7 +1406,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 .editorial-row p { margin: 0; color: var(--color-text-muted); }
 .editorial-row__links { display: flex; flex-direction: column; gap: 8px; }
-.editorial-row__links span { font-family: var(--font-heading); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
+.editorial-row__links span { font-family: var(--font-heading); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
 .editorial-row__links a {
   font-family: var(--font-heading);
   font-size: 0.95rem;

@@ -68,12 +68,25 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // The inline bootstrap script in <head> (see any page's own source)
+  // already sets document.title once, synchronously, before first paint,
+  // reading the same data-title-de/en pair off the <title> element itself
+  // -- avoids a flash of the German tab title on a stored 'en' visit. This
+  // just keeps it in sync on every later toggle; storing both languages as
+  // attributes (rather than reading the element's own current text back)
+  // is what lets it flip back and forth indefinitely without ever losing
+  // the original German title once document.title has overwritten it once.
+  var titleEl = document.querySelector('title[data-title-de]');
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
     langButtons.forEach(function (btn) {
       btn.setAttribute('data-active', String(btn.getAttribute('data-set-lang') === lang));
     });
     if (langToggleTrack) langToggleTrack.classList.toggle('lang-toggle--en', lang === 'en');
+    if (titleEl) {
+      var t = titleEl.getAttribute('data-title-' + lang) || titleEl.getAttribute('data-title-de');
+      if (t) document.title = t;
+    }
     updateUmlautSpacing(lang);
   }
   langButtons.forEach(function (btn) {
@@ -165,12 +178,14 @@ document.addEventListener('DOMContentLoaded', function () {
     opts = opts || {};
     if (!tiles.length) return;
     // Below the 2-column breakpoint the grid is a single full-width
-    // column (see the max-width:760px rules in style.css) — setting an
+    // column (see the matching media query in style.css, also covering a
+    // phone in landscape — often wider than 760px, but still meant to get
+    // the single-column mobile layout, not the desktop grid) — setting an
     // explicit grid-column here would make the browser create a 2nd
-    // implicit column regardless, breaking that. So on narrow viewports
-    // just clear any leftover placement and leave tiles to the normal
-    // single-column flow; there's no 2-column gap to prevent there anyway.
-    var twoCol = window.matchMedia('(min-width: 761px)').matches;
+    // implicit column regardless, breaking that. So there just clear any
+    // leftover placement and leave tiles to the normal single-column
+    // flow; there's no 2-column gap to prevent there anyway.
+    var twoCol = !window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches;
     if (!twoCol) {
       tiles.forEach(function (tile) {
         tile.classList.remove('tile--tall', 'tile--full');
@@ -431,7 +446,6 @@ document.addEventListener('DOMContentLoaded', function () {
           img.src = url;
           var ph = img.previousElementSibling;
           if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
-          if (img.classList.contains('nav__mark-logo')) img.closest('.nav__mark').classList.add('has-logo');
         } else {
           img.style.display = 'none';
         }
@@ -1501,7 +1515,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var lastY = window.scrollY;
     var navTicking = false;
     function updateNavVisibility() {
-      var isMobile = window.matchMedia('(max-width: 760px)').matches;
+      // Width-only wasn't enough: a phone in landscape is often wider
+      // than 760px (reported: the nav then never hid on scroll there) --
+      // also treated as mobile once the screen is short, regardless of
+      // width, since that's what actually distinguishes a rotated phone
+      // from a real desktop window.
+      var isMobile = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches;
       var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
       var y = window.scrollY;
       var hide = isMobile && !menuOpen && y > lastY && y > 80;
@@ -1647,11 +1666,31 @@ document.addEventListener('DOMContentLoaded', function () {
     // resize since panel 1's own height is now content-driven (can be
     // taller than one screen) rather than a fixed viewport unit.
     var boundaryY = 0;
-    function measureBoundary() { boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight; }
+    // Same idea, one seam further down: where Awards ends and the real
+    // footer begins (reported: continuing to scroll past Awards revealed
+    // a slice of the footer instead of stopping with Awards still filling
+    // the window). In the common case Awards is exactly one viewport
+    // tall, same as About, so footerBoundaryY lands on the exact same
+    // value as boundaryY -- resting at boundaryY already satisfies "Awards
+    // fills the window, no footer" with nothing further to stop at.
+    var footerEl = document.querySelector('footer');
+    var footerBoundaryY = 0;
+    function measureBoundary() {
+      boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight;
+      if (footerEl) {
+        var footerTop = footerEl.getBoundingClientRect().top + window.scrollY;
+        footerBoundaryY = Math.max(boundaryY, footerTop - window.innerHeight);
+      } else {
+        footerBoundaryY = boundaryY;
+      }
+    }
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
-    var narrowMq = window.matchMedia('(max-width: 760px)');
+    // Matches the mobile breakpoint in style.css, including a phone in
+    // landscape (often wider than 760px, but still meant to get the
+    // mobile treatment -- see the .stack__panel media query there).
+    var narrowMq = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
 
     // Desktop: a mouse wheel tick is a small, deliberate input (unlike a
     // touch swipe, which can already cover 100-200px before the gesture
@@ -1663,12 +1702,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // means a single short scroll reads as one continuous "push" across
     // the seam instead, no separate jump afterwards. Symmetric: a scroll
     // down while still short of the boundary pushes onto Awards, a
-    // scroll up while just past it pushes back onto About. Left
-    // completely alone everywhere else, in particular anywhere within
-    // Awards' own further content — this is only ever about the one
-    // seam between the two panels, not a general assist, so reaching the
-    // footer still takes its own separate, ordinary scroll like on every
-    // other page.
+    // scroll up while just past it pushes back onto About. One seam
+    // further down, at footerBoundaryY (reported: continuing to scroll
+    // past Awards revealed a slice of the footer instead of stopping with
+    // Awards still filling the window), there's nothing to push *onto* --
+    // a wheel-driven scroll that would carry past it is simply absorbed,
+    // a hard stop rather than another assisted transition. Scrolling up
+    // from there is symmetric with the first seam: it pushes back onto
+    // About. Left completely alone everywhere else, in particular
+    // anywhere within Awards' own further content on a viewport tall
+    // enough to fit more than the panel.
     var REVERSE_ZONE_PX = 200;
     // Previously drove this with native window.scrollTo(...,
     // {behavior:'smooth'}) and had to *guess* when it had actually
@@ -1702,64 +1745,38 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!gestureEligible) { e.preventDefault(); return; }
       if (Math.abs(e.deltaY) <= 4) return;
       var y = window.scrollY;
-      if (e.deltaY > 0 && y < boundaryY) {
-        e.preventDefault();
-        startTransition(boundaryY);
-      } else if (e.deltaY < 0 && y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
-        e.preventDefault();
-        startTransition(0);
+      var hasFooterZone = footerBoundaryY > boundaryY;
+      if (e.deltaY > 0) {
+        if (y < boundaryY) {
+          e.preventDefault();
+          startTransition(boundaryY);
+        } else if (hasFooterZone && y < footerBoundaryY) {
+          e.preventDefault();
+          startTransition(footerBoundaryY);
+        } else if (footerEl && y >= footerBoundaryY - 1) {
+          // Already resting with Awards filling the window (or as close
+          // as the seam above gets it) -- swallow the tick instead of
+          // handing it to native scroll, which is exactly what used to
+          // drift on into the footer.
+          e.preventDefault();
+        }
+      } else if (e.deltaY < 0) {
+        if (hasFooterZone && y > boundaryY && y <= footerBoundaryY + REVERSE_ZONE_PX) {
+          e.preventDefault();
+          startTransition(boundaryY);
+        } else if (y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
+          e.preventDefault();
+          startTransition(0);
+        }
       }
     }, { passive: false });
 
-    // Mobile: touch scroll momentum is too unpredictable to safely
-    // intercept mid-gesture the same way (this is exactly the class of
-    // thing that caused the earlier position:sticky/scroll-snap WebKit
-    // bugs on this same page) — kept as a settle-based nudge instead,
-    // reacting only once a gesture has fully stopped. Only the *final*
-    // jump itself was upgraded here, from an instant teleport to the
-    // same smooth "push" animation the wheel case above uses, so it
-    // still reads as one motion rather than a scroll-then-teleport.
-    // Small fixed margin right at the true boundary, not the whole
-    // panel-1 range — a touch-scroll's own first-frame jump already
-    // covers 100-200px, so a full-range zone here made any small swipe
-    // auto-complete instantly (reported previously). 100px (tried first)
-    // then 240px both turned out too narrow the other way: reported
-    // repeatedly as not doing anything at all, and testing a realistic
-    // range of swipe strengths confirmed it -- landing short of the
-    // boundary by 300-700px is common with real momentum, well outside
-    // either width, so the assist often never got a chance to fire.
-    //
-    // Only this "landed short" side actually needs catching. Landing
-    // *past* the boundary isn't the same kind of problem: the viewport
-    // is already showing pure Awards content from further down, not a
-    // visible mix of both panels, so there's nothing broken to correct
-    // there -- confirmed by reasoning through what's actually on screen
-    // at rest past boundaryY, not just by re-testing. That asymmetry is
-    // what makes a considerably wider zone here still safe: it only
-    // ever pulls a *short* landing the rest of the way forward, never
-    // yanks a comfortably-past-the-seam position backward. Still well
-    // short of the whole panel range (typically 800px+ on its own), so
-    // a small deliberate scroll from early in About still won't
-    // auto-complete.
-    var MOBILE_DEAD_ZONE_PX = 550;
-    var settleTimer = null;
-    var prevScrollY = window.scrollY;
-    var scrollDir = 0;
-    window.addEventListener('scroll', function () {
-      var y = window.scrollY;
-      if (y !== prevScrollY) scrollDir = y > prevScrollY ? 1 : -1;
-      prevScrollY = y;
-      if (!narrowMq.matches) return;
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(function () {
-        var yy = window.scrollY;
-        var zoneStart = boundaryY - MOBILE_DEAD_ZONE_PX;
-        if (yy > zoneStart + 4 && yy < boundaryY - 4) {
-          pushScrollTo(scrollDir >= 0 ? boundaryY : zoneStart);
-        }
-      }, 150);
-    }, { passive: true });
-
+    // Mobile no longer runs any snap/nudge assist here at all: About and
+    // Awards are two plain cards in normal document flow now (see the
+    // mobile .stack__panel rules in style.css), not two full-viewport
+    // panels with a seam to smooth over, so there's no boundary left to
+    // land short of. The scroll-cue buttons below stay wired up for
+    // desktop; the buttons themselves are hidden on mobile via CSS.
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {

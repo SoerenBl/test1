@@ -142,7 +142,7 @@ function requireSame(data, key, pageLabel) {
 
 // ---------------------------------------------------------------- About --
 
-const ABOUT_KEYS = ['BioAbsatz1', 'BioAbsatz2', 'Zeitstrahl', 'AwardsText', 'AwardsListe'];
+const ABOUT_KEYS = ['Titel', 'BioAbsatz1', 'BioAbsatz2', 'Zeitstrahl', 'AwardsText', 'AwardsListe'];
 const ABOUT_LIST_KEYS = ['Zeitstrahl', 'AwardsListe'];
 
 function splitYear(line, label) {
@@ -158,8 +158,23 @@ function renderTimelineRows(entries) {
 }
 
 function updateAbout(html, data) {
+  // The About panel's title is content.txt-driven (unlike Awards' own
+  // title just below, still fixed), so unlike every other field here it
+  // can't be anchored on its own *previous* fixed literal text -- anchored
+  // on its photo path instead (data-photo="about/about", never itself
+  // edited), which stays a valid anchor no matter what the title says.
   html = patchBilingual(html,
-    '<h1 class="stack__title hover-letters">About</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
+    '<img data-photo="about/about" alt="">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
+    data.de.Titel, data.en.Titel, 'Titel (About)');
+
+  // Now that the title itself has just been written, BioAbsatz1 can anchor
+  // on it the same way Awards' own fields anchor on its (still-fixed)
+  // English title further below.
+  const titelEnHtml = escapeHtml(data.en.Titel);
+  const titelDeHtml = escapeHtml(data.de.Titel);
+  html = patchBilingual(html,
+    titelEnHtml + '</span></h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
     '\n          </p>', data.de.BioAbsatz1, data.en.BioAbsatz1, 'BioAbsatz1');
   html = patchBilingual(html,
     '</p>\n          <p>\n            ',
@@ -169,7 +184,7 @@ function updateAbout(html, data) {
   const enYears = data.en.Zeitstrahl.map((l) => splitYear(l, 'Zeitstrahl (EN)'));
   if (deYears.length !== enYears.length) throw new Error('Zeitstrahl: DE und EN haben unterschiedlich viele Eintraege.');
   html = patchContainer(html,
-    '<h1 class="stack__title hover-letters">About</h1>',
+    '<h1 class="stack__title hover-letters"><span data-lang="de">' + titelDeHtml + '</span><span data-lang="en">' + titelEnHtml + '</span></h1>',
     '<div class="timeline">\n', '\n        </div>',
     renderTimelineRows(deYears.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enYears[i].text }))),
     'Zeitstrahl (About)');
