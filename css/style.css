@@ -41,13 +41,6 @@
   --editorial-title-size: clamp(4rem, 14vw, 9.5rem);
   --editorial-top-pad: clamp(50px, 7vh, 100px);
 
-  --cat-1: #000000;
-  --cat-2: #33538f;
-  --cat-3: #d9a12b;
-  --cat-4: #b23b3b;
-  --cat-5: #cf6a2c;
-  --cat-6: #2f9a9a;
-
   --font-display: 'Anton', 'Arial Black', 'Helvetica Neue', sans-serif;
   --font-heading: Helvetica, Arial, 'Helvetica Neue', sans-serif;
   --font-body: Helvetica, Arial, 'Helvetica Neue', sans-serif;
@@ -754,7 +747,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 
 /* Category tiles: idle background is a plain near-white, not the warm
-   beige placeholder tone — the coloured --tile-hover only shows on hover. */
+   beige placeholder tone — the accent blue only shows on hover. */
 #categories .tile:nth-of-type(odd) .tile__media { background-color: #ffffff; }
 #categories .tile:nth-of-type(even) .tile__media { background-color: #f5f5f5; }
 
@@ -772,14 +765,10 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   display: block;
 }
 
-/* Homepage category tiles: hover reveals one colour per category */
-#categories .tile:nth-of-type(1) { --tile-hover: var(--cat-1); }
-#categories .tile:nth-of-type(2) { --tile-hover: var(--cat-2); }
-#categories .tile:nth-of-type(3) { --tile-hover: var(--cat-3); }
-#categories .tile:nth-of-type(4) { --tile-hover: var(--cat-4); }
-#categories .tile:nth-of-type(5) { --tile-hover: var(--cat-5); }
-#categories .tile:nth-of-type(6) { --tile-hover: var(--cat-6); }
-#categories .tile:hover .tile__media { background-color: var(--tile-hover, var(--color-accent)); }
+/* Homepage category tiles: hover reveals the sitewide accent blue, same
+   colour on every tile -- previously one distinct colour per category
+   (including plain black for Mobility), unified to blue on request. */
+#categories .tile:hover .tile__media { background-color: var(--color-accent); }
 #categories .tile:hover .ph { opacity: 0.22; border-color: rgba(255,255,255,0.6); color: rgba(255,255,255,0.9); }
 
 /* Service tile: a permanent white "drafting paper" CTA banner — no
@@ -1260,7 +1249,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 /* Service only -- its lede sits noticeably further from the title than on
    the other page-hero pages, this pulls it in closer underneath "Service"
    without touching the shared spacing everywhere else. */
-.page-hero__title--tight { margin-bottom: clamp(8px, 1.2vh, 16px); }
+.page-hero__title--tight { margin-bottom: clamp(-2px, 0.3vh, 6px); }
 @media (max-width: 760px) {
   .page-hero { padding-top: clamp(90px, 18vh, 140px); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
@@ -1378,7 +1367,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 .editorial-row p { margin: 0; color: var(--color-text-muted); }
 .editorial-row__links { display: flex; flex-direction: column; gap: 8px; }
-.editorial-row__links span { font-family: var(--font-heading); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
+.editorial-row__links span { font-family: var(--font-heading); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); }
 .editorial-row__links a {
   font-family: var(--font-heading);
   font-size: 0.95rem;
