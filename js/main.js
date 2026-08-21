@@ -1552,241 +1552,36 @@ document.addEventListener('DOMContentLoaded', function () {
   var heroTile = document.querySelector('.hero-tile');
 
   // --- Stack pages (About/Awards) ---
-  // Rebuilt from an earlier position:sticky version whose "cover slides
-  // over the previous panel" illusion needed a second, inner scroll
-  // context (.stack__content's own overflow-y:auto) for panels with more
-  // copy than one screen — see the CSS comment above .stack__panel for
-  // why that combination was the real root cause of the whole run of
-  // mobile scroll reports (hard lock, swipe stopping dead at the panel
-  // boundary, a cropped cover). The panels are now plain block-flow
-  // content (CSS handles the "grow past one screen if needed" part) and
-  // there's only the one, single, ordinary page scroll — same as
-  // everywhere else on the site. The one flourish worth keeping, "scroll
-  // to the end of About and one more scroll carries you onto Awards", is
-  // rebuilt here purely by nudging the *resting* scroll position once a
-  // gesture has fully settled — it never touches native scroll machinery
-  // itself, so there's nothing left for a real device to get stuck
-  // fighting the way scroll-snap-type or position:sticky could.
-  // Shared by the About/Awards panel push below and the sitewide footer
-  // push further down: animates scrollY to an exact target over a fixed,
-  // short duration instead of leaving it to the browser's own
-  // smooth-scroll, whose duration is unspecified and tends to grow with
-  // distance -- the likely source of a "sluggish, mit Verzögerung"
-  // complaint on a tall panel. Driving every frame itself also means it
-  // always lands exactly on target, so nothing further needs to watch
-  // for or correct an overshoot, and the caller knows the *exact* frame
-  // it's finished instead of having to guess with a timer.
-  function pushScrollTo(target, onDone) {
-    var startY = window.scrollY;
-    var diff = target - startY;
-    if (Math.abs(diff) < 1) { if (onDone) onDone(); return; }
-    var duration = 420;
-    var startTime = null;
-    function step(ts) {
-      if (startTime === null) startTime = ts;
-      var progress = Math.min((ts - startTime) / duration, 1);
-      var eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-      // { behavior: 'instant' } matters here, not stylistic -- html has
-      // scroll-behavior:smooth sitewide, which applies to *any*
-      // programmatic scrollTo call, including the plain two-argument
-      // form. Without overriding it per frame, every one of these calls
-      // would itself kick off a browser-driven smooth scroll, fighting
-      // this rAF loop's own easing and producing exactly the
-      // sluggish/uneven motion this helper was written to get rid of.
-      window.scrollTo({ top: startY + diff * eased, left: 0, behavior: 'instant' });
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      } else if (onDone) {
-        onDone();
-      }
-    }
-    requestAnimationFrame(step);
-  }
-
-  // Shared across BOTH push mechanisms below (About/Awards panel seam and
-  // the sitewide footer seam), not one flag per mechanism. A single wheel
-  // gesture dispatches a whole stream of wheel events, not one -- real
-  // trackpad momentum does this, and Chromium's synthetic wheel input
-  // does too (confirmed while testing the panel-push mechanism earlier).
-  // With two independent flags, residual events from one mechanism's own
-  // in-flight push could still reach the *other* listener, whose flag was
-  // still false, and kick off a second competing pushScrollTo animation
-  // to a different target while the first was still running -- both
-  // fighting over window.scrollTo every frame. One shared flag means
-  // only one push can ever be in flight at a time, globally.
-  var anyPushTransitioning = false;
-  // A landing target can, on some viewports/pages, sit right at the edge
-  // of *another* push's own trigger zone (e.g. Awards is short enough on
-  // some screens that its start and the footer's pre-boundary zone are
-  // only a few px apart). Reported: pushing from About to Awards would
-  // sometimes keep going by itself and reveal a slice of the footer --
-  // a single strong trackpad flick is a whole stream of wheel events
-  // that can keep arriving for over a second (established earlier,
-  // while chasing the About/Awards overshoot bug), easily outlasting
-  // the panel push's own ~420ms animation. Its trailing tail was
-  // landing inside the *footer* push's trigger zone and kicking off a
-  // second, unrequested push -- one physical gesture, two jumps.
-  //
-  // A fixed cooldown after a push ends (tried first) still isn't
-  // enough to rule this out: momentum can run well past any reasonable
-  // fixed window. What actually distinguishes "residual tail of the
-  // gesture that just triggered a push" from "a genuinely new gesture"
-  // is silence -- a real gap with no wheel events at all. This gate
-  // only engages for that specific window, right after a push
-  // completes (awaitingFreshGesture), and stays out of the way of
-  // ordinary scrolling otherwise -- it must NOT judge every wheel event
-  // by the gap since the last one, or a normal continuous scroll would
-  // never have a large enough gap to trigger a push in the first place.
-  // Both push mechanisms share this (same reasoning as
-  // anyPushTransitioning above). Capture phase + registered before the
-  // two feature listeners below guarantees this always runs first for a
-  // given wheel event, so both of them see gestureEligible already
-  // resolved for the event they're about to handle.
-  var lastWheelAt = 0;
-  var awaitingFreshGesture = false;
-  var GESTURE_QUIET_MS = 220;
-  var gestureEligible = true;
-  window.addEventListener('wheel', function (e) {
-    var gap = e.timeStamp - lastWheelAt;
-    lastWheelAt = e.timeStamp;
-    if (awaitingFreshGesture) {
-      if (gap < GESTURE_QUIET_MS) { gestureEligible = false; return; }
-      awaitingFreshGesture = false;
-    }
-    gestureEligible = true;
-  }, { passive: true, capture: true });
-
+  // The "stop exactly at each panel, never overshoot into the footer"
+  // behaviour used to be hand-rolled here: a wheel listener computing
+  // pixel boundaries and animating window.scrollTo toward them. Reported
+  // repeatedly to still overshoot into the footer regardless, most
+  // recently on Safari with trackpad input -- almost certainly because a
+  // trackpad's momentum curve is decided by the OS/browser the instant
+  // the gesture starts, so a JS preventDefault() several frames later can
+  // lose that race. That's now done with plain CSS scroll-snap instead
+  // (.stack becomes its own scroll container on desktop, see style.css) --
+  // the browser itself is what decides where momentum lands, so there's
+  // no race left to lose. All that's left here is wiring the two visible
+  // arrow buttons to scroll between panels; scrollIntoView finds .stack
+  // as the nearest scrollable ancestor on desktop (where it's the
+  // container) and falls back to the page's own scroll on mobile (where
+  // .stack is plain flow again) with no branching needed either way.
   (function () {
     var stackEl = document.querySelector('.stack');
     if (!stackEl) return;
-    var firstPanel = stackEl.querySelector(':scope > .stack__panel');
-    if (!firstPanel) return;
-
-    // Document-Y where panel 1 ends and panel 2 begins. Re-measured on
-    // resize since panel 1's own height is now content-driven (can be
-    // taller than one screen) rather than a fixed viewport unit.
-    var boundaryY = 0;
-    // Same idea, one seam further down: where Awards ends and the real
-    // footer begins (reported: continuing to scroll past Awards revealed
-    // a slice of the footer instead of stopping with Awards still filling
-    // the window). In the common case Awards is exactly one viewport
-    // tall, same as About, so footerBoundaryY lands on the exact same
-    // value as boundaryY -- resting at boundaryY already satisfies "Awards
-    // fills the window, no footer" with nothing further to stop at.
-    var footerEl = document.querySelector('footer');
-    var footerBoundaryY = 0;
-    function measureBoundary() {
-      boundaryY = firstPanel.offsetTop + firstPanel.offsetHeight;
-      if (footerEl) {
-        var footerTop = footerEl.getBoundingClientRect().top + window.scrollY;
-        footerBoundaryY = Math.max(boundaryY, footerTop - window.innerHeight);
-      } else {
-        footerBoundaryY = boundaryY;
-      }
-    }
-    measureBoundary();
-    window.addEventListener('resize', measureBoundary);
-
-    // Matches the mobile breakpoint in style.css, including a phone in
-    // landscape (often wider than 760px, but still meant to get the
-    // mobile treatment -- see the .stack__panel media query there).
-    var narrowMq = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
-
-    // Desktop: a mouse wheel tick is a small, deliberate input (unlike a
-    // touch swipe, which can already cover 100-200px before the gesture
-    // has even finished) — letting native scroll run, waiting for it to
-    // settle, and only *then* silently snapping read as two disconnected
-    // motions: a scroll, a pause, then a sudden unexplained jump.
-    // Intercepting the wheel event itself instead — the same pattern
-    // already used for the PDF viewer's own wheel-driven page turns —
-    // means a single short scroll reads as one continuous "push" across
-    // the seam instead, no separate jump afterwards. Symmetric: a scroll
-    // down while still short of the boundary pushes onto Awards, a
-    // scroll up while just past it pushes back onto About. One seam
-    // further down, at footerBoundaryY (reported: continuing to scroll
-    // past Awards revealed a slice of the footer instead of stopping with
-    // Awards still filling the window), there's nothing to push *onto* --
-    // a wheel-driven scroll that would carry past it is simply absorbed,
-    // a hard stop rather than another assisted transition. Scrolling up
-    // from there is symmetric with the first seam: it pushes back onto
-    // About. Left completely alone everywhere else, in particular
-    // anywhere within Awards' own further content on a viewport tall
-    // enough to fit more than the panel.
-    var REVERSE_ZONE_PX = 200;
-    // Previously drove this with native window.scrollTo(...,
-    // {behavior:'smooth'}) and had to *guess* when it had actually
-    // finished -- several rounds of timer heuristics (a fixed cooldown,
-    // then a self-re-arming one with a hard cap to stop it getting stuck)
-    // existed purely to paper over that unknown. It also read as
-    // sluggish: native smooth-scroll duration is browser-chosen and
-    // grows with distance, so a tall About panel could take noticeably
-    // longer than expected to settle ("mit Verzögerung"). pushScrollTo
-    // (above) drives the scroll itself on a fixed, short duration and
-    // calls back on the exact frame it's done -- no guessing, no timers,
-    // consistently snappy regardless of distance.
-    function startTransition(target) {
-      anyPushTransitioning = true;
-      pushScrollTo(target, function () { anyPushTransitioning = false; awaitingFreshGesture = true; });
-    }
-    window.addEventListener('wheel', function (e) {
-      if (narrowMq.matches) return; // touch input doesn't fire meaningful wheel events anyway
-      if (anyPushTransitioning) { e.preventDefault(); return; }
-      // Swallow (not just skip) the rest of this gesture's tail --
-      // reported: About->Awards would occasionally keep going "by
-      // itself" and reveal a slice of the footer. Only *skipping* here
-      // still let the same residual wheel events fall through to
-      // ordinary unprevented scrolling, which -- with html's sitewide
-      // scroll-behavior:smooth compounding across several of them in
-      // quick succession -- could carry noticeably further than the one
-      // clean push the user actually made. One push should fully
-      // consume the gesture that triggered it; a genuinely later, fresh
-      // gesture is unaffected since gestureEligible flips back to true
-      // as soon as real silence is observed.
-      if (!gestureEligible) { e.preventDefault(); return; }
-      if (Math.abs(e.deltaY) <= 4) return;
-      var y = window.scrollY;
-      var hasFooterZone = footerBoundaryY > boundaryY;
-      if (e.deltaY > 0) {
-        if (y < boundaryY) {
-          e.preventDefault();
-          startTransition(boundaryY);
-        } else if (hasFooterZone && y < footerBoundaryY) {
-          e.preventDefault();
-          startTransition(footerBoundaryY);
-        } else if (footerEl && y >= footerBoundaryY - 1) {
-          // Already resting with Awards filling the window (or as close
-          // as the seam above gets it) -- swallow the tick instead of
-          // handing it to native scroll, which is exactly what used to
-          // drift on into the footer.
-          e.preventDefault();
-        }
-      } else if (e.deltaY < 0) {
-        if (hasFooterZone && y > boundaryY && y <= footerBoundaryY + REVERSE_ZONE_PX) {
-          e.preventDefault();
-          startTransition(boundaryY);
-        } else if (y >= boundaryY && y < boundaryY + REVERSE_ZONE_PX) {
-          e.preventDefault();
-          startTransition(0);
-        }
-      }
-    }, { passive: false });
-
-    // Mobile no longer runs any snap/nudge assist here at all: About and
-    // Awards are two plain cards in normal document flow now (see the
-    // mobile .stack__panel rules in style.css), not two full-viewport
-    // panels with a seam to smooth over, so there's no boundary left to
-    // land short of. The scroll-cue buttons below stay wired up for
-    // desktop; the buttons themselves are hidden on mobile via CSS.
+    var panels = stackEl.querySelectorAll(':scope > .stack__panel');
+    if (panels.length < 2) return;
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
       scrollCueBtn.addEventListener('click', function () {
-        pushScrollTo(boundaryY);
+        panels[1].scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
     var scrollCueBtnUp = document.getElementById('scrollCueBtnUp');
     if (scrollCueBtnUp) {
       scrollCueBtnUp.addEventListener('click', function () {
-        pushScrollTo(0);
+        panels[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   })();

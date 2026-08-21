@@ -63,7 +63,13 @@
 
   --maxw: 1240px;
   --gutter: clamp(20px, 5vw, 64px);
-  --nav-h: 92px;
+  /* Tracks the nav's own actual rendered height (26px padding top/bottom
+     + its tallest child) -- everything below that reserves clearance
+     under the nav, or centres text against it on the photo-hero pages,
+     reads off this one value. Logo height doubled to 68px, so the nav
+     itself is now taller than the 36px menu button and this grew with
+     it: 26+26+68=120. */
+  --nav-h: 120px;
 }
 
 * { box-sizing: border-box; }
@@ -247,7 +253,7 @@ body.is-menu-open .nav__mark {
    was in flight. A static src has nothing to swap and nothing to flash. */
 .nav__mark-logo {
   display: block;
-  height: 34px;
+  height: 68px;
   width: auto;
 }
 
@@ -1071,6 +1077,30 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    machinery -- so there's nothing left for a real device to get stuck
    fighting. */
 
+/* Desktop: .stack is its own scroll container (not the page), snapping
+   to each panel's start and stopping there even on a fast fling
+   (scroll-snap-stop: always) -- so Awards is always actually seen, never
+   skipped past in one motion. Once scrolled to the very bottom of this
+   container (end of Awards), the browser natively hands remaining wheel
+   input off to the page's own scroll, which is what reveals the footer.
+   That hand-off, and the snapping itself, are both plain browser-native
+   scroll mechanics -- nothing here is watching wheel events or computing
+   scroll positions in JS. That replaces an earlier version that did (a
+   wheel listener computing pixel boundaries and animating scrollTo to
+   them): reported repeatedly, most recently in Safari, to still overshoot
+   into the footer -- almost certainly because a trackpad's momentum
+   scroll is decided by the OS/browser the instant the gesture starts, so
+   a JS preventDefault() a few frames later can lose that race. Native
+   scroll-snap doesn't have that race: the browser is the one deciding
+   where the momentum lands in the first place. */
+@media (min-width: 761px) {
+  .stack {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+  }
+}
 .stack { position: relative; }
 .stack__panel {
   position: relative;
@@ -1079,6 +1109,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
+  /* Overridden off on mobile below, where .stack goes back to being
+     plain page flow rather than its own scroll container -- these two
+     only mean anything paired with that container. */
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   /* Top-packs .stack__content (its one in-flow child) at a fixed offset
      (.stack__content's own padding-top) rather than centring it. Used to
      centre instead, splitting whatever extra room min-height left once
@@ -1235,6 +1270,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      phone screen (reported: felt broken/disorienting), and every other
      content page here already reads as plain scrollable cards on a light
      background, not a special case worth its own animated transition. */
+  .stack {
+    height: auto;
+    overflow-y: visible;
+    scroll-snap-type: none;
+  }
   .stack__panel {
     min-height: 0;
     background: none;
@@ -1242,6 +1282,8 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     display: block;
     padding: 0 16px;
     margin: 0 0 28px;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
   }
   .stack__panel:last-child { margin-bottom: 0; }
   .stack__bg { display: none; }
@@ -1368,17 +1410,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .page-hero--photo > .wrap { position: relative; z-index: 1; }
 .page-hero--photo .lede { color: rgba(250,248,245,0.85); }
 @media (max-width: 760px) {
-  /* clamp(182px, 18vh + 92px, 232px) computes the same range as the
-     previous calc(clamp(90px, 18vh, 140px) + var(--nav-h)) -- 90+92 and
-     140+92 -- but without nesting calc(), clamp() and var() together.
+  /* clamp(210px, 18vh + 120px, 260px) computes the same range as the
+     previous calc(clamp(90px, 18vh, 140px) + var(--nav-h)) -- 90+120 and
+     140+120 -- but without nesting calc(), clamp() and var() together.
      That specific combination is a known source of real title/nav
      overlap on iOS Safari (reported: Service page title rendering
      right on top of the nav instead of below it); clamp()'s own
      preferred-value slot already accepts a plain calc-sum directly, so
-     the wrapping calc() was never actually needed. --nav-h is 92px
+     the wrapping calc() was never actually needed. --nav-h is 120px
      (see :root) -- hardcoded rather than var()'d in for the same
-     reason, so nothing here still depends on the fragile combination. */
-  .page-hero--photo { justify-content: flex-start; padding-top: clamp(182px, 18vh + 92px, 232px); }
+     reason, so nothing here still depends on the fragile combination.
+     Update both the 210/260 here and --nav-h in :root together if the
+     nav's own height changes again. */
+  .page-hero--photo { justify-content: flex-start; padding-top: clamp(210px, 18vh + 120px, 260px); }
 }
 
 /* Edge-to-edge on mobile: these hero/title blocks use a smaller gutter
