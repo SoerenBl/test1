@@ -1639,6 +1639,46 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .page-hero--photo .field input::placeholder,
 .page-hero--photo .field textarea::placeholder { color: rgba(255,255,255,0.5); }
 
+/* ---------- Auto text contrast (Service/About/Awards/Contact) ----------
+   Every one of these sections assumes a dark background photo and sets
+   its text white -- fine for the actual project/studio photos this site
+   ships with, but not guaranteed for whatever gets uploaded later (a
+   bright, high-key shot would wash the white text out). .contrast-dark
+   is added/removed by applyBgContrast() in js/main.js once each hero
+   photo has actually loaded, by sampling its own average brightness --
+   switches this whole block over to the site's normal dark text instead
+   of touching colours in place, so nothing here needs to duplicate the
+   values, just point at the same variables .stack__panel--light above
+   already uses for the identical "light background, dark text" case. */
+.stack__panel.contrast-dark .stack__title { color: var(--color-text); }
+.stack__panel.contrast-dark .stack__body { color: var(--color-text); }
+.stack__panel.contrast-dark .stack__body .eyebrow { color: var(--color-accent); }
+.stack__panel.contrast-dark .stack__body .timeline__row time { color: var(--color-text-muted); }
+.stack__panel.contrast-dark .stack__body .timeline__row { border-top-color: var(--color-line); }
+.page-hero--photo.contrast-dark { color: var(--color-text); }
+.page-hero--photo.contrast-dark .lede { color: var(--color-text-muted); }
+.page-hero--photo.contrast-dark .editorial-row:last-child { border-bottom-color: var(--color-line); }
+.page-hero--photo.contrast-dark .editorial-row p { color: var(--color-text-muted); text-shadow: none; }
+.page-hero--photo.contrast-dark .editorial-row__links span { color: var(--color-text-muted); }
+.page-hero--photo.contrast-dark .editorial-row__links a { color: var(--color-text); }
+.page-hero--photo.contrast-dark .contact-list li { border-top-color: var(--color-line); color: var(--color-text); }
+.page-hero--photo.contrast-dark .contact-list li span { color: var(--color-text-muted); }
+.page-hero--photo.contrast-dark .field label { color: var(--color-text-muted); }
+.page-hero--photo.contrast-dark .field input,
+.page-hero--photo.contrast-dark .field textarea {
+  background: rgba(23,22,26,0.05);
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+.page-hero--photo.contrast-dark .field input::placeholder,
+.page-hero--photo.contrast-dark .field textarea::placeholder { color: var(--color-text-muted); }
+/* .stack__scrim (the dark gradient every photo panel already has, for the
+   white-text case) works against dark text instead of for it -- fading
+   it out here rather than deleting it outright keeps the photo's own
+   vignette/depth, just without the added darkening layer on top. */
+.stack__panel.contrast-dark .stack__scrim,
+.page-hero--photo.contrast-dark .page-hero__bg .stack__scrim { opacity: 0; }
+
 /* ---------- Footer ---------- */
 
 /* No scroll-snap here on purpose. It was tried (scroll-snap-type:
@@ -1668,12 +1708,24 @@ footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
 .footer__social a { transition: color 0.2s ease; }
 .footer__social a:hover { color: var(--color-panel-hover); }
 
-/* ---------- Letter-jump hover (About/Awards/Service/Contact titles) ----------
-   Each character is split into its own span (see initLetterFx in
-   js/main.js) so a hover can animate them individually via the Web
-   Animations API — a staggered per-letter bounce+blue-flash, restarted
-   cleanly on every hover rather than fighting CSS animation replay. */
-.hover-letters .letter-fx__char { display: inline-block; }
+/* ---------- Title hover glow (About/Awards/Service/Contact titles) ----------
+   Replaces an earlier per-letter bounce+colour-flash (asked for something
+   dezenter -- "completely different", not a variation on the same idea):
+   no movement and no colour change of the glyphs themselves now, just a
+   soft blue glow fading in behind the whole title as one calm block. Pure
+   CSS -- the old version's per-character DOM splitting (one span per
+   letter, purely to animate them individually) is gone with it, so this
+   also stops fragmenting each title's text for screen readers. */
+.hover-letters {
+  transition: text-shadow 0.45s ease;
+  text-shadow: 0 0 0 rgba(159, 216, 255, 0);
+}
+.hover-letters:hover {
+  text-shadow: 0 0 22px rgba(159, 216, 255, 0.55), 0 0 5px rgba(159, 216, 255, 0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-letters { transition: none; }
+}
 
 /* ---------- Lightbox (project photo zoom) ---------- */
 
