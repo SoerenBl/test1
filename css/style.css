@@ -1080,19 +1080,31 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 /* Desktop: .stack is its own scroll container (not the page), snapping
    to each panel's start and stopping there even on a fast fling
    (scroll-snap-stop: always) -- so Awards is always actually seen, never
-   skipped past in one motion. Once scrolled to the very bottom of this
-   container (end of Awards), the browser natively hands remaining wheel
-   input off to the page's own scroll, which is what reveals the footer.
-   That hand-off, and the snapping itself, are both plain browser-native
-   scroll mechanics -- nothing here is watching wheel events or computing
-   scroll positions in JS. That replaces an earlier version that did (a
-   wheel listener computing pixel boundaries and animating scrollTo to
-   them): reported repeatedly, most recently in Safari, to still overshoot
-   into the footer -- almost certainly because a trackpad's momentum
-   scroll is decided by the OS/browser the instant the gesture starts, so
-   a JS preventDefault() a few frames later can lose that race. Native
-   scroll-snap doesn't have that race: the browser is the one deciding
-   where the momentum lands in the first place. */
+   skipped past in one motion. The footer lives as a plain (non-snapping)
+   third child inside .stack, not outside it as a separate page section --
+   continuing to scroll past Awards' snap point reaches it as ordinary
+   free scroll within the same single context. That one-context design
+   is deliberate, not incidental: an earlier version kept the footer
+   outside .stack, relying on the browser's scroll-chaining hand-off
+   between two separate scroll contexts (.stack's internal one and the
+   page's own) -- reaching the footer worked, but scrolling back *up*
+   from it didn't reliably hand control back immediately, since which of
+   the two contexts a given wheel event's delta lands in depends on
+   exactly where the cursor is hit-testing, and .stack visually covers
+   almost the whole viewport even with the page scrolled just far enough
+   to reveal the footer's few px. One scroll context removes that
+   ambiguity entirely: there's only one scrollTop to reason about, so
+   scrolling up starts closing the footer on the very first tick,
+   regardless of cursor position. This whole approach also replaces an
+   even earlier version that computed pixel boundaries in a wheel
+   listener and drove scrollTo() by hand: reported repeatedly, most
+   recently in Safari, to still overshoot into the footer -- almost
+   certainly because a trackpad's momentum scroll is decided by the
+   OS/browser the instant the gesture starts, so a JS preventDefault() a
+   few frames later can lose that race. Plain scroll-snap doesn't have
+   that race: the browser itself decides where momentum lands, and (with
+   everything in one scroll context) there's no second context for that
+   decision to disagree with. */
 @media (min-width: 761px) {
   .stack {
     height: 100vh;
@@ -1102,6 +1114,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   }
 }
 .stack { position: relative; }
+@media (min-width: 761px) {
+  /* Without a snap point of its own, scroll-snap-stop:always on Awards
+     (above) has nothing to advance *to* -- confirmed by testing: even a
+     large, separate, later scroll gesture stayed stuck exactly at
+     Awards' snap point instead of continuing into the footer at all.
+     Giving the footer its own snap point (aligned to the container's
+     end, since it's shorter than a full panel) is what lets a further,
+     deliberate scroll actually reach it. */
+  .stack > footer { scroll-snap-align: end; }
+}
 .stack__panel {
   position: relative;
   min-height: 100vh;
