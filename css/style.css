@@ -192,7 +192,7 @@ p { margin: 0 0 1em; }
    more once the mobile About/Awards redesign below swaps those photos
    for plain light cards -- same dark-text treatment as .nav--solid,
    just scoped to mobile so desktop keeps its white nav untouched. */
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 500px) and (orientation: landscape) {
   .nav--solid-mobile {
     --nav-fg: var(--color-text);
     --nav-fg-muted: var(--color-text-muted);
@@ -1198,7 +1198,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__body .eyebrow { color: rgba(255,255,255,0.85); }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 500px) and (orientation: landscape) {
   /* About/Awards on mobile: two plain light cards on the page's own
      background, read by scrolling normally, instead of two full-viewport
      photo panels with a snap assist between them -- the immersive photo

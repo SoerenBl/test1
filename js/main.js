@@ -1670,7 +1670,10 @@ document.addEventListener('DOMContentLoaded', function () {
     measureBoundary();
     window.addEventListener('resize', measureBoundary);
 
-    var narrowMq = window.matchMedia('(max-width: 760px)');
+    // Matches the mobile breakpoint in style.css, including a phone in
+    // landscape (often wider than 760px, but still meant to get the
+    // mobile treatment -- see the .stack__panel media query there).
+    var narrowMq = window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)');
 
     // Desktop: a mouse wheel tick is a small, deliberate input (unlike a
     // touch swipe, which can already cover 100-200px before the gesture
