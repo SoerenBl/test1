@@ -49,6 +49,23 @@ Wichtig beim Anlegen über GitHub im Browser ("Add file" → "Create new file"):
 
 Also: gleicher Unterpfad wie das Originalfoto, nur einmal komplett unter `mobil/` gespiegelt. Existiert unter `mobil/...` keine Datei, wird automatisch das normale Foto verwendet — nichts anzulegen ist also immer eine gültige, sichere Option.
 
+## Texte einpflegen
+
+Genau wie bei den Fotos: jede Seite mit editierbarem Text hat ihre eigene `content.txt` (Projektseiten) bzw. `...-content.txt` (die sechs Einzelseiten) direkt neben sich liegen — Titel, Fließtext usw. stehen da einmal auf Deutsch und einmal auf Englisch drin, keine zweite Übersetzung nötig.
+
+```
+about-content.txt      → About- und Auszeichnungen-Seite (Titel, Bio-Text, Zeitstrahl, Auszeichnungen)
+contact-content.txt    → Kontaktseite (Titel, Untertitel, E-Mail, Telefon, Standort)
+home-content.txt       → Startseite (Eyebrow, Titel, Text)
+services/content.txt   → Service-Seite (Titel, Untertitel, die drei Leistungsfelder)
+impressum/content.txt  → Impressum (alle Pflichtangaben)
+datenschutz/content.txt → Datenschutzerklärung (alle Abschnitte)
+```
+
+Alle liegen im Hauptverzeichnis bzw. im jeweiligen Seitenordner (also z. B. genau da, wo bei den Kategorien auch die `cover.jpg` liegt). Format: `--- DEUTSCH ---`, dann die Felder als `Feldname: Text`, danach `--- ENGLISH ---` mit denselben Feldern auf Englisch. **Text ändern:** Datei bearbeiten, committen, pushen — GitHub baut die betreffende Seite automatisch neu, kein Code muss angepasst werden. Ändert sich an einer Seite mal etwas Strukturelles (ein neues Feld, ein neuer Abschnitt), sag kurz Bescheid, dann richte ich das entsprechend ein.
+
+**`menu-content.txt`** (Hauptverzeichnis) ist eine Ausnahme: sie listet die Texte des Slide-Menüs (Start/Arbeiten/Service/Über mich/Kontakt, Fußzeile, Impressum/Datenschutz-Links) zum Nachschlagen und für spätere Änderungen — ist aber **noch nicht** an die Automatisierung angeschlossen, das Menü bleibt also unverändert, auch wenn diese Datei bearbeitet wird. Sag Bescheid, wenn sie live geschaltet werden soll.
+
 ## Wichtig für Claude (mich)
 
 Diese Datei bei jeder Änderung an Ordnerstruktur, Foto-Namenskonvention oder Automatisierung direkt mit aktualisieren, nicht erst wenn danach gefragt wird.

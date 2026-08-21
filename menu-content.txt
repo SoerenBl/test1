@@ -1,0 +1,19 @@
+--- DEUTSCH ---
+NavStart: Start
+NavArbeiten: Arbeiten
+NavService: Service
+NavUeberMich: Über mich
+NavKontakt: Kontakt
+Fusszeile: Deutschland — weltweit verfügbar
+FussImpressum: Impressum
+FussDatenschutz: Datenschutz
+
+--- ENGLISH ---
+NavStart: Home
+NavArbeiten: Work
+NavService: Services
+NavUeberMich: About
+NavKontakt: Contact
+Fusszeile: Germany — available worldwide
+FussImpressum: Legal Notice
+FussDatenschutz: Privacy
