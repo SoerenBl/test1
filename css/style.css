@@ -1085,6 +1085,14 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 @media (max-width: 760px) {
   .stack__panel { min-height: 100svh; justify-content: flex-start; }
 }
+/* Awards' own content (title + placeholder text) is shorter than About's
+   bio+timeline, so centring it (like every other panel here) left its
+   title sitting noticeably lower on screen than About's or Service's —
+   reported as not matching. Pins it to the same top offset the others
+   already land near instead of leaving it content-height-dependent. */
+@media (min-width: 761px) {
+  .stack__panel--top { justify-content: flex-start; }
+}
 
 .stack__bg {
   position: absolute;
