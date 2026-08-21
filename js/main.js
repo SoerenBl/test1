@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // implicit column regardless, breaking that. So there just clear any
     // leftover placement and leave tiles to the normal single-column
     // flow; there's no 2-column gap to prevent there anyway.
-    var twoCol = !window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)').matches;
+    var twoCol = !window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches;
     if (!twoCol) {
       tiles.forEach(function (tile) {
         tile.classList.remove('tile--tall', 'tile--full');
@@ -1520,7 +1520,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // also treated as mobile once the screen is short, regardless of
       // width, since that's what actually distinguishes a rotated phone
       // from a real desktop window.
-      var isMobile = window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)').matches;
+      var isMobile = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches;
       var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
       var y = window.scrollY;
       var hide = isMobile && !menuOpen && y > lastY && y > 80;
@@ -1673,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Matches the mobile breakpoint in style.css, including a phone in
     // landscape (often wider than 760px, but still meant to get the
     // mobile treatment -- see the .stack__panel media query there).
-    var narrowMq = window.matchMedia('(max-width: 760px), (max-height: 500px) and (orientation: landscape)');
+    var narrowMq = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
 
     // Desktop: a mouse wheel tick is a small, deliberate input (unlike a
     // touch swipe, which can already cover 100-200px before the gesture
