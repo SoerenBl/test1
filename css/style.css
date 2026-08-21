@@ -1070,28 +1070,25 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   padding: 0;
   overflow: hidden;
   background: var(--color-bg-alt);
-  /* Vertically centres .stack__content (its one in-flow child) within
-     whatever extra room min-height leaves once the content itself is
-     shorter than a screen — on desktop. Has to live here, not on
-     .stack__content itself: that element is always sized snugly to its
-     own title+body (nothing to redistribute internally), so the actual
-     slack only ever exists at *this* level, between it and the panel's
-     own min-height floor. Mobile overrides back to flex-start below,
-     unchanged from before. */
+  /* Top-packs .stack__content (its one in-flow child) at a fixed offset
+     (.stack__content's own padding-top) rather than centring it. Used to
+     centre instead, splitting whatever extra room min-height left once
+     content was shorter than a screen between top and bottom — but since
+     .page-hero--photo (Service) centres too, and centring's actual
+     on-screen offset depends on each panel's own content height, About's
+     and Awards' titles drifted further from Service's the taller the
+     viewport got (reported: still not on the same line). All three share
+     the exact same padding-top formula, so packing them to it instead of
+     centring is what actually guarantees the same line, at any viewport
+     height, regardless of how much copy any one of them has. Mobile
+     already used flex-start unconditionally below; this just extends the
+     same idea to desktop. */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 @media (max-width: 760px) {
-  .stack__panel { min-height: 100svh; justify-content: flex-start; }
-}
-/* Awards' own content (title + placeholder text) is shorter than About's
-   bio+timeline, so centring it (like every other panel here) left its
-   title sitting noticeably lower on screen than About's or Service's —
-   reported as not matching. Pins it to the same top offset the others
-   already land near instead of leaving it content-height-dependent. */
-@media (min-width: 761px) {
-  .stack__panel--top { justify-content: flex-start; }
+  .stack__panel { min-height: 100svh; }
 }
 
 .stack__bg {
@@ -1310,14 +1307,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      footer directly, same as the rest of the site. */
   min-height: 100vh;
   min-height: 100dvh;
-  /* Vertically centred on desktop, kept in step with .stack__content
-     (About/Awards) on purpose — see its own comment for why flex-start
-     (top-packed, with a dead gap of photo below the text on a short,
-     wide viewport) was replaced with this. Mobile overrides back to
-     flex-start below, unchanged. */
+  /* Top-packed at the same fixed offset as .stack__content (About/Awards)
+     below — see its own comment for why centring (which this used to do)
+     doesn't actually keep them on the same line: it drifts with content
+     height. This is the page whose line is the reference the others are
+     matched to, so it stays anchored to this exact padding-top. Mobile
+     overrides back to flex-start below (was already the same value,
+     unchanged in effect). */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding-top: calc(var(--editorial-top-pad) + var(--nav-h));
   padding-bottom: clamp(30px, 5vh, 60px);
   color: #fff;
