@@ -39,13 +39,12 @@ Dafür gibt es den Ordner `mobil/` im Hauptverzeichnis — er spiegelt exakt den
 ```
 mobil/hero.jpg                                         → mobile Version von hero.jpg
 mobil/kategorien/mobility/cover.jpg                     → mobile Version von kategorien/mobility/cover.jpg
-mobil/about/about.jpg                                   → mobile Version von about/about.jpg
 mobil/services/cover.jpg                                → mobile Version von services/cover.jpg
 mobil/contact/cover.jpg                                 → mobile Version von contact/cover.jpg
 mobil/kategorien/mobility/bmw-k100-aero-de-2024/1.jpg   → mobile Version des Projekt-Hero-Fotos dieses Projekts
 ```
 
-**Sonderfall About/Auszeichnungen:** Auf dem Handy teilen sich beide Abschnitte (About + Auszeichnungen) ein einziges, durchgängiges Hintergrundfoto — nur `mobil/about/about.jpg` wird dort benutzt, `about/awards.jpg` (bzw. dessen mobile Version) nur noch am Desktop, wo beide weiterhin als zwei getrennte Vollbild-Panels funktionieren.
+**Sonderfall About/Auszeichnungen:** Auf dem Handy teilen sich beide Abschnitte (About + Auszeichnungen) ein einziges, durchgängiges Hintergrundfoto, ganz ohne Desktop-Gegenstück: `mobil/about/cover.jpg`. `about/about.jpg`/`about/awards.jpg` (die zwei festen Desktop-Fotos oben in der Liste) werden auf dem Handy nicht benutzt — nur noch am Desktop, wo beide Seiten weiterhin als zwei getrennte Vollbild-Panels funktionieren.
 
 **Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben ein optionales Hintergrundfoto, das über die *gesamte* Seite geht (Titel und der ganze Rechtstext darunter), oben bündig angesetzt und unten abgeschnitten — auf dem Handy genau wie am Desktop. Anders als bei den übrigen Seiten oben ist das Foto hier also nicht nur eine mobile Zusatzversion, sondern ein eigenständiges, festes Hintergrundfoto wie `services/cover.jpg` — plus optional wieder eine eigene mobile Version über `mobil/`:
 

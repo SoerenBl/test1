@@ -1,3 +1,3 @@
-Hier rein: `about.jpg` (oder `.png`/`.webp`) — die mobile Version von `about/about.jpg`.
+Hier rein: `cover.jpg` (oder `.png`/`.webp`) — das *einzige* Hintergrundfoto für die ganze About/Auszeichnungen-Seite, nur auf dem Handy (kein Desktop-Gegenstück, wie bei Impressum/Datenschutz gibt es hierfür keine Datei `about/cover.jpg` im Hauptverzeichnis).
 
-Seit Kurzem das *einzige* Hintergrundfoto für die ganze About/Auszeichnungen-Seite (nur mobil): es geht jetzt durchgängig von oben bis zur Fußzeile, die beiden Glaskarten scrollen darüber. `about/awards.jpg` (bzw. dessen mobile Version) wird auf dem Handy nicht mehr benutzt — nur noch am Desktop, wo die beiden Seiten weiterhin als zwei getrennte Vollbild-Panels funktionieren.
+Es geht durchgängig von oben bis zur Fußzeile, die beiden Glaskarten scrollen darüber. `about/about.jpg` und `about/awards.jpg` (die beiden festen Desktop-Fotos) werden auf dem Handy nicht benutzt — nur noch am Desktop, wo die beiden Seiten weiterhin als zwei getrennte Vollbild-Panels funktionieren.
