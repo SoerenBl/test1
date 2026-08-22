@@ -381,17 +381,57 @@ document.addEventListener('DOMContentLoaded', function () {
         if (url || !fallback) return url;
         return probePhotoMobileAware(fallback);
       }).then(function (url) {
+        var ph = img.previousElementSibling;
         if (url) {
           img.src = url;
-          var ph = img.previousElementSibling;
           if (ph && ph.classList.contains('ph')) ph.style.display = 'none';
         } else {
           img.style.display = 'none';
+          // Most .ph placeholders are meant to stay visible on failure --
+          // a "photo still needs uploading" hint aimed at the site owner,
+          // for a slot that's always expected to have one eventually.
+          // data-photo-optional marks the opposite case (Impressum/
+          // Datenschutz's mobile background, for instance): no photo is
+          // a perfectly normal, possibly permanent state there, not a
+          // gap to flag, so the placeholder hides too and the page just
+          // shows its own plain background underneath.
+          if (ph && ph.classList.contains('ph') && img.hasAttribute('data-photo-optional')) {
+            ph.style.display = 'none';
+          }
         }
+        img.dispatchEvent(new CustomEvent('photoresolved', { detail: { found: !!url } }));
       });
     });
   }
   resolveStaticPhotos();
+
+  // --- Mobile: nav text colour follows whether this page's own hero
+  // photo actually loaded --- Service/About/Awards/Contact/Impressum/
+  // Datenschutz can each optionally show a background photo behind their
+  // floating mobile nav; white nav text reads fine over a photo but
+  // disappears against the plain page background when there isn't one,
+  // so .nav--solid-mobile (dark text, already mobile-only via its own
+  // media query -- see style.css) is toggled on/off to match instead of
+  // being hardcoded per page. Only the first matching hero image on the
+  // page is watched (About has two, one per panel; nav only ever reads
+  // against whichever one is under it at rest, not scroll-position-
+  // aware) -- deliberately simple over exact, since nav colour has never
+  // changed on scroll anywhere else on this site either.
+  (function () {
+    var heroImg = document.querySelector('.stack__bg img[data-photo], .page-hero__bg img[data-photo]');
+    var nav = document.querySelector('.nav');
+    if (!heroImg) return;
+    // Impressum/Datenschutz only: their plain .page-hero also swaps its
+    // title/lede to white and switches on the scrim once a photo actually
+    // resolves (see .page-hero--bg-active in style.css) -- Service's
+    // always-on-photo .page-hero--photo doesn't need this, it's white by
+    // default already.
+    var heroSection = heroImg.closest('.page-hero:not(.page-hero--photo)');
+    heroImg.addEventListener('photoresolved', function (e) {
+      if (nav) nav.classList.toggle('nav--solid-mobile', !e.detail.found);
+      if (heroSection) heroSection.classList.toggle('page-hero--bg-active', e.detail.found);
+    });
+  })();
 
   // --- Auto text contrast on hero photos (Service/About/Awards/Contact) ---
   // These sections all assume a dark background photo and set their text
