@@ -1181,6 +1181,15 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   }
 }
 .stack { position: relative; }
+/* Wraps just the two panels (not the footer) so a single mobile-only
+   background photo (see .stack__page-bg, mobile media query below) can
+   span exactly them, edge to edge, without also running behind the
+   footer. display:contents on desktop removes it from the box tree
+   entirely -- .stack__panel stays a direct child of .stack there, so the
+   existing scroll-snap behaviour (which needs that direct relationship)
+   is completely unaffected. */
+.stack__group { display: contents; }
+.stack__page-bg { display: none; }
 @media (min-width: 761px) {
   /* Without a snap point of its own, scroll-snap-stop:always on Awards
      (above) has nothing to advance *to* -- confirmed by testing: even a
@@ -1387,6 +1396,43 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     overflow-y: visible;
     scroll-snap-type: none;
   }
+  /* One continuous photo behind both cards (not one per panel, which read
+     as two disconnected patches with a plain gap between them) -- see
+     .stack__group/.stack__page-bg above. .stack__group turns from
+     display:contents into a real, position:relative box here, giving the
+     single background something to span (exactly the two panels, not the
+     footer after them) and something for the glass cards to visually sit
+     over as the page scrolls past. */
+  .stack__group { display: block; position: relative; }
+  .stack__page-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .stack__page-bg img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Flush to the very top, cropping the bottom as the page grows --
+       same "crop from the bottom, never the top" idea as every other
+       page's optional background here. */
+    object-position: top;
+    display: block;
+  }
+  /* The dark gradient here exists so *white* text (desktop) reads over a
+     photo -- this card's text is dark instead (see .stack__content
+     below), which a dark scrim would only fight, so it's switched off
+     here rather than left fighting the glass card's own tint. */
+  .stack__page-bg .stack__scrim { opacity: 0; }
+  /* Each panel's own background is superseded by the single shared one
+     above -- hidden rather than removed so the desktop two-photo,
+     full-screen-panel treatment (a completely different design, see
+     .stack__bg above) is untouched there. */
+  .stack__panel > .stack__bg { display: none; }
   .stack__panel {
     min-height: 0;
     background: none;
@@ -1398,16 +1444,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     scroll-snap-stop: normal;
   }
   .stack__panel:last-child { margin-bottom: 0; }
-  /* Flush to the very top of its own panel (not just the padded/rounded
-     card), same "crop from the bottom, never the top" idea as every
-     other page's optional background here -- growing the panel (more
-     copy in the card later) just reveals more of a tall enough photo. */
-  .stack__bg img { object-position: top; }
-  /* The dark gradient here exists so *white* text (desktop) reads over a
-     photo -- this card's text is dark instead (see .stack__content
-     below), which a dark scrim would only fight, so it's switched off
-     here rather than left fighting the glass card's own tint. */
-  .stack__scrim { opacity: 0; }
   .scroll-cue { display: none; }
   .stack__content {
     margin: 0;
@@ -1435,8 +1471,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   /* First card's title needs real clearance under the floating nav (the
      desktop padding-top this replaces did too, see above); the second
      card follows straight after in normal flow, so it only needs enough
-     room to clear its own title comfortably. */
-  .stack__panel:not(:first-child) .stack__content {
+     room to clear its own title comfortably. A sibling combinator (any
+     .stack__panel preceded by another one), not :not(:first-child) --
+     .stack__page-bg is now the actual first child of .stack__group, which
+     made :first-child match no panel at all and this rule apply to both. */
+  .stack__panel ~ .stack__panel .stack__content {
     padding-top: clamp(32px, 8vw, 44px);
   }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
@@ -1569,7 +1608,8 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    (title, lede, services) sitting on top of it, so the instructional copy
    must stay out of the way instead of competing for the centre. */
 .page-hero__bg .ph,
-.stack__bg .ph {
+.stack__bg .ph,
+.stack__page-bg .ph {
   border: none;
   min-height: 100%;
   margin: 0;
