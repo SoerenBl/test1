@@ -12,9 +12,9 @@ hero.jpg                                              → Hero-Foto der Startsei
 kategorien/furniture-lighting/cover.jpg                          → Kachel-Foto dieser Kategorie auf der Startseite (+ Hintergrund der Kategorieseite)
 kategorien/furniture-lighting/c-shape-nightstand-de-2018/1.jpg, 2.jpg, ...   → Fotos dieses Projekts
 
-about/about.jpg, about/awards.jpg                     → Hintergrundfotos der About- bzw. Auszeichnungen-Kachel
+about/about.jpg, about/awards.jpg                     → Hintergrundfotos der About- bzw. Auszeichnungen-Kachel (Desktop; mobil nur about/about.jpg, siehe unten)
 services/cover.jpg                                    → Hintergrundfoto der Service-Seite
-contact-cover.jpg                                      → Hintergrundfoto der Kontaktseite (liegt im Hauptverzeichnis)
+contact/cover.jpg                                      → Hintergrundfoto der Kontaktseite
 logo.png                                                → Logo oben links (liegt im Hauptverzeichnis)
 ```
 
@@ -22,7 +22,7 @@ Alle sechs Kategorie-Ordner liegen zusammen in `kategorien/` (`kategorien/mobili
 
 **Projektordner** (`1.jpg`, `2.jpg`, …): komplett dynamisch. Wie viele nummerierte Fotos dort liegen, so viele Kacheln entstehen automatisch auf der Projektseite (max. 24). `1.jpg` ist gleichzeitig das große Hero-Foto oben auf der Projektseite. Lücken in der Nummerierung werden übersprungen. Liegt noch kein Foto vor, zeigt die Seite einen Platzhalter ("Fotos folgen in Kürze").
 
-**`cover.jpg`** (pro Kategorie), **`hero.jpg`**, **`about/about.jpg`**, **`about/awards.jpg`**, **`services/cover.jpg`** und **`contact-cover.jpg`** sind je ein festes einzelnes Hintergrundfoto. Fehlt eines davon, zeigt die jeweilige Kachel einen einfachen grauen Platzhalter statt eines Fotos — kein Fehler, einfach noch nicht befüllt.
+**`cover.jpg`** (pro Kategorie), **`hero.jpg`**, **`about/about.jpg`**, **`about/awards.jpg`**, **`services/cover.jpg`** und **`contact/cover.jpg`** sind je ein festes einzelnes Hintergrundfoto. Fehlt eines davon, zeigt die jeweilige Kachel einen einfachen grauen Platzhalter statt eines Fotos — kein Fehler, einfach noch nicht befüllt.
 
 **Foto ändern/hinzufügen:** Datei am passenden Ort ablegen bzw. ersetzen, mit GitHub Desktop committen und pushen. Die Seite zeigt sie automatisch, kein Code muss angepasst werden.
 
@@ -41,18 +41,24 @@ mobil/hero.jpg                                         → mobile Version von he
 mobil/kategorien/mobility/cover.jpg                     → mobile Version von kategorien/mobility/cover.jpg
 mobil/about/about.jpg                                   → mobile Version von about/about.jpg
 mobil/services/cover.jpg                                → mobile Version von services/cover.jpg
-mobil/contact-cover.jpg                                 → mobile Version von contact-cover.jpg
+mobil/contact/cover.jpg                                 → mobile Version von contact/cover.jpg
 mobil/kategorien/mobility/bmw-k100-aero-de-2024/1.jpg   → mobile Version des Projekt-Hero-Fotos dieses Projekts
 ```
 
-**Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben *nur* auf dem Handy ein optionales Hintergrundfoto (oben, hochkant, wird oben bündig angesetzt und bei Bedarf unten abgeschnitten) — am Desktop bleiben sie immer wie bisher. Dafür reicht allein die mobile Datei, ganz ohne Desktop-Gegenstück:
+**Sonderfall About/Auszeichnungen:** Auf dem Handy teilen sich beide Abschnitte (About + Auszeichnungen) ein einziges, durchgängiges Hintergrundfoto — nur `mobil/about/about.jpg` wird dort benutzt, `about/awards.jpg` (bzw. dessen mobile Version) nur noch am Desktop, wo beide weiterhin als zwei getrennte Vollbild-Panels funktionieren.
+
+**Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben *nur* auf dem Handy ein optionales Hintergrundfoto — es geht über die *gesamte* Seite (Titel und der ganze Rechtstext darunter), hochformatig, oben bündig angesetzt und unten abgeschnitten. Am Desktop bleiben beide Seiten immer wie bisher. Dafür reicht allein die mobile Datei, ganz ohne Desktop-Gegenstück:
 
 ```
 mobil/impressum/cover.jpg     → optionales Hintergrundfoto Impressum (nur mobil)
 mobil/datenschutz/cover.jpg   → optionales Hintergrundfoto Datenschutz (nur mobil)
 ```
 
-Fehlt eine davon, bleibt die jeweilige Seite einfach weiß — kein Platzhalter, kein Fehler.
+Fehlt eine davon, bleibt die jeweilige Seite einfach weiß — kein Platzhalter, kein Fehler. Die Textfarbe stellt sich automatisch auf das Foto ein (siehe unten) — bei einem sehr langen Rechtstext wird ein hochformatiges Foto aber stark in die Breite beschnitten, je länger die Seite ist; ein ruhiges, eher detailarmes Foto eignet sich hier besser als eines mit einem zentralen Motiv, das darunter leiden würde.
+
+### Automatische Textfarbe (Kontrast) auf Hintergrundfotos
+
+Service-, About/Auszeichnungen-, Kontakt- sowie Impressum/Datenschutz-Hintergrundfotos werden nach dem Laden automatisch auf ihre Helligkeit geprüft und die Schrift entsprechend weiß oder dunkel gestellt — für ein dunkles Foto (wie die bisherigen) bleibt sie weiß, für ein sehr helles Foto schaltet sie automatisch auf dunkel um. Es muss also nichts weiter beachtet werden, welches Foto auch immer hochgeladen wird, es bleibt immer lesbar.
 
 Wichtig beim Anlegen über GitHub im Browser ("Add file" → "Create new file"): dort muss beim Dateinamen ein **Schrägstrich `/`** stehen, kein Doppelpunkt — also `mobil/hero.jpg` eintippen (das legt automatisch den Unterordner an), nicht `mobil:hero.jpg`. Mit einem Doppelpunkt landet die Datei nicht am richtigen Ort und wird nicht gefunden.
 

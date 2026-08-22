@@ -1539,34 +1539,55 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      wholesale -- that would also drag along its always-white text, its
      own centring behaviour, and more, none of which is wanted for these
      two on desktop, where they stay exactly as before.
-     Confined to a fixed-height banner (not the full, very tall section --
-     these pages carry long legal text below) so object-fit:cover crops
-     it sensibly from the bottom instead of stretching a short photo to
-     fill an arbitrarily long page. Only the title+lede's own .wrap sits
-     over it; the legal-text .wrap below is untouched, in normal flow,
-     regardless of whether a photo is present. No photo present (the
-     common case, data-photo-optional hides both image and placeholder
-     on failure) -- this whole block is invisible and the page reads as
-     plain white, exactly as before. */
+     Spans the *entire* section now (title+lede AND all the legal text
+     below, previously just a banner behind the title) -- matches the
+     same "one continuous photo, content scrolls over it" treatment
+     About/Awards uses. A photo that's much shorter than these
+     text-heavy pages will still get cropped hard by object-fit:cover the
+     further the legal text stretches the page -- worth using a tall,
+     fairly plain/low-detail source photo here rather than one with a
+     lot going on that a deep, narrow crop would mangle. No photo present
+     (the common case, data-photo-optional hides both image and
+     placeholder on failure) -- this whole block is invisible and the
+     page reads as plain white, exactly as before. */
   .page-hero:not(.page-hero--photo) {
     position: relative;
   }
-  .page-hero:not(.page-hero--photo) .page-hero__bg {
-    display: block;
-    bottom: auto;
-    height: clamp(320px, 55vh, 480px);
-    overflow: hidden;
-  }
+  .page-hero:not(.page-hero--photo) .page-hero__bg { display: block; }
   .page-hero:not(.page-hero--photo) .page-hero__bg img { object-position: top; }
-  .page-hero:not(.page-hero--photo) > .page-hero__bg + .wrap { position: relative; z-index: 1; }
+  /* Every .wrap here (title+lede *and* the legal text after it), not just
+     the first -- a sibling combinator so it isn't tied to exactly one
+     .wrap following .page-hero__bg, the same mistake already made (and
+     fixed) once on this page's own :first-of-type rule further up. */
+  .page-hero:not(.page-hero--photo) .page-hero__bg ~ .wrap { position: relative; z-index: 1; }
   /* Scrim/white-text only switch on once a photo actually resolves --
      .page-hero--bg-active is toggled by JS alongside nav--solid-mobile
      (see main.js), reusing the same photoresolved event. Until then the
      scrim stays off so no dark gradient shows over a plain white page. */
   .page-hero:not(.page-hero--photo) .page-hero__bg .stack__scrim { opacity: 0; }
   .page-hero--bg-active .page-hero__bg .stack__scrim { opacity: 1; }
-  .page-hero--bg-active > .page-hero__bg + .wrap .page-hero__title,
-  .page-hero--bg-active > .page-hero__bg + .wrap .lede { color: #fff; }
+  /* White text baseline across *both* wraps -- title/lede and, now that
+     the photo runs the full page, the legal text below it too (headings,
+     paragraphs inherit; the list needs its own rule same as everywhere
+     else .contact-list appears over a photo, see .page-hero--photo
+     further down). .contrast-dark (real per-photo brightness sampling,
+     same mechanism as Service/About/Contact -- see applyBgContrast in
+     main.js, now also watching this page's photo) below reverts all of
+     it back to normal dark text for a photo that turns out bright rather
+     than the dark one this whole block otherwise assumes. */
+  .page-hero--bg-active { color: #fff; }
+  .page-hero--bg-active .lede { color: rgba(250,248,245,0.85); }
+  .page-hero--bg-active .contact-list li { border-top-color: rgba(255,255,255,0.25); color: #fff; }
+  .page-hero--bg-active .contact-list li span { color: rgba(250,248,245,0.75); }
+  .page-hero--bg-active .contact-list li > span:nth-child(1),
+  .page-hero--bg-active .contact-list li > span:nth-child(2) { color: rgba(250,248,245,0.9); }
+  .page-hero--bg-active.contrast-dark { color: var(--color-text); }
+  .page-hero--bg-active.contrast-dark .lede { color: var(--color-text-muted); }
+  .page-hero--bg-active.contrast-dark .contact-list li { border-top-color: var(--color-line); color: var(--color-text); }
+  .page-hero--bg-active.contrast-dark .contact-list li span { color: var(--color-text-muted); }
+  .page-hero--bg-active.contrast-dark .contact-list li > span:nth-child(1),
+  .page-hero--bg-active.contrast-dark .contact-list li > span:nth-child(2) { color: #58575c; }
+  .page-hero--bg-active.contrast-dark .page-hero__bg .stack__scrim { opacity: 0; }
 }
 
 /* Photo-background variant of .page-hero (Service): mirrors the About

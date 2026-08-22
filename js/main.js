@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // set (see its own comment, right by .contrast-dark) rather than this
   // touching any colour directly.
   function applyBgContrast(img) {
-    var panel = img.closest('.stack__panel, .page-hero--photo');
+    var panel = img.closest('.stack__panel, .page-hero--photo, .page-hero:not(.page-hero--photo)');
     if (!panel) return;
     function sample() {
       if (!img.naturalWidth) return;
