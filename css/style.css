@@ -1868,6 +1868,27 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   font-size: 1.05rem;
 }
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-accent); }
+/* Browser autofill (name/email remembered from a previous visit) paints
+   its own background colour straight over whatever's set here -- a
+   yellow tint in Safari/Chrome, blue in some others -- ignoring normal
+   background/color entirely; the only thing that actually overrides it
+   is an absurdly large inset box-shadow (paints on top of the autofill
+   layer) paired with -webkit-text-fill-color (background-color alone
+   doesn't touch the text). transition-delay is the standard trick for
+   stopping Chrome re-animating its own colour back in a few seconds
+   later. Repeated per background variant below (plain/on-photo/
+   on-photo-contrast-dark) since each needs its own matching fill. */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus,
+.field textarea:-webkit-autofill,
+.field textarea:-webkit-autofill:hover,
+.field textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  box-shadow: 0 0 0 1000px #fff inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 /* White-on-photo variant, same treatment as .page-hero--photo .editorial-row */
 .page-hero--photo .contact-list li { border-top-color: rgba(255,255,255,0.25); color: #fff; }
@@ -1881,6 +1902,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 .page-hero--photo .field input::placeholder,
 .page-hero--photo .field textarea::placeholder { color: rgba(255,255,255,0.5); }
+.page-hero--photo .field input:-webkit-autofill,
+.page-hero--photo .field input:-webkit-autofill:hover,
+.page-hero--photo .field input:-webkit-autofill:focus,
+.page-hero--photo .field textarea:-webkit-autofill,
+.page-hero--photo .field textarea:-webkit-autofill:hover,
+.page-hero--photo .field textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px rgba(255,255,255,0.08) inset;
+  box-shadow: 0 0 0 1000px rgba(255,255,255,0.08) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 /* ---------- Auto text contrast (Service/About/Awards/Contact) ----------
    Every one of these sections assumes a dark background photo and sets
@@ -1915,6 +1947,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 .page-hero--photo.contrast-dark .field input::placeholder,
 .page-hero--photo.contrast-dark .field textarea::placeholder { color: var(--color-text-muted); }
+.page-hero--photo.contrast-dark .field input:-webkit-autofill,
+.page-hero--photo.contrast-dark .field input:-webkit-autofill:hover,
+.page-hero--photo.contrast-dark .field input:-webkit-autofill:focus,
+.page-hero--photo.contrast-dark .field textarea:-webkit-autofill,
+.page-hero--photo.contrast-dark .field textarea:-webkit-autofill:hover,
+.page-hero--photo.contrast-dark .field textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px rgba(23,22,26,0.05) inset;
+  box-shadow: 0 0 0 1000px rgba(23,22,26,0.05) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
 /* .stack__scrim (the dark gradient every photo panel already has, for the
    white-text case) works against dark text instead of for it -- fading
    it out here rather than deleting it outright keeps the photo's own
