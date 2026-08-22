@@ -70,6 +70,23 @@
      itself is now taller than the 36px menu button and this grew with
      it: 26+26+68=120. */
   --nav-h: 120px;
+  /* Shared mobile title offset for Service/About/Awards/Contact/
+     Impressum/Datenschutz -- "as close under the status bar as About's
+     already was" was the ask, but About's own old value (a flat
+     clamp(90px, 22vh, 150px)) turned out to have a real bug: on a phone
+     in landscape, 22vh can compute below even the 90px floor, landing
+     under --nav-h (120px) and actually overlapping the nav (confirmed:
+     90px top vs 120px nav bottom at several landscape sizes). Floor
+     raised to comfortably clear the nav instead of a value that predates
+     the nav being this tall. 132px (not var(--nav-h) + a calc()) is
+     deliberate, not laziness -- combining clamp()/calc()/var() like that
+     is a known source of a real Safari title/nav-overlap bug elsewhere
+     in this file (see the .page-hero--photo mobile rule and its own
+     comment); hardcoding it here avoids the same risk. Keep this and
+     --nav-h in sync by hand if the nav's own height changes again. On a
+     normal portrait phone, 22vh still comfortably exceeds this floor and
+     the result matches the old clamp exactly. */
+  --mobile-hero-top-pad: clamp(132px, 22vh, 150px);
 }
 
 * { box-sizing: border-box; }
@@ -91,6 +108,14 @@ body {
 }
 
 body.nav-pad { padding-top: var(--nav-h); }
+/* Impressum/Datenschutz only (the only body.nav-pad pages). Their nav
+   floats on mobile now instead of reserving this space -- .page-hero
+   itself (below) provides its own clearance via --mobile-hero-top-pad,
+   same as every other page here, since it may have a photo behind the
+   nav to float over. */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  body.nav-pad { padding-top: 0; }
+}
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -198,15 +223,25 @@ p { margin: 0 0 1em; }
   }
   .nav.is-hidden { transform: translateY(-100%); }
 }
-.nav.nav--solid {
-  --nav-fg: var(--color-text);
-  --nav-fg-muted: var(--color-text-muted);
+/* Desktop only -- Impressum/Datenschutz are the only pages that ever set
+   this, and only for their solid, no-photo desktop nav. Their mobile
+   layout now optionally shows a background photo of its own (like every
+   other page here), so their nav needs to be able to go back to the
+   default white/floating look there too -- .nav--solid-mobile (below,
+   already mobile-only) is what actually governs mobile nav colour now,
+   toggled dynamically by js/main.js based on whether that page's own
+   photo loaded, not hardcoded to always-dark like this used to be. */
+@media (min-width: 761px) {
+  .nav.nav--solid {
+    --nav-fg: var(--color-text);
+    --nav-fg-muted: var(--color-text-muted);
+  }
 }
-/* About page only: the floating white-on-photo nav (needed above the
-   dark stack__bg photos on desktop) has nothing dark to sit over any
-   more once the mobile About/Awards redesign below swaps those photos
-   for plain light cards -- same dark-text treatment as .nav--solid,
-   just scoped to mobile so desktop keeps its white nav untouched. */
+/* Dark nav text for whichever mobile page currently has no background
+   photo to sit over (white text there would be invisible against the
+   plain page background) -- toggled by js/main.js per page, not tied to
+   any one page by name anymore now that all of Service/About/Awards/
+   Contact/Impressum/Datenschutz can each optionally show one. */
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   .nav--solid-mobile {
     --nav-fg: var(--color-text);
@@ -1337,13 +1372,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .stack__panel--light .stack__body .eyebrow { color: var(--color-accent); }
 
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
-  /* About/Awards on mobile: two plain light cards on the page's own
-     background, read by scrolling normally, instead of two full-viewport
-     photo panels with a snap assist between them -- the immersive photo
-     hero treatment (built for desktop) didn't hold up ported down to a
-     phone screen (reported: felt broken/disorienting), and every other
-     content page here already reads as plain scrollable cards on a light
-     background, not a special case worth its own animated transition. */
+  /* About/Awards on mobile: two glass cards over their own (optional)
+     full-bleed background photo, read by scrolling normally, instead of
+     two full-viewport photo panels with a snap assist between them -- the
+     immersive desktop treatment didn't hold up ported down to a phone
+     screen (reported: felt broken/disorienting). Used to drop the photo
+     entirely in favour of a plain solid card; now reinstated as a
+     frosted-glass card *over* the photo instead (still asked to keep the
+     rounded-card shape, just glass rather than solid), matching the
+     other mobile pages here, which all optionally show a photo behind
+     their own content the same way. */
   .stack {
     height: auto;
     overflow-y: visible;
@@ -1352,7 +1390,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__panel {
     min-height: 0;
     background: none;
-    overflow: visible;
+    overflow: hidden;
     display: block;
     padding: 0 16px;
     margin: 0 0 28px;
@@ -1360,13 +1398,39 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     scroll-snap-stop: normal;
   }
   .stack__panel:last-child { margin-bottom: 0; }
-  .stack__bg { display: none; }
+  /* Flush to the very top of its own panel (not just the padded/rounded
+     card), same "crop from the bottom, never the top" idea as every
+     other page's optional background here -- growing the panel (more
+     copy in the card later) just reveals more of a tall enough photo. */
+  .stack__bg img { object-position: top; }
+  /* The dark gradient here exists so *white* text (desktop) reads over a
+     photo -- this card's text is dark instead (see .stack__content
+     below), which a dark scrim would only fight, so it's switched off
+     here rather than left fighting the glass card's own tint. */
+  .stack__scrim { opacity: 0; }
   .scroll-cue { display: none; }
   .stack__content {
     margin: 0;
-    padding: clamp(90px, 22vh, 150px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
-    background: var(--color-bg-alt);
+    padding: var(--mobile-hero-top-pad) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
+    /* Frosted glass: a light, translucent tint plus blur, rather than
+       the flat --color-bg-alt this used to be -- lets whatever's behind
+       it (the panel's own photo, or plain white if there isn't one)
+       show through softly instead of hiding it outright. White (not the
+       page's own colours) on purpose: it stays readable against dark
+       text regardless of what photo ends up behind it, without needing
+       the same per-photo brightness check the desktop pages use. */
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 20px;
+  }
+  /* backdrop-filter isn't universally supported (older Android WebView in
+     particular) -- falls back to a solid, opaque card identical to the
+     old design rather than dark text on a fully see-through, potentially
+     illegible background. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .stack__content { background: var(--color-bg-alt); }
   }
   /* First card's title needs real clearance under the floating nav (the
      desktop padding-top this replaces did too, see above); the second
@@ -1419,10 +1483,51 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    the other page-hero pages, this pulls it in closer underneath "Service"
    without touching the shared spacing everywhere else. */
 .page-hero__title--tight { margin-bottom: clamp(-2px, 0.3vh, 6px); }
-@media (max-width: 760px) {
-  .page-hero { padding-top: clamp(90px, 18vh, 140px); }
+/* Impressum/Datenschutz's optional background photo is a mobile-only
+   feature (see the media query below) -- hidden outright at desktop
+   widths regardless of whether a photo happens to resolve there, so a
+   stray desktop-sized file can never reflow or cover this section's
+   (unrelated, unpositioned) title on desktop, where these two pages keep
+   their original plain-white layout untouched. */
+.page-hero:not(.page-hero--photo) .page-hero__bg { display: none; }
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  .page-hero { padding-top: var(--mobile-hero-top-pad); }
   .page-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; }
   .page-hero__title--compact { font-size: clamp(2.1rem, 9.5vw, 3.4rem); }
+  /* Impressum/Datenschutz: optional background photo, same idea as every
+     other page here, layered onto the plain (non --photo) .page-hero
+     instead of switching them onto the desktop-oriented --photo variant
+     wholesale -- that would also drag along its always-white text, its
+     own centring behaviour, and more, none of which is wanted for these
+     two on desktop, where they stay exactly as before.
+     Confined to a fixed-height banner (not the full, very tall section --
+     these pages carry long legal text below) so object-fit:cover crops
+     it sensibly from the bottom instead of stretching a short photo to
+     fill an arbitrarily long page. Only the title+lede's own .wrap sits
+     over it; the legal-text .wrap below is untouched, in normal flow,
+     regardless of whether a photo is present. No photo present (the
+     common case, data-photo-optional hides both image and placeholder
+     on failure) -- this whole block is invisible and the page reads as
+     plain white, exactly as before. */
+  .page-hero:not(.page-hero--photo) {
+    position: relative;
+  }
+  .page-hero:not(.page-hero--photo) .page-hero__bg {
+    display: block;
+    bottom: auto;
+    height: clamp(320px, 55vh, 480px);
+    overflow: hidden;
+  }
+  .page-hero:not(.page-hero--photo) .page-hero__bg img { object-position: top; }
+  .page-hero:not(.page-hero--photo) > .page-hero__bg + .wrap { position: relative; z-index: 1; }
+  /* Scrim/white-text only switch on once a photo actually resolves --
+     .page-hero--bg-active is toggled by JS alongside nav--solid-mobile
+     (see main.js), reusing the same photoresolved event. Until then the
+     scrim stays off so no dark gradient shows over a plain white page. */
+  .page-hero:not(.page-hero--photo) .page-hero__bg .stack__scrim { opacity: 0; }
+  .page-hero--bg-active .page-hero__bg .stack__scrim { opacity: 1; }
+  .page-hero--bg-active > .page-hero__bg + .wrap .page-hero__title,
+  .page-hero--bg-active > .page-hero__bg + .wrap .lede { color: #fff; }
 }
 
 /* Photo-background variant of .page-hero (Service): mirrors the About
@@ -1483,7 +1588,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 }
 .page-hero--photo > .wrap { position: relative; z-index: 1; }
 .page-hero--photo .lede { color: rgba(250,248,245,0.85); }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   /* clamp(210px, 18vh + 120px, 260px) computes the same range as the
      previous calc(clamp(90px, 18vh, 140px) + var(--nav-h)) -- 90+120 and
      140+120 -- but without nesting calc(), clamp() and var() together.
@@ -1494,9 +1599,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      the wrapping calc() was never actually needed. --nav-h is 120px
      (see :root) -- hardcoded rather than var()'d in for the same
      reason, so nothing here still depends on the fragile combination.
-     Update both the 210/260 here and --nav-h in :root together if the
-     nav's own height changes again. */
-  .page-hero--photo { justify-content: flex-start; padding-top: clamp(210px, 18vh + 120px, 260px); }
+     Now matches --mobile-hero-top-pad (About/Service/Contact/Impressum/
+     Datenschutz all sit on the same line as a result, closer under the
+     status bar than this used to sit) -- that variable is itself a
+     plain clamp() with no var()/calc() nested inside it, so referencing
+     it here via a single var() substitution doesn't reintroduce the
+     bug; only *defining* a clamp with calc(var()) nested inside it did. */
+  .page-hero--photo { justify-content: flex-start; padding-top: var(--mobile-hero-top-pad); }
+  /* Flush to the top, cropping the bottom as content grows -- same as
+     every other page's optional background photo now, instead of the
+     centred crop desktop still uses. */
+  .page-hero--photo .page-hero__bg img { object-position: top; }
 }
 
 /* Edge-to-edge on mobile: these hero/title blocks use a smaller gutter

@@ -45,6 +45,15 @@ mobil/contact-cover.jpg                                 → mobile Version von c
 mobil/kategorien/mobility/bmw-k100-aero-de-2024/1.jpg   → mobile Version des Projekt-Hero-Fotos dieses Projekts
 ```
 
+**Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben *nur* auf dem Handy ein optionales Hintergrundfoto (oben, hochkant, wird oben bündig angesetzt und bei Bedarf unten abgeschnitten) — am Desktop bleiben sie immer wie bisher. Dafür reicht allein die mobile Datei, ganz ohne Desktop-Gegenstück:
+
+```
+mobil/impressum/cover.jpg     → optionales Hintergrundfoto Impressum (nur mobil)
+mobil/datenschutz/cover.jpg   → optionales Hintergrundfoto Datenschutz (nur mobil)
+```
+
+Fehlt eine davon, bleibt die jeweilige Seite einfach weiß — kein Platzhalter, kein Fehler.
+
 Wichtig beim Anlegen über GitHub im Browser ("Add file" → "Create new file"): dort muss beim Dateinamen ein **Schrägstrich `/`** stehen, kein Doppelpunkt — also `mobil/hero.jpg` eintippen (das legt automatisch den Unterordner an), nicht `mobil:hero.jpg`. Mit einem Doppelpunkt landet die Datei nicht am richtigen Ort und wird nicht gefunden.
 
 Also: gleicher Unterpfad wie das Originalfoto, nur einmal komplett unter `mobil/` gespiegelt. Existiert unter `mobil/...` keine Datei, wird automatisch das normale Foto verwendet — nichts anzulegen ist also immer eine gültige, sichere Option.
