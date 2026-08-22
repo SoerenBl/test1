@@ -413,23 +413,33 @@ document.addEventListener('DOMContentLoaded', function () {
   // so .nav--solid-mobile (dark text, already mobile-only via its own
   // media query -- see style.css) is toggled on/off to match instead of
   // being hardcoded per page. Only the first matching hero image on the
-  // page is watched (About has two, one per panel; nav only ever reads
-  // against whichever one is under it at rest, not scroll-position-
-  // aware) -- deliberately simple over exact, since nav colour has never
-  // changed on scroll anywhere else on this site either.
+  // page is watched -- .stack__page-bg listed first specifically so
+  // About/Awards watches its one *visible* shared mobile photo, not the
+  // two hidden per-panel desktop photos further down the same page (which
+  // used to be picked instead, purely because they came first in document
+  // order -- nav colour, and the glass cards' own white-text switch below,
+  // both silently tracked the wrong, invisible photo until this was
+  // added). Deliberately simple over exact otherwise -- nav colour has
+  // never changed on scroll anywhere else on this site either.
   (function () {
-    var heroImg = document.querySelector('.stack__bg img[data-photo], .page-hero__bg img[data-photo]');
+    var heroImg = document.querySelector('.stack__page-bg img[data-photo], .stack__bg img[data-photo], .page-hero__bg img[data-photo]');
     var nav = document.querySelector('.nav');
     if (!heroImg) return;
-    // Impressum/Datenschutz only: their plain .page-hero also swaps its
+    // Impressum/Datenschutz: their plain .page-hero also swaps its
     // title/lede to white and switches on the scrim once a photo actually
     // resolves (see .page-hero--bg-active in style.css) -- Service's
     // always-on-photo .page-hero--photo doesn't need this, it's white by
     // default already.
     var heroSection = heroImg.closest('.page-hero:not(.page-hero--photo)');
+    // About/Awards: the shared glass-card text defaults to dark (safe
+    // against the plain .ph placeholder before any photo exists) and only
+    // switches to white once this confirms a photo actually resolved --
+    // see .stack__group--bg-active in style.css.
+    var stackGroup = heroImg.closest('.stack__group');
     heroImg.addEventListener('photoresolved', function (e) {
       if (nav) nav.classList.toggle('nav--solid-mobile', !e.detail.found);
       if (heroSection) heroSection.classList.toggle('page-hero--bg-active', e.detail.found);
+      if (stackGroup) stackGroup.classList.toggle('stack__group--bg-active', e.detail.found);
     });
   })();
 
@@ -443,8 +453,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // whole text/border palette over to the site's normal dark-on-light
   // set (see its own comment, right by .contrast-dark) rather than this
   // touching any colour directly.
-  function applyBgContrast(img) {
-    var panel = img.closest('.stack__panel, .page-hero--photo, .page-hero:not(.page-hero--photo)');
+  function applyBgContrast(img, threshold) {
+    var panel = img.closest('.stack__panel, .page-hero--photo, .page-hero:not(.page-hero--photo), .stack__group');
     if (!panel) return;
     function sample() {
       if (!img.naturalWidth) return;
@@ -465,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (var i = 0; i < data.length; i += 4) {
           total += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
         }
-        panel.classList.toggle('contrast-dark', total / (data.length / 4) > 165);
+        panel.classList.toggle('contrast-dark', total / (data.length / 4) > threshold);
       } catch (e) {
         // getImageData can throw on a tainted canvas -- leave the default
         // (white-text) styling in place rather than guessing.
@@ -480,7 +490,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (img.complete && img.naturalWidth) sample();
     else img.addEventListener('load', sample);
   }
-  document.querySelectorAll('.stack__bg img[data-photo], .page-hero__bg img[data-photo]').forEach(applyBgContrast);
+  document.querySelectorAll('.stack__bg img[data-photo], .page-hero__bg img[data-photo]').forEach(function (img) {
+    applyBgContrast(img, 165);
+  });
+  // About/Awards' shared mobile photo sits *behind* a translucent white
+  // glass card (~0.3 opacity, see .stack__content) rather than directly
+  // under the text -- the tint itself always adds roughly 0.3*255 ≈ 76 of
+  // brightness to whatever shows through it, so the same raw-photo cutoff
+  // used above (165, calibrated for an untinted photo) would flip to dark
+  // text later than the card actually needs it to. ~127 is that same 165
+  // effective-brightness line solved backwards through the tint's own math
+  // (165 - 76) / 0.7 ≈ 127 -- everything else about the sampling is shared
+  // with applyBgContrast above.
+  var stackPageBgImg = document.querySelector('.stack__page-bg img[data-photo]');
+  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 127);
 
   // --- Favicon: "SB" by default, swapped automatically for logo2.* if
   // that file exists (kept separate from logo.* so the nav mark and the

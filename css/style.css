@@ -1448,25 +1448,32 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__content {
     margin: 0;
     padding: var(--mobile-hero-top-pad) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
-    /* Frosted glass: a light, translucent tint plus blur, rather than
-       the flat --color-bg-alt this used to be -- lets whatever's behind
-       it (the panel's own photo, or plain white if there isn't one)
-       show through softly instead of hiding it outright. White (not the
-       page's own colours) on purpose: it stays readable against dark
-       text regardless of what photo ends up behind it, without needing
-       the same per-photo brightness check the desktop pages use. */
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Liquid-glass tint: much more transparent than the old 0.55 (closer
+       to iOS's own translucent-glass material) plus saturate() alongside
+       the blur -- blur alone flattens colour, saturate brings back some
+       of what's showing through instead of leaving it washed-out grey.
+       The thin, bright border plus soft shadow is the same "edge catches
+       the light, card floats above the photo" pairing that material
+       uses. Text colour itself is unaffected by any of this (see the
+       dark/white/.contrast-dark rules further down) -- it's not reacting
+       to the tint's opacity here, it's reacting to whether a photo is
+       even present at all and, once it is, how bright it turns out. */
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
     border-radius: 20px;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.16);
   }
   /* backdrop-filter isn't universally supported (older Android WebView in
-     particular) -- falls back to a solid, opaque card identical to the
-     old design rather than dark text on a fully see-through, potentially
-     illegible background. */
+     particular) -- falls back to a solid, opaque card instead of a
+     razor-sharp (unblurred) photo showing straight through a mostly
+     see-through tint. Text colour rules further down don't need their
+     own fallback copy here: they were already rewritten to react to
+     whether a photo is present/bright rather than to the tint itself, so
+     they stay correct with or without blur support. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .stack__content { background: var(--color-bg-alt); }
+    .stack__content { background: var(--color-bg-alt); box-shadow: none; }
   }
   /* First card's title needs real clearance under the floating nav (the
      desktop padding-top this replaces did too, see above); the second
@@ -1480,12 +1487,39 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
-     don't collide between lines. */
-  .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; color: var(--color-text); }
-  .stack__body { color: var(--color-text); }
-  .stack__body .eyebrow { color: var(--color-accent); }
-  .stack__body .timeline__row time { color: var(--color-text-muted); }
-  .stack__body .timeline__row { border-top-color: var(--color-line); }
+     don't collide between lines.
+     Default stays dark text -- safe against the plain, near-white .ph
+     placeholder shown before any photo has been uploaded (confirmed by
+     testing: white-by-default here left both cards nearly illegible on
+     a blank page). Only switches to white once .stack__group--bg-active
+     is confirmed, toggled by main.js off the same photoresolved event
+     Impressum/Datenschutz use for their own .page-hero--bg-active. Both
+     panels share one photo (.stack__page-bg above), so the brightness
+     sample driving the white/dark switch (applyBgContrast in main.js)
+     toggles .contrast-dark on .stack__group too, not per panel.
+     Every rule below is routed through ".stack .stack__group .stack__panel"
+     (real ancestors, not an arbitrary specificity bump) so it reliably
+     outranks .stack__panel.contrast-dark .stack__title etc. further down
+     the file -- those exist for the desktop-only two-photo design and,
+     because the hidden mobile .stack__bg photos underneath are still
+     probed/sampled even though invisible here, can end up with their own
+     independent .contrast-dark on .stack__panel that has nothing to do
+     with the one *visible* mobile photo. Without the extra specificity
+     that unrelated, equally-specific-but-later rule would silently win
+     and react to the wrong photo. */
+  .stack .stack__group .stack__panel .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; color: var(--color-text); }
+  .stack .stack__group .stack__panel .stack__body { color: var(--color-text); }
+  .stack .stack__group .stack__panel .stack__body .eyebrow { color: var(--color-accent); }
+  .stack .stack__group .stack__panel .stack__body .timeline__row time { color: var(--color-text-muted); }
+  .stack .stack__group .stack__panel .stack__body .timeline__row { border-top-color: var(--color-line); }
+  .stack .stack__group--bg-active .stack__panel .stack__title,
+  .stack .stack__group--bg-active .stack__panel .stack__body { color: #fff; }
+  .stack .stack__group--bg-active .stack__panel .stack__body .timeline__row time { color: rgba(255, 255, 255, 0.7); }
+  .stack .stack__group--bg-active .stack__panel .stack__body .timeline__row { border-top-color: rgba(255, 255, 255, 0.3); }
+  .stack .stack__group--bg-active.contrast-dark .stack__panel .stack__title,
+  .stack .stack__group--bg-active.contrast-dark .stack__panel .stack__body { color: var(--color-text); }
+  .stack .stack__group--bg-active.contrast-dark .stack__panel .stack__body .timeline__row time { color: var(--color-text-muted); }
+  .stack .stack__group--bg-active.contrast-dark .stack__panel .stack__body .timeline__row { border-top-color: var(--color-line); }
 }
 
 /* Plain-section counterpart of .stack__content/.stack__title, used by
