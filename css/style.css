@@ -1403,7 +1403,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      single background something to span (exactly the two panels, not the
      footer after them) and something for the glass cards to visually sit
      over as the page scrolls past. */
-  .stack__group { display: block; position: relative; }
+  /* overflow:hidden isn't clipping anything of its own here -- it's what
+     stops the first/last panel's margin below from collapsing straight
+     through .stack__group and pushing the whole group (photo included)
+     down/up instead of actually opening up space *inside* it, which is
+     what actually lets the photo show through in that space. */
+  .stack__group { display: block; position: relative; overflow: hidden; }
+  /* Same breathing room above the first card as its own left/right
+     gutter (.stack__panel's 16px padding below); the last card gets
+     noticeably more underneath than that, so the photo has room to read
+     as a deliberate margin instead of the card just stopping at the very
+     edge of the page. */
+  .stack__page-bg + .stack__panel { margin-top: 16px; }
+  .stack__panel:last-child { margin-bottom: 48px; }
   .stack__page-bg {
     display: block;
     position: absolute;
@@ -1443,7 +1455,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     scroll-snap-align: none;
     scroll-snap-stop: normal;
   }
-  .stack__panel:last-child { margin-bottom: 0; }
   .scroll-cue { display: none; }
   .stack__content {
     margin: 0;
