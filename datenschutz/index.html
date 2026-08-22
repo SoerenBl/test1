@@ -6,9 +6,9 @@
 <title data-title-de="Datenschutz — Sören Bläcker" data-title-en="Privacy — Sören Bläcker">Datenschutz — Sören Bläcker</title>
 <meta name="description" content="Datenschutzerklärung von Sören Bläcker.">
 <meta name="robots" content="noindex">
-<script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);var t=document.querySelector('title[data-title-de]');if(t){var v=t.getAttribute('data-title-'+l);if(v)document.title=v;}})();</script>
+<script>(function(){function d(){var n=navigator.languages||[navigator.language||''];for(var i=0;i<n.length;i++){if((n[i]||'').toLowerCase().indexOf('de')===0)return'de';}return'en';}var l=localStorage.getItem('lang')||d();document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);var t=document.querySelector('title[data-title-de]');if(t){var v=t.getAttribute('data-title-'+l);if(v)document.title=v;}})();</script>
 <link rel="icon" href="../favicon.svg" id="faviconLink" data-favicon-fallback="../logo2">
-<link rel="stylesheet" href="../css/style.css?v=111">
+<link rel="stylesheet" href="../css/style.css?v=112">
 </head>
 <body class="nav-pad">
 
@@ -99,7 +99,7 @@
 
     <h2><span data-lang="de">6. Lokale Spracheinstellung</span><span data-lang="en">6. Local language preference</span></h2>
     <p>
-      <span data-lang="de">Deine Auswahl der Sprache (Deutsch/Englisch) wird im lokalen Speicher (Local Storage) deines Browsers auf deinem Gerät gespeichert, damit sie bei einem erneuten Besuch erhalten bleibt. Diese Information verlässt dein Gerät nicht und wird nicht an den Server übertragen. Da es sich um eine technisch notwendige Funktion handelt, ist hierfür keine Einwilligung nach § 25 TTDSG erforderlich.</span><span data-lang="en">Your language selection (German/English) is stored in your browser's local storage on your device so it is remembered on your next visit. This information never leaves your device and is not transmitted to the server. As this is a technically necessary function, no consent under § 25 TTDSG (German Telecommunications-Telemedia Data Protection Act) is required.</span>
+      <span data-lang="de">Beim ersten Besuch wird die Sprache anhand der Sprachpräferenz deines Browsers voreingestellt (Deutsch für deutschsprachige Browsereinstellungen, sonst Englisch) — hierfür wird lediglich eine vom Browser ohnehin bereitgestellte Information ausgelesen, es findet keine Standortbestimmung und keine Datenübertragung an den Server oder Dritte statt. Deine anschließende Auswahl der Sprache (Deutsch/Englisch) wird im lokalen Speicher (Local Storage) deines Browsers auf deinem Gerät gespeichert, damit sie bei einem erneuten Besuch erhalten bleibt und die automatische Voreinstellung dann nicht mehr greift. Diese Information verlässt dein Gerät nicht und wird nicht an den Server übertragen. Da es sich um eine technisch notwendige Funktion handelt, ist hierfür keine Einwilligung nach § 25 TTDSG erforderlich.</span><span data-lang="en">On your first visit, the language is pre-set based on your browser's language preference (German for German-language browser settings, otherwise English) — this only reads information the browser already provides; no location is determined and no data is transmitted to the server or any third party. Your subsequent language selection (German/English) is stored in your browser's local storage on your device so it is remembered on your next visit, at which point the automatic default no longer applies. This information never leaves your device and is not transmitted to the server. As this is a technically necessary function, no consent under § 25 TTDSG (German Telecommunications-Telemedia Data Protection Act) is required.</span>
     </p>
 
     <h2><span data-lang="de">7. Kontaktformular</span><span data-lang="en">7. Contact form</span></h2>
@@ -153,6 +153,6 @@
   </div>
 </footer>
 
-<script src="../js/main.js?v=111"></script>
+<script src="../js/main.js?v=112"></script>
 </body>
 </html>

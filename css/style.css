@@ -364,17 +364,28 @@ body.is-menu-open .project-hero__overlay {
   z-index: 2;
 }
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
-  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .project-hero__overlay { padding-top: clamp(90px, 18vh, 140px); }
   .project-hero__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 1.05; }
-  /* Kept in sync with .nav.is-hidden by the same mobile scroll-direction
-     check (see js/main.js) — a CSS transition here, rather than chasing
-     the nav's live position every scroll frame, is what keeps this from
-     lagging while also guaranteeing it hides/shows at the exact same
-     moment as the nav bar it's about to dock into. Slides the same
-     translateY(-100%) as .nav.is-hidden itself (not just a fade) so the
-     two read as one connected motion, not two separate effects that
-     happen to line up in time. */
-  .project-hero__overlay.is-nav-hidden { opacity: 0; transform: translateY(-100%); }
+  /* Used to also slide/fade out in sync with .nav.is-hidden here (the
+     same scroll-direction class, toggled on this element too every
+     scroll frame) -- reported: on a real phone, the title would exit at
+     the top then immediately re-enter from the bottom, ending up stuck
+     at the bottom edge of the last gallery photo, only releasing again
+     near the very top of the page. Root cause: unlike .nav (position:
+     fixed, purely viewport-relative), this title is position:absolute
+     against .project-hero -- a section whose height includes the sticky
+     hero photo *and* the whole gallery beneath it. It was already
+     scrolling itself out of view from ordinary document flow within
+     about one screen of scrolling, well before the gallery's sticky
+     photo even releases -- the .is-nav-hidden transform was fighting an
+     element that was, for all practical purposes, already gone, and
+     doing so right as the sticky panel's own containing block changes
+     (the gallery finishing, releasing the stuck photo) is exactly the
+     kind of moment mobile WebKit has repeatedly gotten scroll-position
+     timing wrong on elsewhere in this codebase. Dropping the coupling
+     removes that fight entirely -- the title still disappears early via
+     its own ordinary scroll, just without a second, redundant mechanism
+     also trying to move it at the same time. */
 }
 @media (prefers-reduced-motion: reduce) {
   .project-hero__overlay { position: relative; z-index: 5; }
@@ -601,6 +612,27 @@ body.is-menu-open .project-hero__overlay {
 }
 .menu-panel__social { display: flex; gap: 16px; font-family: var(--font-heading); font-size: 0.85rem; }
 .menu-panel__social a:hover { color: var(--color-panel-hover); }
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  /* Slightly narrower panel on mobile (asked for), and the four social/
+     legal links centred on their own row rather than left-flush with a
+     big gap on the right. That flush-left result wasn't a sizing issue
+     -- .menu-panel__foot's justify-content:space-between only has two
+     items (the footer text, then .menu-panel__social as a whole); once
+     the panel's narrow enough that they wrap onto separate lines,
+     space-between has nothing left to split on .menu-panel__social's own
+     now-solo line, so it just sits at the line's start. Forcing it onto
+     its own full-width row here and centring *within* that row (it's
+     already its own flex container) is what actually balances the
+     space either side of it, rather than a panel-width tweak alone
+     fixing an alignment rule it was never actually about. */
+  .menu-panel { width: min(380px, 84vw); }
+  /* gap trimmed down too -- at the old 16px, the four links' combined
+     natural width (295px) slightly exceeded even the *un-narrowed*
+     panel's own content width (287px), so centring alone still left it
+     overflowing a few px past the right edge instead of actually
+     balancing. */
+  .menu-panel__social { flex-basis: 100%; justify-content: center; gap: 10px 16px; }
+}
 
 .menu-scrim {
   position: fixed;

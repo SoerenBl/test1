@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var titleEl = document.querySelector('title[data-title-de]');
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
     langButtons.forEach(function (btn) {
       btn.setAttribute('data-active', String(btn.getAttribute('data-set-lang') === lang));
     });
@@ -1498,7 +1499,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var nav = document.querySelector('.nav');
     if (!nav) return;
-    var navHeroOverlay = document.querySelector('.project-hero__overlay');
     var lastY = window.scrollY;
     var navTicking = false;
     function updateNavVisibility() {
@@ -1517,10 +1517,6 @@ document.addEventListener('DOMContentLoaded', function () {
       } else if (show) {
         nav.classList.remove('is-hidden');
       }
-      // Docked project/category title lives visually inside the nav bar
-      // once scrolled — hide/show it in the exact same frame as the nav
-      // itself so the two never drift out of sync.
-      if (navHeroOverlay) navHeroOverlay.classList.toggle('is-nav-hidden', hide);
       lastY = y;
       navTicking = false;
     }
@@ -1657,12 +1653,11 @@ document.addEventListener('DOMContentLoaded', function () {
       fontSize: parseFloat(getComputedStyle(projectHeroTitleEl).fontSize)
     };
     projectHeroTitleEl.style.transform = prevTransform;
-    // Docked target is measured once here (and again on resize/nav-hide
-    // toggle) rather than every scroll frame — .nav__mark only actually
-    // moves on resize or during the mobile show/hide transition (handled
-    // separately via the .is-nav-hidden CSS transition), so re-reading
-    // its rect on every single scroll tick was pure wasted layout work
-    // and the main source of scroll lag on mobile.
+    // Docked target is measured once here (and again on resize) rather
+    // than every scroll frame — .nav__mark only actually moves on resize
+    // (this whole dock system is desktop-only, where the nav itself never
+    // hides), so re-reading its rect on every single scroll tick was pure
+    // wasted layout work.
     if (projectHeroNav) {
       var navRect = projectHeroNav.getBoundingClientRect();
       var navFontPx = parseFloat(getComputedStyle(projectHeroNav).fontSize) || 24;
@@ -1744,12 +1739,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Project/category titles keep the grow-and-dock-into-the-nav animation
-  // on desktop only now -- on mobile the title just sits at its natural
-  // size and position, fading/sliding away together with the nav itself
-  // via .project-hero__overlay.is-nav-hidden (plain CSS, driven by the
-  // exact same scroll-direction check as .nav.is-hidden -- see the mobile
-  // rule in style.css), at the user's request to drop the movement effect
-  // there specifically.
+  // on desktop only -- on mobile the title just sits at its natural size
+  // and position (no JS-driven transform at all), scrolling itself out of
+  // view via ordinary document flow same as any other content, at the
+  // user's request to drop the movement effect there specifically. It
+  // used to also be explicitly tied to the nav's own show/hide via a
+  // mirrored CSS class -- removed (see the mobile rule in style.css, and
+  // its own comment) once that turned out to be redundant with the title
+  // already being gone from view by then anyway, and the likely source of
+  // a reported real-device scroll glitch.
   var projectHeroDockMq = window.matchMedia('(max-width: 760px)');
 
   if (!reduceMotion && (parallaxEls.length || heroContent || projectHero)) {
