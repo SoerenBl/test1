@@ -22,7 +22,7 @@ Alle sechs Kategorie-Ordner liegen zusammen in `kategorien/` (`kategorien/mobili
 
 **Projektordner** (`1.jpg`, `2.jpg`, …): komplett dynamisch. Wie viele nummerierte Fotos dort liegen, so viele Kacheln entstehen automatisch auf der Projektseite (max. 24). `1.jpg` ist gleichzeitig das große Hero-Foto oben auf der Projektseite. Lücken in der Nummerierung werden übersprungen. Liegt noch kein Foto vor, zeigt die Seite einen Platzhalter ("Fotos folgen in Kürze").
 
-**`cover.jpg`** (pro Kategorie), **`hero.jpg`**, **`about/about.jpg`**, **`about/awards.jpg`**, **`services/cover.jpg`** und **`contact/cover.jpg`** sind je ein festes einzelnes Hintergrundfoto. Fehlt eines davon, zeigt die jeweilige Kachel einen einfachen grauen Platzhalter statt eines Fotos — kein Fehler, einfach noch nicht befüllt.
+**`cover.jpg`** (pro Kategorie), **`hero.jpg`**, **`about/about.jpg`**, **`about/awards.jpg`**, **`services/cover.jpg`**, **`contact/cover.jpg`**, **`impressum/cover.jpg`** und **`datenschutz/cover.jpg`** sind je ein festes einzelnes Hintergrundfoto. Fehlt eines davon, zeigt die jeweilige Kachel einen einfachen grauen Platzhalter statt eines Fotos (bei Impressum/Datenschutz: bleibt einfach weiß) — kein Fehler, einfach noch nicht befüllt.
 
 **Foto ändern/hinzufügen:** Datei am passenden Ort ablegen bzw. ersetzen, mit GitHub Desktop committen und pushen. Die Seite zeigt sie automatisch, kein Code muss angepasst werden.
 
@@ -47,14 +47,16 @@ mobil/kategorien/mobility/bmw-k100-aero-de-2024/1.jpg   → mobile Version des P
 
 **Sonderfall About/Auszeichnungen:** Auf dem Handy teilen sich beide Abschnitte (About + Auszeichnungen) ein einziges, durchgängiges Hintergrundfoto — nur `mobil/about/about.jpg` wird dort benutzt, `about/awards.jpg` (bzw. dessen mobile Version) nur noch am Desktop, wo beide weiterhin als zwei getrennte Vollbild-Panels funktionieren.
 
-**Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben *nur* auf dem Handy ein optionales Hintergrundfoto — es geht über die *gesamte* Seite (Titel und der ganze Rechtstext darunter), hochformatig, oben bündig angesetzt und unten abgeschnitten. Am Desktop bleiben beide Seiten immer wie bisher. Dafür reicht allein die mobile Datei, ganz ohne Desktop-Gegenstück:
+**Sonderfall Impressum/Datenschutz:** Diese beiden Seiten haben ein optionales Hintergrundfoto, das über die *gesamte* Seite geht (Titel und der ganze Rechtstext darunter), oben bündig angesetzt und unten abgeschnitten — auf dem Handy genau wie am Desktop. Anders als bei den übrigen Seiten oben ist das Foto hier also nicht nur eine mobile Zusatzversion, sondern ein eigenständiges, festes Hintergrundfoto wie `services/cover.jpg` — plus optional wieder eine eigene mobile Version über `mobil/`:
 
 ```
-mobil/impressum/cover.jpg     → optionales Hintergrundfoto Impressum (nur mobil)
-mobil/datenschutz/cover.jpg   → optionales Hintergrundfoto Datenschutz (nur mobil)
+impressum/cover.jpg           → Hintergrundfoto Impressum
+datenschutz/cover.jpg         → Hintergrundfoto Datenschutz
+mobil/impressum/cover.jpg     → optionale mobile Version davon
+mobil/datenschutz/cover.jpg   → optionale mobile Version davon
 ```
 
-Fehlt eine davon, bleibt die jeweilige Seite einfach weiß — kein Platzhalter, kein Fehler. Die Textfarbe stellt sich automatisch auf das Foto ein (siehe unten) — bei einem sehr langen Rechtstext wird ein hochformatiges Foto aber stark in die Breite beschnitten, je länger die Seite ist; ein ruhiges, eher detailarmes Foto eignet sich hier besser als eines mit einem zentralen Motiv, das darunter leiden würde.
+Fehlt das Foto (Desktop-Datei), bleibt die jeweilige Seite einfach weiß — kein Platzhalter, kein Fehler. Die Textfarbe stellt sich automatisch auf das Foto ein (siehe unten) — bei einem sehr langen Rechtstext wird ein hochformatiges Foto aber stark in die Breite beschnitten, je länger die Seite ist; ein ruhiges, eher detailarmes Foto eignet sich hier besser als eines mit einem zentralen Motiv, das darunter leiden würde.
 
 ### Automatische Textfarbe (Kontrast) auf Hintergrundfotos
 

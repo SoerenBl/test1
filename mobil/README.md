@@ -4,4 +4,4 @@ Hier rein: eine mobile Zusatzversion eines Hintergrundfotos, unter genau demselb
 
 Details und alle Beispiele: siehe "Eigenes Foto nur für die mobile Ansicht" in der `README.md` im Hauptverzeichnis.
 
-Sonderfall: `mobil/impressum/cover.jpg` und `mobil/datenschutz/cover.jpg` — diese beiden haben kein Desktop-Gegenstück, sie existieren nur hier im `mobil/`-Ordner.
+`mobil/impressum/cover.jpg` und `mobil/datenschutz/cover.jpg` sind die optionalen mobilen Zusatzversionen von `impressum/cover.jpg` bzw. `datenschutz/cover.jpg` im Hauptverzeichnis (deren eigentliches, festes Hintergrundfoto — das jetzt auch am Desktop läuft).
