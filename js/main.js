@@ -88,6 +88,15 @@ function main() {
       var t = titleEl.getAttribute('data-title-' + lang) || titleEl.getAttribute('data-title-de');
       if (t) document.title = t;
     }
+    // Placeholder text can't use the [data-lang] dual-span/CSS-toggle
+    // trick everything else on the site uses -- it's an attribute, not
+    // element content -- so it's kept in data-placeholder-de/-en instead
+    // and copied into the real placeholder attribute here, same as the
+    // title above.
+    document.querySelectorAll('[data-placeholder-de]').forEach(function (el) {
+      var p = el.getAttribute('data-placeholder-' + lang) || el.getAttribute('data-placeholder-de');
+      if (p) el.setAttribute('placeholder', p);
+    });
     updateUmlautSpacing(lang);
   }
   langButtons.forEach(function (btn) {

@@ -7,7 +7,7 @@
 <meta name="description" content="Kontakt — Sören Bläcker, Produktdesigner.">
 <script>(function(){function d(){var n=navigator.languages||[navigator.language||''];for(var i=0;i<n.length;i++){if((n[i]||'').toLowerCase().indexOf('de')===0)return'de';}return'en';}var l=localStorage.getItem('lang')||d();document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);var t=document.querySelector('title[data-title-de]');if(t){var v=t.getAttribute('data-title-'+l);if(v)document.title=v;}})();</script>
 <link rel="icon" href="favicon.svg" id="faviconLink" data-favicon-fallback="logo2">
-<link rel="stylesheet" href="css/style.css?v=131">
+<link rel="stylesheet" href="css/style.css?v=132">
 </head>
 <body>
 
@@ -84,19 +84,19 @@
     <form action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
       <div class="field">
         <label for="name"><span data-lang="de">Name</span><span data-lang="en">Name</span></label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" required data-placeholder-de="Name" data-placeholder-en="Name">
       </div>
       <div class="field">
         <label for="email"><span data-lang="de">E-Mail</span><span data-lang="en">Email</span></label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" required data-placeholder-de="E-Mail" data-placeholder-en="Email">
       </div>
       <div class="field">
         <label for="subject"><span data-lang="de">Betreff</span><span data-lang="en">Subject</span></label>
-        <input type="text" id="subject" name="subject">
+        <input type="text" id="subject" name="subject" data-placeholder-de="Betreff" data-placeholder-en="Subject">
       </div>
       <div class="field">
         <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en">Message</span></label>
-        <textarea id="message" name="message" rows="5" required></textarea>
+        <textarea id="message" name="message" rows="5" required data-placeholder-de="Nachricht" data-placeholder-en="Message"></textarea>
       </div>
       <button type="submit" class="link-arrow link-arrow--light">
         <span data-lang="de">Nachricht senden</span><span data-lang="en">Send message</span>
@@ -118,6 +118,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=131" async></script>
+<script src="js/main.js?v=132" async></script>
 </body>
 </html>
