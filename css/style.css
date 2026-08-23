@@ -1550,30 +1550,21 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
     backdrop-filter: blur(5px) saturate(190%);
     -webkit-backdrop-filter: blur(5px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.32);
+    border: none;
     border-radius: 20px;
     /* Clips the corner glow (::before, just below) to the card's own
-       rounded corners so it never bleeds past the border the way a real
+       rounded corners so it never bleeds past it the way a real
        backdrop-filter blur would. */
     overflow: hidden;
-    /* The bevel: stacked inset shadows tracing the card's own rounded
-       outline (every inset shadow here follows border-radius natively,
-       no extra clipping needed) to read as a curved, physically thick
-       edge rather than a flat cutout -- light hits the top-left more
-       directly (brighter, sharper line) and falls off toward the
-       bottom-right (darker, softer), the same asymmetry real glass
-       shows under a single light source. The wide, soft inset glow at
-       the end fills in the curve *between* those two sharp lines --
-       without it the bevel reads as a hard ring floating just inside
-       the border instead of a surface that's actually rounded over. */
+    /* No hairline border, no crisp bevel lines -- both read as a hard
+       cutout edge (tried and rejected: it looked like a sticker outline,
+       not glass). Just one wide, heavily blurred inward glow instead, so
+       the edge is simply *more opaque/glossy* than the flatter, more
+       matte centre, fading gradually between the two with nothing sharp
+       enough to read as a line anywhere. */
     box-shadow:
       0 10px 34px rgba(0, 0, 0, 0.16),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
-      inset 1.5px 0 0 rgba(255, 255, 255, 0.4),
-      inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
-      inset -1.5px 0 0 rgba(0, 0, 0, 0.08),
-      inset 0 0 12px rgba(255, 255, 255, 0.08);
+      inset 0 0 46px rgba(255, 255, 255, 0.22);
   }
   /* The corner colour fringing described above -- screen-blended so it
      only ever brightens/tints (never darkens or flattens whatever photo
@@ -1588,33 +1579,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
       radial-gradient(120px 90px at 0% 0%, rgba(110, 190, 255, 0.32), transparent 65%),
       radial-gradient(140px 110px at 0% 100%, rgba(255, 150, 110, 0.22), transparent 60%),
       radial-gradient(160px 130px at 100% 100%, rgba(190, 120, 255, 0.26), transparent 65%);
-  }
-  /* Second, smaller concentric rim (photo reference: a real "Liquid
-     Glass" screenshot shows exactly this -- an outer edge line, a
-     darker recessed band, *then* a second inner highlight line before
-     the flatter, more matte centre). One bevel alone reads as a single
-     flat cutout; this second ring 7px further in gives the edge actual
-     depth -- the ungrazed 7px gap between the two reads as the shadowed
-     "wall" of a rounded, physically thick edge, the way the reference
-     photo's own double line does. inset - 7px on all sides shrinks the
-     radius by the same 7px so the two rings stay concentric instead of
-     drifting apart at the corners. */
-  .stack__content::after {
-    content: '';
-    position: absolute;
-    inset: 8px;
-    border-radius: 12px;
-    pointer-events: none;
-    box-shadow:
-      /* Not inset -- bleeds outward into the gap left by this ring's
-         own inset offset, darkening it into a real "groove" between
-         the two rims instead of leaving it as flat, ungrazed fill. */
-      0 0 9px 1px rgba(0, 0, 0, 0.22),
-      inset 0 1.5px 0 rgba(255, 255, 255, 0.65),
-      inset 1.5px 0 0 rgba(255, 255, 255, 0.3),
-      inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
-      inset -1.5px 0 0 rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.26);
   }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a
