@@ -1581,20 +1581,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
       radial-gradient(140px 110px at 0% 100%, rgba(255, 150, 110, 0.22), transparent 60%),
       radial-gradient(160px 130px at 100% 100%, rgba(190, 120, 255, 0.26), transparent 65%);
   }
-  /* Second, fainter edge set slightly inward from the outer border --
-     matches the reference: a bright outer rim plus a dimmer inner line
-     tracing the same rounded corner a few px in, reading as glass with
-     real thickness rather than a second hard ring right on top of the
-     first (that was the rejected "sticker" look). Lower opacity than the
-     outer border and inset far enough to stay clearly separate from it. */
-  .stack__content::after {
-    content: '';
-    position: absolute;
-    inset: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 14px;
-    pointer-events: none;
-  }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a
      razor-sharp (unblurred) photo showing straight through a mostly
