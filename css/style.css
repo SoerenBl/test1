@@ -1414,7 +1414,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      noticeably more underneath than that, so the photo has room to read
      as a deliberate margin instead of the card just stopping at the very
      edge of the page. */
-  .stack__page-bg + .stack__panel { margin-top: 16px; }
+  .stack__page-bg + .stack__panel { margin-top: var(--mobile-hero-top-pad); }
   .stack__panel:last-child { margin-bottom: 48px; }
   .stack__page-bg {
     display: block;
@@ -1463,7 +1463,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .scroll-cue { display: none; }
   .stack__content {
     margin: 0;
-    padding: var(--mobile-hero-top-pad) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
+    padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
     /* Liquid-glass tint: much more transparent than the old 0.55 (closer
        to iOS's own translucent-glass material) plus saturate() alongside
        the blur -- blur alone flattens colour, saturate brings back some
@@ -1490,16 +1490,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      they stay correct with or without blur support. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .stack__content { background: var(--color-bg-alt); box-shadow: none; }
-  }
-  /* First card's title needs real clearance under the floating nav (the
-     desktop padding-top this replaces did too, see above); the second
-     card follows straight after in normal flow, so it only needs enough
-     room to clear its own title comfortably. A sibling combinator (any
-     .stack__panel preceded by another one), not :not(:first-child) --
-     .stack__page-bg is now the actual first child of .stack__group, which
-     made :first-child match no panel at all and this rule apply to both. */
-  .stack__panel ~ .stack__panel .stack__content {
-    padding-top: clamp(32px, 8vw, 44px);
   }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
