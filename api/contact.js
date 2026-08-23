@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { renderConfirmationEmail } = require('../lib/emailTemplate');
+const { renderConfirmationEmail, renderNotificationEmail } = require('../lib/emailTemplate');
 
 function isValidEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -68,6 +68,13 @@ module.exports = async function handler(req, res) {
     const safeSubject = subject.slice(0, 200);
     const safeMessage = message.slice(0, 5000);
 
+    var notification = renderNotificationEmail({
+      name: safeName,
+      email: email,
+      subject: safeSubject,
+      message: safeMessage,
+    });
+
     await transporter.sendMail({
       // IONOS rejects mail whose From doesn't match the authenticated
       // mailbox (anti-spoofing) -- the visitor's own name/address goes in
@@ -77,7 +84,8 @@ module.exports = async function handler(req, res) {
       to: to,
       replyTo: email,
       subject: safeSubject ? '[Kontaktformular] ' + safeSubject : '[Kontaktformular] Neue Anfrage von ' + safeName,
-      text: 'Name: ' + safeName + '\nE-Mail: ' + email + '\n\n' + safeMessage,
+      html: notification.html,
+      text: notification.text,
     });
 
     // Confirmation mail back to the visitor -- best-effort, in its own
