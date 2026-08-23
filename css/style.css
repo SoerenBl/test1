@@ -1594,13 +1594,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      the About/Awards scroll-panel system, so they can't just share the
      .stack__content selector itself (its base, non-mobile rules carry
      panel-centring layout logic that doesn't apply here) -- a separate
-     class with the identical visual declarations instead. Nested one
-     level inside the page's own .wrap (which keeps providing the
-     screen-edge gutter unchanged) rather than replacing it, so the card
-     itself doesn't need to re-implement that outer margin. */
+     class with the identical visual declarations instead. Combined onto
+     the page's own .wrap element (same element, two classes) exactly
+     like .stack__content.wrap above -- nesting it one level *inside*
+     .wrap instead was tried first and stacked the card's own padding on
+     top of .wrap's existing gutter, visibly narrowing the text/fields
+     versus how wide they were before the card existed. Here the card's
+     padding simply replaces .wrap's (later in the cascade, same
+     specificity, source order wins), so the content is exactly as wide
+     as it was pre-card, just with the glass surface behind it. */
   .hero-glass-card {
     position: relative;
-    margin: 0 0 20px;
     padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
     backdrop-filter: blur(5px) saturate(190%);

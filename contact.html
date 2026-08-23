@@ -7,7 +7,7 @@
 <meta name="description" content="Kontakt — Sören Bläcker, Produktdesigner.">
 <script>(function(){function d(){var n=navigator.languages||[navigator.language||''];for(var i=0;i<n.length;i++){if((n[i]||'').toLowerCase().indexOf('de')===0)return'de';}return'en';}var l=localStorage.getItem('lang')||d();document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);var t=document.querySelector('title[data-title-de]');if(t){var v=t.getAttribute('data-title-'+l);if(v)document.title=v;}})();</script>
 <link rel="icon" href="favicon.svg" id="faviconLink" data-favicon-fallback="logo2">
-<link rel="stylesheet" href="css/style.css?v=141">
+<link rel="stylesheet" href="css/style.css?v=142">
 </head>
 <body>
 
@@ -64,49 +64,43 @@
     <img data-photo="contact/cover" alt="">
     <div class="stack__scrim"></div>
   </div>
-  <div class="wrap">
-    <div class="hero-glass-card">
-      <h1 class="page-hero__title hover-letters">
-        <span data-lang="de">Lass uns reden.</span><span data-lang="en">Let's talk.</span>
-      </h1>
-      <p class="lede">
-        <span data-lang="de">Für Anfragen, Auftragsarbeiten oder einfach nur Fragen - melde dich gerne.</span><span data-lang="en">For inquiries, commissions, or just questions - feel free to reach out.</span>
-      </p>
-    </div>
-  </div>
+  <div class="wrap hero-glass-card">
+    <h1 class="page-hero__title hover-letters">
+      <span data-lang="de">Lass uns reden.</span><span data-lang="en">Let's talk.</span>
+    </h1>
+    <p class="lede">
+      <span data-lang="de">Für Anfragen, Auftragsarbeiten oder einfach nur Fragen - melde dich gerne.</span><span data-lang="en">For inquiries, commissions, or just questions - feel free to reach out.</span>
+    </p>
 
-  <div class="wrap">
-    <div class="hero-glass-card">
-      <div class="contact-grid">
-        <div>
-          <ul class="contact-list">
-            <li><span data-lang="de">E-Mail</span><span data-lang="en">Email</span> <span>info@soerenblaecker.com</span></li>
-            <li>Telefon <span>+49 15679825104</span></li>
-            <li><span data-lang="de">Standort</span><span data-lang="en">Location</span> <span data-lang="de">Deutschland</span><span data-lang="en">Germany</span></li>
-          </ul>
-        </div>
-        <form action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
-          <div class="field">
-            <label for="name"><span data-lang="de">Name</span><span data-lang="en">Name</span></label>
-            <input type="text" id="name" name="name" required data-placeholder-de="Name" data-placeholder-en="Name">
-          </div>
-          <div class="field">
-            <label for="email"><span data-lang="de">E-Mail</span><span data-lang="en">Email</span></label>
-            <input type="email" id="email" name="email" required data-placeholder-de="E-Mail" data-placeholder-en="Email">
-          </div>
-          <div class="field">
-            <label for="subject"><span data-lang="de">Betreff</span><span data-lang="en">Subject</span></label>
-            <input type="text" id="subject" name="subject" data-placeholder-de="Betreff" data-placeholder-en="Subject">
-          </div>
-          <div class="field">
-            <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en">Message</span></label>
-            <textarea id="message" name="message" rows="5" required data-placeholder-de="Nachricht" data-placeholder-en="Message"></textarea>
-          </div>
-          <button type="submit" class="link-arrow link-arrow--light">
-            <span data-lang="de">Nachricht senden</span><span data-lang="en">Send message</span>
-          </button>
-        </form>
+    <div class="contact-grid">
+      <div>
+        <ul class="contact-list">
+          <li><span data-lang="de">E-Mail</span><span data-lang="en">Email</span> <span>info@soerenblaecker.com</span></li>
+          <li>Telefon <span>+49 15679825104</span></li>
+          <li><span data-lang="de">Standort</span><span data-lang="en">Location</span> <span data-lang="de">Deutschland</span><span data-lang="en">Germany</span></li>
+        </ul>
       </div>
+      <form action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
+        <div class="field">
+          <label for="name"><span data-lang="de">Name</span><span data-lang="en">Name</span></label>
+          <input type="text" id="name" name="name" required data-placeholder-de="Name" data-placeholder-en="Name">
+        </div>
+        <div class="field">
+          <label for="email"><span data-lang="de">E-Mail</span><span data-lang="en">Email</span></label>
+          <input type="email" id="email" name="email" required data-placeholder-de="E-Mail" data-placeholder-en="Email">
+        </div>
+        <div class="field">
+          <label for="subject"><span data-lang="de">Betreff</span><span data-lang="en">Subject</span></label>
+          <input type="text" id="subject" name="subject" data-placeholder-de="Betreff" data-placeholder-en="Subject">
+        </div>
+        <div class="field">
+          <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en">Message</span></label>
+          <textarea id="message" name="message" rows="5" required data-placeholder-de="Nachricht" data-placeholder-en="Message"></textarea>
+        </div>
+        <button type="submit" class="link-arrow link-arrow--light">
+          <span data-lang="de">Nachricht senden</span><span data-lang="en">Send message</span>
+        </button>
+      </form>
     </div>
   </div>
 </section>
@@ -124,6 +118,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=141" async></script>
+<script src="js/main.js?v=142" async></script>
 </body>
 </html>
