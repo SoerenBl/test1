@@ -1589,6 +1589,51 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
       radial-gradient(140px 110px at 0% 100%, rgba(255, 150, 110, 0.22), transparent 60%),
       radial-gradient(160px 130px at 100% 100%, rgba(190, 120, 255, 0.26), transparent 65%);
   }
+  /* Same glass-card treatment as .stack__content above, reused verbatim
+     for Service/Contact (.page-hero--photo): those pages aren't part of
+     the About/Awards scroll-panel system, so they can't just share the
+     .stack__content selector itself (its base, non-mobile rules carry
+     panel-centring layout logic that doesn't apply here) -- a separate
+     class with the identical visual declarations instead. Nested one
+     level inside the page's own .wrap (which keeps providing the
+     screen-edge gutter unchanged) rather than replacing it, so the card
+     itself doesn't need to re-implement that outer margin. */
+  .hero-glass-card {
+    position: relative;
+    margin: 0 0 20px;
+    padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
+    backdrop-filter: blur(5px) saturate(190%);
+    -webkit-backdrop-filter: blur(5px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 10px 34px rgba(0, 0, 0, 0.16),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 1.5px 0 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
+      inset -1.5px 0 0 rgba(0, 0, 0, 0.08),
+      inset 0 0 26px rgba(255, 255, 255, 0.14);
+  }
+  .hero-glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    background:
+      radial-gradient(120px 90px at 0% 0%, rgba(110, 190, 255, 0.32), transparent 65%),
+      radial-gradient(140px 110px at 0% 100%, rgba(255, 150, 110, 0.22), transparent 60%),
+      radial-gradient(160px 130px at 100% 100%, rgba(190, 120, 255, 0.26), transparent 65%);
+  }
+  /* The card now does the photo-legibility job on its own (its own tint
+     over the backdrop blur) -- the plain dark scrim underneath would
+     only flatten the photo showing through outside the card's rounded
+     corners for no benefit, same reasoning as .stack__page-bg .stack__scrim
+     above. */
+  .page-hero--photo .page-hero__bg .stack__scrim { opacity: 0; }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a
      razor-sharp (unblurred) photo showing straight through a mostly
@@ -1598,6 +1643,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      they stay correct with or without blur support. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .stack__content { background: var(--color-bg-alt); box-shadow: none; }
+    .hero-glass-card { background: var(--color-bg-alt); box-shadow: none; }
   }
   /* Looser line-height than the desktop 0.82 — long titles wrap to 2-3
      lines at this width and need clearance so ascenders/descenders
