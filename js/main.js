@@ -446,22 +446,30 @@ function main() {
   // --- Hero-photo blur-in reveal --- see the matching comment in
   // style.css above the .is-revealed rules for why this exists (the
   // sitewide page-fade-in on body is a fixed timer, not synced to when
-  // this page's own big photo actually finishes loading). photoresolved
-  // firing found:true only means the src has just been *assigned*, not
-  // that the browser has actually downloaded/decoded it yet -- reveal on
-  // the image's own load event (or immediately if it's already cached
-  // and .complete), so the blur-to-sharp transition always lines up with
-  // the photo actually appearing, whether that's instant or delayed. A
-  // named function (not an inline IIFE) because category pages' own
-  // project tiles need the exact same treatment but don't exist yet at
-  // this point in main() -- they're injected later by buildCategoryTiles
-  // once its GitHub API discovery call resolves, which is called again
-  // there against just that freshly-built grid.
+  // this page's own big photo actually finishes loading) and why it
+  // targets each photo's *container*, not the <img> itself (every one of
+  // these sits under an always-visible .stack__scrim that would
+  // otherwise mask the blur). photoresolved firing found:true only means
+  // the src has just been *assigned*, not that the browser has actually
+  // downloaded/decoded it yet -- reveal on the image's own load event
+  // (or immediately if it's already cached and .complete), so the
+  // blur-to-sharp transition always lines up with the photo actually
+  // appearing, whether that's instant or delayed. A named function (not
+  // an inline IIFE) because category pages' own project tiles need the
+  // exact same treatment but don't exist yet at this point in main() --
+  // they're injected later by buildCategoryTiles once its GitHub API
+  // discovery call resolves, which is called again there against just
+  // that freshly-built grid.
   var HERO_PHOTO_REVEAL_SELECTOR =
     '.page-hero__bg img[data-photo], .stack__bg img[data-photo], .stack__page-bg img[data-photo], .project-hero-panel .tile__media img[data-photo], .tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo]';
   function attachPhotoReveal(root) {
     (root || document).querySelectorAll(HERO_PHOTO_REVEAL_SELECTOR).forEach(function (img) {
-      function reveal() { img.classList.add('is-revealed'); }
+      // The img's own direct parent is always the container .is-revealed
+      // is defined on in style.css (.page-hero__bg/.stack__bg/
+      // .stack__page-bg/.tile__media) -- every one of these markup
+      // patterns puts the photo as a direct child, never nested deeper.
+      var target = img.parentElement;
+      function reveal() { target.classList.add('is-revealed'); }
       img.addEventListener('photoresolved', function (e) {
         if (!e.detail.found) return;
         if (img.complete) reveal();
@@ -594,19 +602,19 @@ function main() {
     applyBgContrast(img, 165);
   });
   // About/Awards' shared mobile photo sits *behind* a translucent white
-  // glass card (a 0.22 -> 0.04 diagonal gradient, see .stack__content)
+  // glass card (a 0.16 -> 0.03 diagonal gradient, see .stack__content)
   // rather than directly under the text -- the tint adds brightness to
   // whatever shows through it, so the same raw-photo cutoff used above
   // (165, calibrated for an untinted photo) would flip to dark text later
   // than the card actually needs it to. Calculated off the gradient's
-  // *lowest* point (0.04, not the 0.22 average) since that's the least
+  // *lowest* point (0.03, not the 0.16 average) since that's the least
   // forgiving corner text can still land in -- the top-heavier end only
-  // gets safer from there, never less. (165 - 0.04*255) / 0.96 ≈ 161 is
+  // gets safer from there, never less. (165 - 0.03*255) / 0.97 ≈ 162 is
   // that same 165 effective-brightness line solved backwards through the
   // tint's own math -- everything else about the sampling is shared with
   // applyBgContrast above.
   var stackPageBgImg = document.querySelector('.stack__page-bg img[data-photo]');
-  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 161);
+  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 162);
 
   // --- Favicon: "SB" by default, swapped automatically for logo2.* if
   // that file exists (kept separate from logo.* so the nav mark and the

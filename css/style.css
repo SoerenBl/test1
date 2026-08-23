@@ -991,7 +991,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .project-hero-panel .tile__media {
   cursor: zoom-in;
 }
-.project-hero-panel .tile__media img { transition: transform 0.4s ease, opacity 0.6s ease, filter 0.6s ease; }
+.project-hero-panel .tile__media img { transition: transform 0.4s ease; }
 .project-hero-panel:hover .tile__media img { transform: scale(1.03); }
 
 /* Hero-photo blur-in reveal: the sitewide page-fade-in on body (see
@@ -1003,29 +1003,41 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    a category page's own project tiles even harder -- their photos come
    from a GitHub API discovery call *before* the tile markup even exists,
    so on a slow connection the whole grid can still be empty well past
-   the point body's fade has already finished. This blurs the photo
-   itself instead and only clears once main.js confirms it has actually
-   loaded (.is-revealed, toggled off the same photoresolved event the
+   the point body's fade has already finished.
+   Blurred/faded on the *container* (.page-hero__bg etc.), not the <img>
+   itself -- every one of these sits under a permanently-visible
+   .stack__scrim (the dark gradient every hero photo needs for legible
+   overlaid text; only About/Awards' mobile glass card turns it off,
+   relying on its own tint instead, see .stack__page-bg .stack__scrim
+   further down). Blurring just the photo underneath a scrim that never
+   itself changes barely reads as a blur at all on desktop, where that
+   scrim + text sits over EVERY hero photo -- blurring the container
+   blurs the scrim along with it, so the whole composed visual (photo
+   *and* the darkening over it) resolves together, the same way it
+   already visibly does on mobile where there's no scrim in the way.
+   Clears once main.js confirms the photo has actually loaded
+   (.is-revealed, toggled off the same photoresolved event the
    nav-colour/footer-tint logic above already uses -- attachPhotoReveal()
    re-runs it against a category grid's freshly-built tiles too), so the
    reveal always lines up with what's actually appearing on screen. */
-.page-hero__bg img[data-photo],
-.stack__bg img[data-photo],
-.stack__page-bg img[data-photo] {
+.page-hero__bg,
+.stack__bg,
+.stack__page-bg {
   opacity: 0;
   filter: blur(18px);
   transition: opacity 0.6s ease, filter 0.6s ease;
 }
-.project-hero-panel .tile__media img[data-photo],
-.tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo] {
+.project-hero-panel .tile__media,
+.tile-grid--projects:not([data-fixed-layout]) .tile__media {
   opacity: 0;
   filter: blur(18px);
+  transition: opacity 0.6s ease, filter 0.6s ease;
 }
-.page-hero__bg img[data-photo].is-revealed,
-.stack__bg img[data-photo].is-revealed,
-.stack__page-bg img[data-photo].is-revealed,
-.project-hero-panel .tile__media img[data-photo].is-revealed,
-.tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo].is-revealed {
+.page-hero__bg.is-revealed,
+.stack__bg.is-revealed,
+.stack__page-bg.is-revealed,
+.project-hero-panel .tile__media.is-revealed,
+.tile-grid--projects:not([data-fixed-layout]) .tile__media.is-revealed {
   opacity: 1;
   filter: none;
 }
@@ -1054,7 +1066,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    zooms in slightly, same cue as the fixed-layout gallery above. */
 .tile-grid--projects:not([data-fixed-layout]) .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile__media .ph {
-  transition: transform 0.4s ease, opacity 0.6s ease, filter 0.6s ease;
+  transition: transform 0.4s ease;
 }
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media .ph,
@@ -1516,30 +1528,52 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__content {
     margin: 0;
     padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
-    /* Liquid-glass tint, take three: even less blur (10px, down from 16px)
-       and a lower diagonal gradient (0.22 down to 0.04, down from 0.34/
-       0.08) -- less a frosted panel now, more a thin pane of clear glass
-       with a tint just barely there. saturate() stays high since there's
-       so little blur left to flatten colour in the first place. The top
-       inset highlight is bumped up to compensate -- a thinner, clearer
-       pane needs a brighter caught-light edge to still read as glass
-       rather than just "a border", the same way real glass gets *more*
-       visually reflective, not less, as it gets thinner and cleaner.
+    /* Liquid-glass tint, take four: reference is a real "Liquid Glass" UI
+       screenshot -- almost no blur at all (the scene behind reads sharp,
+       just faintly softened) and, most of what actually sells it as
+       glass rather than a plain translucent panel, colour fringing at
+       the corners: a cool blue-cyan hint top-left, warm pink/orange
+       bottom-left, cooler purple top/bottom-right -- real glass bends
+       light slightly differently per edge depending on the angle it's
+       viewed/lit from, this is a flat CSS approximation of that (the
+       radial-gradient corner glows below, .stack__content::before)
+       rather than true refraction. Blur down to 5px (from 10) and the
+       tint gradient trimmed further (0.16 -> 0.03, from 0.22/0.04) to
+       match how clear the reference's centre reads. saturate() stays
+       high since there's now almost no blur left to flatten colour.
        Text colour itself is unaffected by any of this (see the dark/
        white/.contrast-dark rules further down) -- it's not reacting to
        the tint here, it's reacting to whether a photo is even present at
        all and, once it is, how bright it turns out (recalculated for
        this lower tint -- see the threshold passed to applyBgContrast in
        main.js). */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.11) 45%, rgba(255, 255, 255, 0.04) 100%);
-    backdrop-filter: blur(10px) saturate(190%);
-    -webkit-backdrop-filter: blur(10px) saturate(190%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
+    backdrop-filter: blur(5px) saturate(190%);
+    -webkit-backdrop-filter: blur(5px) saturate(190%);
     border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: 20px;
+    /* Clips the corner glow (::before, just below) to the card's own
+       rounded corners so it never bleeds past the border the way a real
+       backdrop-filter blur would. */
+    overflow: hidden;
     box-shadow:
       0 10px 34px rgba(0, 0, 0, 0.16),
       inset 0 1px 0 rgba(255, 255, 255, 0.7),
       inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+  /* The corner colour fringing described above -- screen-blended so it
+     only ever brightens/tints (never darkens or flattens whatever photo
+     shows through). */
+  .stack__content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    background:
+      radial-gradient(120px 90px at 0% 0%, rgba(110, 190, 255, 0.32), transparent 65%),
+      radial-gradient(140px 110px at 0% 100%, rgba(255, 150, 110, 0.22), transparent 60%),
+      radial-gradient(160px 130px at 100% 100%, rgba(190, 120, 255, 0.26), transparent 65%);
   }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a
