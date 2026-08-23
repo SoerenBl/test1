@@ -3,7 +3,7 @@ Hinweistext: Rechtlich vollständig bis auf die Angabe zur Umsatzsteuer weiter u
 Name: Sören Bläcker
 Anschrift: Hüfferstr. 31a, 33378 Rheda-Wiedenbrück
 Telefon: +49 15679825104
-EMail: hallo@soerenblaecker.com
+EMail: info@soerenblaecker.com
 Website: www.soerenblaecker.com
 Berufsbezeichnung: Berufsbezeichnung: Tischler / M.Sc. Industrial & Product Designer (verliehen in Deutschland und Italien). Sören Bläcker ist Einzelunternehmer (kein eingetragenes Handelsunternehmen) und nicht in der Handwerksrolle einer Handwerkskammer eingetragen.
 Umsatzsteuer: [Platzhalter — entweder: „Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: DE ..." oder, falls zutreffend: „Gemäß § 19 Abs. 1 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung)."]
@@ -17,7 +17,7 @@ Hinweistext: Legally complete except for the VAT status further below. This page
 Name: Sören Bläcker
 Anschrift: Hüfferstr. 31a, 33378 Rheda-Wiedenbrück
 Telefon: +49 15679825104
-EMail: hallo@soerenblaecker.com
+EMail: info@soerenblaecker.com
 Website: www.soerenblaecker.com
 Berufsbezeichnung: Professional title: joiner/carpenter (Tischler) / M.Sc. Industrial & Product Designer (awarded in Germany and Italy). Sören Bläcker operates as a sole proprietor (not a registered commercial company) and is not entered in the register of a chamber of skilled crafts (Handwerkskammer).
 Umsatzsteuer: [Placeholder — either: "VAT identification number pursuant to § 27a of the German VAT Act: DE ..." or, if applicable: "No VAT is charged pursuant to § 19 (1) of the German VAT Act (small business regulation)."]

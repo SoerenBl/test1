@@ -2,7 +2,7 @@
 VerantwortlicherText: Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:
 Name: Sören Bläcker
 Anschrift: Hüfferstr. 31a, 33378 Rheda-Wiedenbrück
-EMail: hallo@soerenblaecker.com
+EMail: info@soerenblaecker.com
 Uebersicht: Bei Aufruf dieser Website werden folgende personenbezogene Daten verarbeitet: technische Zugriffsdaten beim Hosting (automatisch), Angaben aus dem Kontaktformular (nur bei aktiver Nutzung) sowie eine Spracheinstellung im lokalen Speicher deines Browsers (automatisch, ohne Datenübertragung). Diese Website setzt keine Analyse-, Marketing- oder Tracking-Cookies und keine Drittanbieter-Skripte zur Nutzungsauswertung ein.
 Hosting: Diese Website wird bei Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA, gehostet. Beim Aufruf der Seite verarbeitet Vercel automatisch technische Daten in sogenannten Server-Logfiles, die dein Browser übermittelt (siehe Punkt 4). Dies erfolgt auf Grundlage berechtigter Interessen (Art. 6 Abs. 1 lit. f DSGVO) an einer technisch fehlerfreien und sicheren Bereitstellung der Website. Da Vercel Inc. ein US-Unternehmen ist, kann eine Datenübermittlung in die USA (Drittland) stattfinden; Vercel verweist hierzu auf Standardvertragsklauseln der EU-Kommission als Garantie für ein angemessenes Datenschutzniveau.
 ServerLogfiles: Bei jedem Aufruf dieser Website werden durch den Hosting-Provider automatisch Informationen erfasst, die dein Browser übermittelt: IP-Adresse, Datum und Uhrzeit der Anfrage, aufgerufene Seite, verwendeter Browser und Betriebssystem sowie die zuvor besuchte Seite (Referrer). Diese Daten dienen ausschließlich der technischen Bereitstellung und Absicherung der Website, werden nicht mit anderen Datenquellen zusammengeführt und regelmäßig gelöscht.
@@ -19,7 +19,7 @@ Aenderung: Diese Datenschutzerklärung wird bei Änderungen der Website oder der
 VerantwortlicherText: The controller responsible for data processing under the General Data Protection Regulation (GDPR) is:
 Name: Sören Bläcker
 Anschrift: Hüfferstr. 31a, 33378 Rheda-Wiedenbrück
-EMail: hallo@soerenblaecker.com
+EMail: info@soerenblaecker.com
 Uebersicht: When this website is visited, the following personal data is processed: technical access data at the hosting level (automatically), information from the contact form (only when actively used), and a language preference stored in your browser's local storage (automatically, without any data transmission). This website does not use analytics, marketing or tracking cookies, nor any third-party scripts for usage analysis.
 Hosting: This website is hosted by Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA. When you visit the site, Vercel automatically processes technical data in server log files transmitted by your browser (see section 4). This is done on the basis of legitimate interests (Art. 6 (1)(f) GDPR) in the technically error-free and secure provision of the website. As Vercel Inc. is a US company, data may be transferred to the USA (a third country); Vercel relies on the EU Commission's Standard Contractual Clauses as a safeguard for an adequate level of data protection.
 ServerLogfiles: Each time this website is accessed, the hosting provider automatically collects information transmitted by your browser: IP address, date and time of the request, the page accessed, the browser and operating system used, and the previously visited page (referrer). This data serves solely to technically provide and secure the website, is not merged with other data sources, and is deleted on a regular basis.
