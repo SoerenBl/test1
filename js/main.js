@@ -1776,7 +1776,10 @@ function main() {
   (function () {
     var stackEl = document.querySelector('.stack');
     if (!stackEl) return;
-    var panels = stackEl.querySelectorAll(':scope > .stack__panel');
+    // Not :scope > -- panels live one level deeper, under .stack__group,
+    // not as direct children of .stack itself. Depth-agnostic here on
+    // purpose so this keeps working regardless of what wraps them.
+    var panels = stackEl.querySelectorAll('.stack__panel');
     if (panels.length < 2) return;
     var scrollCueBtn = document.getElementById('scrollCueBtn');
     if (scrollCueBtn) {
