@@ -1795,6 +1795,89 @@ function main() {
     }
   })();
 
+  // Awards list is fetched and rendered from about-content.txt at runtime
+  // instead of being hand-written here -- add a new "- Jahr | Text" (or
+  // "- Jahr | Text | Link") line to that file and push, and it shows up on
+  // the next page load with no HTML/script change needed. An entry with a
+  // link gets wrapped in one automatically, plus the three pulsing arrow
+  // chevrons at the end of its text; without one it's a plain row. The
+  // rows already in the HTML are the last-known-good fallback -- shown
+  // as-is if the fetch fails or the file's shape changes unexpectedly, so
+  // a network hiccup never means an empty Awards section.
+  (function () {
+    var timelineEl = document.getElementById('awardsTimeline');
+    if (!timelineEl) return;
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    // Pulls just the "AwardsListe:" block out of one language section
+    // (everything from the "--- DEUTSCH ---" / "--- ENGLISH ---" marker up
+    // to the next one, or end of file) -- consecutive "- " lines starting
+    // right after the "AwardsListe:" line, stopping at the first line that
+    // isn't one (blank line or next field, either way the list is done).
+    function parseAwardsListe(fullText, sectionMarker) {
+      var sectionStart = fullText.indexOf(sectionMarker);
+      if (sectionStart === -1) return null;
+      var section = fullText.slice(sectionStart + sectionMarker.length);
+      var nextSection = section.indexOf('\n--- ');
+      if (nextSection !== -1) section = section.slice(0, nextSection);
+      var listStart = section.indexOf('AwardsListe:');
+      if (listStart === -1) return null;
+      var lines = section.slice(listStart + 'AwardsListe:'.length).split('\n');
+      var entries = [];
+      var started = false;
+      for (var i = 0; i < lines.length; i++) {
+        var m = lines[i].match(/^\s*-\s*(.+)$/);
+        if (m) {
+          started = true;
+          var parts = m[1].split('|').map(function (s) { return s.trim(); });
+          entries.push({ jahr: parts[0] || '', text: parts[1] || '', url: parts[2] || null });
+          continue;
+        }
+        // The very first line right after "AwardsListe:" is always the
+        // empty string from that line's own trailing newline -- skip past
+        // it before any "- " entry has been seen; once inside the list,
+        // any non-"- " line (blank or otherwise) really does mean it's over.
+        if (!started && lines[i].trim() === '') continue;
+        break;
+      }
+      return entries;
+    }
+
+    function renderRow(jahr, de, en, url) {
+      var jahrHtml = escapeHtml(jahr);
+      if (!url) {
+        return '<div class="timeline__row"><time>' + jahrHtml + '</time>'
+          + '<span data-lang="de">' + escapeHtml(de) + '</span><span data-lang="en">' + escapeHtml(en) + '</span></div>';
+      }
+      var arrows = '<span class="award-arrows" aria-hidden="true"><span></span><span></span><span></span></span>';
+      var hrefHtml = escapeHtml(url);
+      return '<div class="timeline__row">'
+        + '<a href="' + hrefHtml + '" target="_blank" rel="noopener" style="display:contents;color:inherit;text-decoration:none;">'
+        + '<time>' + jahrHtml + '</time>'
+        + '<span data-lang="de">' + escapeHtml(de) + arrows + '</span><span data-lang="en">' + escapeHtml(en) + arrows + '</span>'
+        + '</a></div>';
+    }
+
+    fetch('about-content.txt').then(function (res) {
+      return res.ok ? res.text() : null;
+    }).then(function (text) {
+      if (!text) return;
+      var de = parseAwardsListe(text, '--- DEUTSCH ---');
+      var en = parseAwardsListe(text, '--- ENGLISH ---');
+      if (!de || !en || !de.length || de.length !== en.length) return;
+      var html = de.map(function (d, i) {
+        return renderRow(d.jahr, d.text, en[i].text, d.url || en[i].url || null);
+      }).join('');
+      timelineEl.innerHTML = html;
+      updateUmlautSpacing(document.documentElement.getAttribute('data-lang') || 'de');
+    }).catch(function () { /* fetch failed -- keep the static fallback rows */ });
+  })();
+
   var projectHero = document.querySelector('.project-hero__overlay');
   var projectHeroSection = projectHero ? projectHero.closest('.project-hero') : null;
   // The docked title stays position:fixed for the *entire* rest of the

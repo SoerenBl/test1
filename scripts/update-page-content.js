@@ -241,7 +241,7 @@ function updateAbout(html, data) {
   const zitatLink = requireSame(data, 'ZitatLink', 'Awards');
   html = patchContainer(html,
     'Awards</span></h1>',
-    '<div class="about-grid stack__body">\n        <div>\n          ', '\n        </div>\n        <div class="timeline">',
+    '<div class="about-grid stack__body">\n        <div>\n          ', '\n        </div>\n        <div class="timeline" id="awardsTimeline">',
     renderAwardsIntro(
       { de: data.de.AwardsText, en: data.en.AwardsText },
       { de: data.de.ZitatIntro, en: data.en.ZitatIntro },
@@ -260,7 +260,7 @@ function updateAbout(html, data) {
   });
   html = patchContainer(html,
     'Awards</span></h1>',
-    '<div class="timeline">\n', '\n        </div>',
+    '<div class="timeline" id="awardsTimeline">\n', '\n        </div>',
     renderAwardsRows(deAwards.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enAwards[i].text, url: d.url }))),
     'AwardsListe');
 
