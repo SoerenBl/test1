@@ -142,7 +142,7 @@ function requireSame(data, key, pageLabel) {
 
 // ---------------------------------------------------------------- About --
 
-const ABOUT_KEYS = ['Titel', 'BioAbsatz1', 'BioAbsatz2', 'Zeitstrahl', 'AwardsText', 'AwardsListe'];
+const ABOUT_KEYS = ['Titel', 'BioAbsatz1', 'BioAbsatz2', 'Zeitstrahl', 'AwardsText', 'ZitatIntro', 'ZitatText', 'ZitatLink', 'AwardsListe'];
 const ABOUT_LIST_KEYS = ['Zeitstrahl', 'AwardsListe'];
 
 function splitYear(line, label) {
@@ -155,6 +155,55 @@ function renderTimelineRows(entries) {
   return entries.map(({ jahr, de, en }) =>
     `          <div class="timeline__row">\n            <time>${jahr}</time>\n            ${bilingualSpan(de, en)}\n          </div>\n`
   ).join('');
+}
+
+// AwardsListe entries take an optional third "| Link" field -- unlike
+// Zeitstrahl (never linked), an award can point at its source. Splitting on
+// every "|" (not just the first) lets the link itself be optional per
+// entry without a separate keyword or format.
+function splitAwardEntry(line, label) {
+  const parts = line.split('|').map((s) => s.trim());
+  if (parts.length < 2) throw new Error(`"${label}"-Eintrag "${line}" hat kein "|" -- Format ist "Jahr | Text" oder "Jahr | Text | Link".`);
+  return { jahr: parts[0], text: parts[1], url: parts[2] || null };
+}
+
+const AWARD_ARROWS_HTML = '<span class="award-arrows" aria-hidden="true"><span></span><span></span><span></span></span>';
+
+// Same row shape as renderTimelineRows, plus: any entry carrying a url gets
+// wrapped in a link (display:contents so it stays invisible to the grid
+// layout -- see about.html) and the three pulsing arrow chevrons appended
+// right after the text, in both languages. An entry without a url renders
+// exactly like a plain Zeitstrahl row -- add a link later and both the
+// wrapper and the arrows show up automatically, nothing else to touch.
+function renderAwardsRows(entries) {
+  return entries.map(({ jahr, de, en, url }) => {
+    if (!url) {
+      return `          <div class="timeline__row">\n            <time>${jahr}</time>\n            ${bilingualSpan(de, en)}\n          </div>\n`;
+    }
+    const href = escapeHtml(url);
+    return `          <div class="timeline__row">\n`
+      + `            <a href="${href}" target="_blank" rel="noopener" style="display:contents;color:inherit;text-decoration:none;">\n`
+      + `              <time>${jahr}</time>\n`
+      + `              <span data-lang="de">${escapeHtml(de)}${AWARD_ARROWS_HTML}</span><span data-lang="en">${escapeHtml(en)}${AWARD_ARROWS_HTML}</span>\n`
+      + `            </a>\n          </div>\n`;
+  }).join('');
+}
+
+// The Awards panel's left column is more than one plain paragraph (unlike
+// every other AwardsText-style field): an intro line, then an optional
+// press-quote block (its own intro sentence + an italic pull-quote,
+// link-wrapped straight to the source) once there's an actual quote to
+// show. zitatText empty skips the quote block entirely rather than
+// rendering an empty one.
+function renderAwardsIntro(awardsText, zitatIntro, zitatText, zitatLink) {
+  let html = `<p>\n            ${bilingualSpan(awardsText.de, awardsText.en)}\n          </p>`;
+  if (zitatText.de || zitatText.en) {
+    html += `\n          <p style="margin-top:28px;">\n            ${bilingualSpan(zitatIntro.de, zitatIntro.en)}\n          </p>`;
+    const href = escapeHtml(zitatLink);
+    html += `\n          <a href="${href}" target="_blank" rel="noopener" style="display:block;color:inherit;text-decoration:none;border-left:2px solid var(--color-accent);padding-left:18px;margin-top:12px;">\n`
+      + `            <p style="font-style:italic;">\n              ${bilingualSpan(zitatText.de, zitatText.en)}\n            </p>\n          </a>`;
+  }
+  return html;
 }
 
 function updateAbout(html, data) {
@@ -189,18 +238,31 @@ function updateAbout(html, data) {
     renderTimelineRows(deYears.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enYears[i].text }))),
     'Zeitstrahl (About)');
 
-  html = patchBilingual(html,
-    'Awards</span></h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
-    '\n          </p>', data.de.AwardsText, data.en.AwardsText, 'AwardsText');
+  const zitatLink = requireSame(data, 'ZitatLink', 'Awards');
+  html = patchContainer(html,
+    'Awards</span></h1>',
+    '<div class="about-grid stack__body">\n        <div>\n          ', '\n        </div>\n        <div class="timeline">',
+    renderAwardsIntro(
+      { de: data.de.AwardsText, en: data.en.AwardsText },
+      { de: data.de.ZitatIntro, en: data.en.ZitatIntro },
+      { de: data.de.ZitatText, en: data.en.ZitatText },
+      zitatLink
+    ),
+    'AwardsText/Zitat');
 
-  const deAwards = data.de.AwardsListe.map((l) => splitYear(l, 'AwardsListe (DE)'));
-  const enAwards = data.en.AwardsListe.map((l) => splitYear(l, 'AwardsListe (EN)'));
+  const deAwards = data.de.AwardsListe.map((l) => splitAwardEntry(l, 'AwardsListe (DE)'));
+  const enAwards = data.en.AwardsListe.map((l) => splitAwardEntry(l, 'AwardsListe (EN)'));
   if (deAwards.length !== enAwards.length) throw new Error('AwardsListe: DE und EN haben unterschiedlich viele Eintraege.');
+  deAwards.forEach((d, i) => {
+    if ((d.url || '') !== (enAwards[i].url || '')) {
+      throw new Error(`AwardsListe: Eintrag ${i + 1} hat unterschiedliche Links in DE ("${d.url || ''}") und EN ("${enAwards[i].url || ''}").`);
+    }
+  });
   html = patchContainer(html,
     'Awards</span></h1>',
     '<div class="timeline">\n', '\n        </div>',
-    renderTimelineRows(deAwards.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enAwards[i].text }))),
-    'Zeitstrahl (Awards)');
+    renderAwardsRows(deAwards.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enAwards[i].text, url: d.url }))),
+    'AwardsListe');
 
   return html;
 }
@@ -269,15 +331,12 @@ function updateServices(html, data) {
 // ----------------------------------------------------------- Impressum --
 
 const IMPRESSUM_KEYS = [
-  'Hinweistext', 'Name', 'Anschrift', 'Telefon', 'EMail', 'Website',
+  'Name', 'Anschrift', 'Telefon', 'EMail', 'Website',
   'Berufsbezeichnung', 'Umsatzsteuer', 'Verbraucherstreitbeilegung',
   'HaftungInhalte', 'HaftungLinks', 'Urheberrecht',
 ];
 
 function updateImpressum(html, data) {
-  html = patchBilingual(html, '<p class="lede" style="color:var(--color-accent);">\n      ', '\n    </p>',
-    data.de.Hinweistext, data.en.Hinweistext, 'Hinweistext');
-
   const name = requireSame(data, 'Name', 'Impressum');
   const anschrift = requireSame(data, 'Anschrift', 'Impressum');
   const telefon = requireSame(data, 'Telefon', 'Impressum');
@@ -294,7 +353,7 @@ function updateImpressum(html, data) {
     '<h2><span data-lang="de">Berufsbezeichnung und berufsrechtliche Regelungen</span><span data-lang="en">Professional title and regulations</span></h2>\n    <p>\n      ',
     '\n    </p>', data.de.Berufsbezeichnung, data.en.Berufsbezeichnung, 'Berufsbezeichnung');
   html = patchBilingual(html,
-    '<h2><span data-lang="de">Umsatzsteuer</span><span data-lang="en">VAT</span></h2>\n    <p style="color:var(--color-accent);">\n      ',
+    '<h2><span data-lang="de">Umsatzsteuer</span><span data-lang="en">VAT</span></h2>\n    <p>\n      ',
     '\n    </p>', data.de.Umsatzsteuer, data.en.Umsatzsteuer, 'Umsatzsteuer');
 
   // "Verantwortlich fuer den Inhalt" reuses Name/Anschrift rather than its
