@@ -2,6 +2,7 @@
   "name": "soerenblaecker-portfolio",
   "private": true,
   "dependencies": {
-    "nodemailer": "^9.0.5"
+    "nodemailer": "^9.0.5",
+    "sharp": "^0.35.3"
   }
 }
