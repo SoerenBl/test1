@@ -1550,22 +1550,30 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
     backdrop-filter: blur(5px) saturate(190%);
     -webkit-backdrop-filter: blur(5px) saturate(190%);
-    /* One thin, single outer edge -- a card with literally no boundary
-       line at all read as unfinished/edgeless once tried. The mistake
-       last time wasn't having an edge, it was having *several* (a hard
-       border plus multiple crisp inset highlight/shadow lines plus a
-       whole second inset ring), which stacked up into a sticker-like
-       cutout. Just this one hairline now, paired with the wide soft
-       inward glow below for the actual glossy-to-matte transition. */
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: 20px;
     /* Clips the corner glow (::before, just below) to the card's own
-       rounded corners so it never bleeds past it the way a real
+       rounded corners so it never bleeds past the border the way a real
        backdrop-filter blur would. */
     overflow: hidden;
+    /* The bevel: stacked inset shadows tracing the card's own rounded
+       outline (every inset shadow here follows border-radius natively,
+       no extra clipping needed) to read as a curved, physically thick
+       edge rather than a flat cutout -- light hits the top-left more
+       directly (brighter, sharper line) and falls off toward the
+       bottom-right (darker, softer), the same asymmetry real glass
+       shows under a single light source. The wide, soft inset glow at
+       the end fills in the curve *between* those two sharp lines --
+       without it the bevel reads as a hard ring floating just inside
+       the border instead of a surface that's actually rounded over. */
     box-shadow:
       0 10px 34px rgba(0, 0, 0, 0.16),
-      inset 0 0 46px rgba(255, 255, 255, 0.22);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+      inset 1.5px 0 0 rgba(255, 255, 255, 0.4),
+      inset 0 -1.5px 0 rgba(0, 0, 0, 0.12),
+      inset -1.5px 0 0 rgba(0, 0, 0, 0.08),
+      inset 0 0 26px rgba(255, 255, 255, 0.14);
   }
   /* The corner colour fringing described above -- screen-blended so it
      only ever brightens/tints (never darkens or flattens whatever photo
