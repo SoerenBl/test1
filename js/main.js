@@ -471,7 +471,7 @@ function main() {
       var target = img.parentElement;
       function reveal() { target.classList.add('is-revealed'); }
       img.addEventListener('photoresolved', function (e) {
-        if (!e.detail.found) return;
+        if (!e.detail.found) { reveal(); return; }
         if (img.complete) reveal();
         else img.addEventListener('load', reveal, { once: true });
       }, { once: true });
