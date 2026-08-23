@@ -478,7 +478,25 @@ function main() {
       // .stack__page-bg/.tile__media) -- every one of these markup
       // patterns puts the photo as a direct child, never nested deeper.
       var target = img.parentElement;
-      function reveal() { target.classList.add('is-revealed'); }
+      // A photo that's already sitting in the browser's own HTTP cache
+      // (visited this project's tile before, revisited the page, etc.)
+      // makes img.complete true the instant photoresolved fires --
+      // .is-revealed then gets added in the very same tick as the
+      // opacity:0/blur "before" state, before the browser has painted
+      // that state even once. With nothing to actually transition *from*
+      // yet, it just skips straight to the end state -- the photo pops
+      // in with no visible blur at all, intermittently (only on a warm
+      // cache), which read as "the blur only sometimes works". A double
+      // rAF guarantees at least one real paint of the blurred state
+      // happens first, so the transition always has something to
+      // animate from, cached or not.
+      function reveal() {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            target.classList.add('is-revealed');
+          });
+        });
+      }
       img.addEventListener('photoresolved', function (e) {
         if (!e.detail.found) { reveal(); return; }
         if (img.complete) reveal();
