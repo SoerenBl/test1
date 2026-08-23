@@ -370,7 +370,18 @@ function main() {
   // prefix would otherwise have to duplicate per page depth. Entirely
   // optional: nothing at the mobil/ path just falls straight through to
   // the normal photo, same as any other missing file on this site.
-  var MOBILE_PHOTO_MQ = window.matchMedia('(max-width: 760px)');
+  // Same query as the mobile layout everywhere else on the site (see the
+  // .stack__content/.hero-glass-card media query in style.css) -- must
+  // stay in sync with it, not just check width, or a phone in landscape
+  // (often wider than 760px, but still switched into the mobile CSS
+  // layout via the height/orientation half of this query) ends up in a
+  // mismatched state: CSS renders the mobile glass card/shared-photo
+  // layout while this only ever probes the desktop photo path underneath
+  // it, which for pages that only ever got a mobile photo uploaded (no
+  // desktop equivalent exists) resolves to nothing at all -- a plain
+  // white background where the mobile photo should be, reported by the
+  // owner as "rotate the phone and the photo disappears".
+  var MOBILE_PHOTO_MQ = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
   function probePhotoMobileAware(base) {
     if (!MOBILE_PHOTO_MQ.matches) return probePhoto(base);
     var mobileBase = '/mobil' + new URL(base, location.href).pathname;
@@ -525,7 +536,7 @@ function main() {
     var img = null;
     var stackGroup = document.querySelector('.stack__group');
     if (stackGroup) {
-      if (window.matchMedia('(max-width: 760px)').matches) {
+      if (window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches) {
         img = stackGroup.querySelector(':scope > .stack__page-bg img[data-photo]');
       } else {
         var panels = stackGroup.querySelectorAll(':scope > .stack__panel');
@@ -1744,7 +1755,7 @@ function main() {
   // total here, so no need for the IntersectionObserver-tracked active
   // set that's worth it for a category page's couple dozen captions.
   var stackCards = document.querySelectorAll('.stack__panel .stack__content, .hero-glass-card');
-  var stackCardMq = window.matchMedia('(max-width: 760px)');
+  var stackCardMq = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
 
   // --- Stack pages (About/Awards) ---
   // The "stop exactly at each panel, never overshoot into the footer"
