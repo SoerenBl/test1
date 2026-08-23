@@ -443,6 +443,29 @@ function main() {
     });
   })();
 
+  // --- Hero-photo blur-in reveal --- see the matching comment in
+  // style.css above the .is-revealed rules for why this exists (the
+  // sitewide page-fade-in on body is a fixed timer, not synced to when
+  // this page's own big photo actually finishes loading). photoresolved
+  // firing found:true only means the src has just been *assigned*, not
+  // that the browser has actually downloaded/decoded it yet -- reveal on
+  // the image's own load event (or immediately if it's already cached
+  // and .complete), so the blur-to-sharp transition always lines up with
+  // the photo actually appearing, whether that's instant or delayed.
+  (function () {
+    var heroPhotos = document.querySelectorAll(
+      '.page-hero__bg img[data-photo], .stack__bg img[data-photo], .stack__page-bg img[data-photo], .project-hero-panel .tile__media img[data-photo]'
+    );
+    heroPhotos.forEach(function (img) {
+      function reveal() { img.classList.add('is-revealed'); }
+      img.addEventListener('photoresolved', function (e) {
+        if (!e.detail.found) return;
+        if (img.complete) reveal();
+        else img.addEventListener('load', reveal, { once: true });
+      }, { once: true });
+    });
+  })();
+
   // --- Footer picks up the colour its own page's background photo ends
   // on --- rather than the page cutting straight back to plain white the
   // moment the photo's section stops. Only makes sense for a page whose

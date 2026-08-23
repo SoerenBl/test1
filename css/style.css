@@ -115,7 +115,7 @@ body {
      cascade once it finishes, which is opacity:1/filter:none anyway
      (neither is set outside this animation), so there's no visual
      jump -- just a real, not just interpolated, filter:none at rest. */
-  animation: page-fade-in 0.3s ease-out;
+  animation: page-fade-in 0.6s ease-in-out;
 }
 
 @keyframes page-fade-in {
@@ -991,8 +991,37 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 .project-hero-panel .tile__media {
   cursor: zoom-in;
 }
-.project-hero-panel .tile__media img { transition: transform 0.4s ease; }
+.project-hero-panel .tile__media img { transition: transform 0.4s ease, opacity 0.6s ease, filter 0.6s ease; }
 .project-hero-panel:hover .tile__media img { transform: scale(1.03); }
+
+/* Hero-photo blur-in reveal: the sitewide page-fade-in on body (see
+   above) is a short fixed timer tied to navigation start, not to when
+   this page's own big above-the-fold photo actually finishes loading --
+   fine for text-heavy pages, but on Project/Service/Contact/Impressum/
+   Datenschutz/About/Awards a slow-loading hero photo pops in well after
+   that fade is already over, so the blur never reads. This blurs the
+   photo itself instead and only clears once main.js confirms it has
+   actually loaded (.is-revealed, toggled off the same photoresolved
+   event the nav-colour/footer-tint logic above already uses), so the
+   reveal always lines up with what's actually appearing on screen. */
+.page-hero__bg img[data-photo],
+.stack__bg img[data-photo],
+.stack__page-bg img[data-photo] {
+  opacity: 0;
+  filter: blur(18px);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+.project-hero-panel .tile__media img[data-photo] {
+  opacity: 0;
+  filter: blur(18px);
+}
+.page-hero__bg img[data-photo].is-revealed,
+.stack__bg img[data-photo].is-revealed,
+.stack__page-bg img[data-photo].is-revealed,
+.project-hero-panel .tile__media img[data-photo].is-revealed {
+  opacity: 1;
+  filter: none;
+}
 
 /* Project tiles (category & project pages): hover darkens with a tint */
 .tile-grid--projects .tile__media::after {
