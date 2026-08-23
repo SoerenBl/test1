@@ -1,24 +1,22 @@
-# Bestätigungsmail — Referenzdateien
+# Bestätigungsmail — Referenzdatei für einen IONOS-Autoresponder
 
-Diese beiden HTML-Dateien sind Beispiel-Renderings der automatischen
-Bestätigungsmail, die `api/contact.js` nach jeder Kontaktformular-Anfrage
-an den Absender verschickt (Vorlage: `lib/emailTemplate.js`).
+Diese beiden HTML-Dateien sind eine **generische, nicht-personalisierte**
+Fassung der Bestätigungsmail-Optik (Vorlage: `lib/emailTemplate.js`,
+Modus `static`). Gedacht als fertige Datei, falls IONOS eine Funktion
+anbietet, direkt an die Mailbox gesendete Anfragen (am Kontaktformular
+vorbei) automatisch zu beantworten.
 
-Sie liegen hier als Referenz/Backup und in einem Format, das sich
-grundsätzlich in einen E-Mail-Client oder -Dienst importieren lässt
-(reines, tabellenbasiertes HTML mit inline Styles).
-
-**Wichtig:** Der eigentliche Betreff, Name und Nachrichtentext im
-"Das hast du geschickt"-Kasten sind hier mit Beispieldaten befüllt
-(`confirmation-de.html` = "Max Mustermann", `confirmation-en.html` =
-"Jane Smith"). Bei jeder echten Anfrage übers Kontaktformular werden
-diese Felder dynamisch mit den tatsächlichen Angaben der anfragenden
-Person gefüllt — das kann eine statische Datei (z. B. ein klassischer
-IONOS-Autoresponder für direkt an das Postfach gesendete Mails) nicht
-nachbilden. Für einen solchen Autoresponder wäre daher nur ein fester,
-nicht-personalisierter Text möglich, ohne den Kacheln, das Bestätigungs-
-Layout und den Empfänger automatisch dynamisch anzupassen.
+Anders als die Bestätigungsmail, die `api/contact.js` nach einer echten
+Kontaktformular-Anfrage verschickt, enthalten diese Dateien **keine
+Anrede mit Namen** und **keinen "Das hast du geschickt"-Kasten** mehr:
+Ein klassischer, statischer Autoresponder weiß nicht, wer geschrieben
+hat oder was in der Mail stand, kann diese Felder also nicht befüllen.
+Deshalb nur "Hallo," ohne Namen, und kein Rückblick auf Betreff/
+Nachricht — alles andere (Titelfoto, Logo, Fließtext, Kontaktdaten,
+rechtliche Links) bleibt gleich.
 
 Logo und Titelbild werden live von soerenblaecker.com geladen
 (`/logo.png` bzw. `/api/email-hero`) und aktualisieren sich automatisch,
-sobald diese Dateien auf der Seite ausgetauscht werden.
+sobald diese Dateien auf der Seite ausgetauscht werden — das gilt auch,
+wenn diese Datei unverändert in IONOS hochgeladen wird, solange IONOS
+externe Bilder beim Öffnen der Mail nachlädt.
