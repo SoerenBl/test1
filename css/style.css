@@ -999,10 +999,15 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    this page's own big above-the-fold photo actually finishes loading --
    fine for text-heavy pages, but on Project/Service/Contact/Impressum/
    Datenschutz/About/Awards a slow-loading hero photo pops in well after
-   that fade is already over, so the blur never reads. This blurs the
-   photo itself instead and only clears once main.js confirms it has
-   actually loaded (.is-revealed, toggled off the same photoresolved
-   event the nav-colour/footer-tint logic above already uses), so the
+   that fade is already over, so the blur never reads. Same problem hits
+   a category page's own project tiles even harder -- their photos come
+   from a GitHub API discovery call *before* the tile markup even exists,
+   so on a slow connection the whole grid can still be empty well past
+   the point body's fade has already finished. This blurs the photo
+   itself instead and only clears once main.js confirms it has actually
+   loaded (.is-revealed, toggled off the same photoresolved event the
+   nav-colour/footer-tint logic above already uses -- attachPhotoReveal()
+   re-runs it against a category grid's freshly-built tiles too), so the
    reveal always lines up with what's actually appearing on screen. */
 .page-hero__bg img[data-photo],
 .stack__bg img[data-photo],
@@ -1011,14 +1016,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   filter: blur(18px);
   transition: opacity 0.6s ease, filter 0.6s ease;
 }
-.project-hero-panel .tile__media img[data-photo] {
+.project-hero-panel .tile__media img[data-photo],
+.tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo] {
   opacity: 0;
   filter: blur(18px);
 }
 .page-hero__bg img[data-photo].is-revealed,
 .stack__bg img[data-photo].is-revealed,
 .stack__page-bg img[data-photo].is-revealed,
-.project-hero-panel .tile__media img[data-photo].is-revealed {
+.project-hero-panel .tile__media img[data-photo].is-revealed,
+.tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo].is-revealed {
   opacity: 1;
   filter: none;
 }
@@ -1047,7 +1054,7 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    zooms in slightly, same cue as the fixed-layout gallery above. */
 .tile-grid--projects:not([data-fixed-layout]) .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile__media .ph {
-  transition: transform 0.4s ease;
+  transition: transform 0.4s ease, opacity 0.6s ease, filter 0.6s ease;
 }
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media img,
 .tile-grid--projects:not([data-fixed-layout]) .tile:hover .tile__media .ph,
@@ -1509,31 +1516,30 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__content {
     margin: 0;
     padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
-    /* Liquid-glass tint, take two: less blur (16px, down from 28px) so
-       the photo behind reads as clear glass instead of frosted/matte,
-       and a diagonal gradient (0.34 down to 0.08) instead of a flat 0.3
-       -- lower on average, and unevenly so on purpose, the same way real
-       glass catches more light on one side than the other rather than
-       tinting uniformly. saturate() alongside the (now lighter) blur
-       still keeps colour from washing out grey. The gloss itself is the
-       two inset shadows: a bright line along the top edge (light hitting
-       the rim) and a faint dark one along the bottom (its own thickness
-       falling into shadow) -- together they read as a curved, polished
-       surface rather than a flat tinted panel. Text colour itself is
-       unaffected by any of this (see the dark/white/.contrast-dark rules
-       further down) -- it's not reacting to the tint here, it's reacting
-       to whether a photo is even present at all and, once it is, how
-       bright it turns out (recalculated for this lower tint -- see the
-       threshold passed to applyBgContrast in main.js). */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.16) 45%, rgba(255, 255, 255, 0.08) 100%);
-    backdrop-filter: blur(16px) saturate(190%);
-    -webkit-backdrop-filter: blur(16px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Liquid-glass tint, take three: even less blur (10px, down from 16px)
+       and a lower diagonal gradient (0.22 down to 0.04, down from 0.34/
+       0.08) -- less a frosted panel now, more a thin pane of clear glass
+       with a tint just barely there. saturate() stays high since there's
+       so little blur left to flatten colour in the first place. The top
+       inset highlight is bumped up to compensate -- a thinner, clearer
+       pane needs a brighter caught-light edge to still read as glass
+       rather than just "a border", the same way real glass gets *more*
+       visually reflective, not less, as it gets thinner and cleaner.
+       Text colour itself is unaffected by any of this (see the dark/
+       white/.contrast-dark rules further down) -- it's not reacting to
+       the tint here, it's reacting to whether a photo is even present at
+       all and, once it is, how bright it turns out (recalculated for
+       this lower tint -- see the threshold passed to applyBgContrast in
+       main.js). */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.11) 45%, rgba(255, 255, 255, 0.04) 100%);
+    backdrop-filter: blur(10px) saturate(190%);
+    -webkit-backdrop-filter: blur(10px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: 20px;
     box-shadow:
       0 10px 34px rgba(0, 0, 0, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.65),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
   }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a

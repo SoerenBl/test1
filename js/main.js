@@ -451,12 +451,16 @@ function main() {
   // that the browser has actually downloaded/decoded it yet -- reveal on
   // the image's own load event (or immediately if it's already cached
   // and .complete), so the blur-to-sharp transition always lines up with
-  // the photo actually appearing, whether that's instant or delayed.
-  (function () {
-    var heroPhotos = document.querySelectorAll(
-      '.page-hero__bg img[data-photo], .stack__bg img[data-photo], .stack__page-bg img[data-photo], .project-hero-panel .tile__media img[data-photo]'
-    );
-    heroPhotos.forEach(function (img) {
+  // the photo actually appearing, whether that's instant or delayed. A
+  // named function (not an inline IIFE) because category pages' own
+  // project tiles need the exact same treatment but don't exist yet at
+  // this point in main() -- they're injected later by buildCategoryTiles
+  // once its GitHub API discovery call resolves, which is called again
+  // there against just that freshly-built grid.
+  var HERO_PHOTO_REVEAL_SELECTOR =
+    '.page-hero__bg img[data-photo], .stack__bg img[data-photo], .stack__page-bg img[data-photo], .project-hero-panel .tile__media img[data-photo], .tile-grid--projects:not([data-fixed-layout]) .tile__media img[data-photo]';
+  function attachPhotoReveal(root) {
+    (root || document).querySelectorAll(HERO_PHOTO_REVEAL_SELECTOR).forEach(function (img) {
       function reveal() { img.classList.add('is-revealed'); }
       img.addEventListener('photoresolved', function (e) {
         if (!e.detail.found) return;
@@ -464,7 +468,8 @@ function main() {
         else img.addEventListener('load', reveal, { once: true });
       }, { once: true });
     });
-  })();
+  }
+  attachPhotoReveal();
 
   // --- Footer picks up the colour its own page's background photo ends
   // on --- rather than the page cutting straight back to plain white the
@@ -589,19 +594,19 @@ function main() {
     applyBgContrast(img, 165);
   });
   // About/Awards' shared mobile photo sits *behind* a translucent white
-  // glass card (a 0.34 -> 0.08 diagonal gradient, see .stack__content)
+  // glass card (a 0.22 -> 0.04 diagonal gradient, see .stack__content)
   // rather than directly under the text -- the tint adds brightness to
   // whatever shows through it, so the same raw-photo cutoff used above
   // (165, calibrated for an untinted photo) would flip to dark text later
   // than the card actually needs it to. Calculated off the gradient's
-  // *lowest* point (0.08, not the 0.34 average) since that's the least
+  // *lowest* point (0.04, not the 0.22 average) since that's the least
   // forgiving corner text can still land in -- the top-heavier end only
-  // gets safer from there, never less. (165 - 0.08*255) / 0.92 ≈ 157 is
+  // gets safer from there, never less. (165 - 0.04*255) / 0.96 ≈ 161 is
   // that same 165 effective-brightness line solved backwards through the
   // tint's own math -- everything else about the sampling is shared with
   // applyBgContrast above.
   var stackPageBgImg = document.querySelector('.stack__page-bg img[data-photo]');
-  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 157);
+  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 161);
 
   // --- Favicon: "SB" by default, swapped automatically for logo2.* if
   // that file exists (kept separate from logo.* so the nav mark and the
@@ -754,6 +759,7 @@ function main() {
         layoutTilesGapFree(tiles, { preserveFull: true });
       }
       resolveStaticPhotos(grid);
+      attachPhotoReveal(grid);
     });
   }
 
