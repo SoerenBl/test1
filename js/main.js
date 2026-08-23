@@ -2114,6 +2114,10 @@ function main() {
         subject: contactForm.subject.value,
         message: contactForm.message.value,
         company: contactForm.company.value,
+        // Drives which language the confirmation mail sent back to the
+        // visitor is written in -- same toggle already showing/hiding
+        // every data-lang span sitewide, no separate detection needed.
+        lang: document.documentElement.getAttribute('data-lang') || 'de',
       };
       contactForm.classList.remove('form--success', 'form--error');
       contactForm.classList.add('form--sending');

@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { renderConfirmationEmail } = require('../lib/emailTemplate');
 
 function isValidEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -24,6 +25,7 @@ module.exports = async function handler(req, res) {
     const email = typeof body.email === 'string' ? body.email.trim() : '';
     const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
     const message = typeof body.message === 'string' ? body.message.trim() : '';
+    const lang = body.lang === 'en' ? 'en' : 'de';
     // Honeypot -- real visitors never see or fill this field (hidden
     // off-screen in the form); a filled value means a bot submitted it.
     // Pretend success so the bot doesn't learn its submission was rejected.
@@ -77,6 +79,31 @@ module.exports = async function handler(req, res) {
       subject: safeSubject ? '[Kontaktformular] ' + safeSubject : '[Kontaktformular] Neue Anfrage von ' + safeName,
       text: 'Name: ' + safeName + '\nE-Mail: ' + email + '\n\n' + safeMessage,
     });
+
+    // Confirmation mail back to the visitor -- best-effort, in its own
+    // try/catch: the notification above (the one that actually matters,
+    // Sören seeing the enquiry) already succeeded, so a hiccup here
+    // shouldn't turn into a form-level error for the visitor. This one is
+    // genuinely from Sören (not the anti-spoofing display-name trick
+    // above), so From is just the mailbox itself.
+    try {
+      var confirmation = renderConfirmationEmail({
+        lang: lang,
+        name: safeName,
+        subject: safeSubject,
+        message: safeMessage,
+      });
+      await transporter.sendMail({
+        from: '"Sören Bläcker" <' + user + '>',
+        to: email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+        text: confirmation.text,
+      });
+    } catch (confirmErr) {
+      console.error('Confirmation mail to visitor failed:', confirmErr);
+    }
+
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('Contact form send failed:', err);
