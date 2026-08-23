@@ -105,12 +105,22 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  animation: page-fade-in 0.2s ease-out both;
+  /* No forwards/both fill mode on purpose: any non-none filter value
+     held after the animation ends -- even the interpolated "blur(0px)"
+     Chromium reports for a filter:none end keyframe once fill-mode
+     holds it -- makes body a containing block for position:fixed
+     descendants (nav, menu panel, lightbox all use it), silently
+     breaking them for the rest of the page's life. Without a fill
+     mode the animation's effect simply releases back to the normal
+     cascade once it finishes, which is opacity:1/filter:none anyway
+     (neither is set outside this animation), so there's no visual
+     jump -- just a real, not just interpolated, filter:none at rest. */
+  animation: page-fade-in 0.3s ease-out;
 }
 
 @keyframes page-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; filter: blur(10px); }
+  to { opacity: 1; filter: none; }
 }
 
 body.nav-pad { padding-top: var(--nav-h); }
