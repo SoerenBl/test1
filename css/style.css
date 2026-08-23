@@ -1550,18 +1550,19 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.03) 100%);
     backdrop-filter: blur(5px) saturate(190%);
     -webkit-backdrop-filter: blur(5px) saturate(190%);
-    border: none;
+    /* One thin, single outer edge -- a card with literally no boundary
+       line at all read as unfinished/edgeless once tried. The mistake
+       last time wasn't having an edge, it was having *several* (a hard
+       border plus multiple crisp inset highlight/shadow lines plus a
+       whole second inset ring), which stacked up into a sticker-like
+       cutout. Just this one hairline now, paired with the wide soft
+       inward glow below for the actual glossy-to-matte transition. */
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 20px;
     /* Clips the corner glow (::before, just below) to the card's own
        rounded corners so it never bleeds past it the way a real
        backdrop-filter blur would. */
     overflow: hidden;
-    /* No hairline border, no crisp bevel lines -- both read as a hard
-       cutout edge (tried and rejected: it looked like a sticker outline,
-       not glass). Just one wide, heavily blurred inward glow instead, so
-       the edge is simply *more opaque/glossy* than the flatter, more
-       matte centre, fading gradually between the two with nothing sharp
-       enough to read as a line anywhere. */
     box-shadow:
       0 10px 34px rgba(0, 0, 0, 0.16),
       inset 0 0 46px rgba(255, 255, 255, 0.22);
