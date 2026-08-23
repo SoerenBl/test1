@@ -2125,6 +2125,7 @@ function main() {
       })
         .then(function (r) {
           return r.json().catch(function () { return {}; }).then(function (json) {
+            if (!(r.ok && json.ok)) console.error('Contact form error:', json);
             return r.ok && json.ok;
           });
         })
@@ -2138,7 +2139,8 @@ function main() {
             submitBtn.disabled = false;
           }
         })
-        .catch(function () {
+        .catch(function (err) {
+          console.error('Contact form request failed:', err);
           contactForm.classList.remove('form--sending');
           contactForm.classList.add('form--error');
           submitBtn.disabled = false;
