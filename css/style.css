@@ -1594,15 +1594,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      the About/Awards scroll-panel system, so they can't just share the
      .stack__content selector itself (its base, non-mobile rules carry
      panel-centring layout logic that doesn't apply here) -- a separate
-     class with the identical visual declarations instead. Combined onto
-     the page's own .wrap element (same element, two classes) exactly
-     like .stack__content.wrap above -- nesting it one level *inside*
-     .wrap instead was tried first and stacked the card's own padding on
-     top of .wrap's existing gutter, visibly narrowing the text/fields
-     versus how wide they were before the card existed. Here the card's
-     padding simply replaces .wrap's (later in the cascade, same
-     specificity, source order wins), so the content is exactly as wide
-     as it was pre-card, just with the glass surface behind it. */
+     class with the identical visual declarations instead, nested one
+     level inside the page's own .wrap, mirroring .stack__panel (outer,
+     margin from the screen edge) > .stack__content (inner, the card
+     itself) exactly. .wrap's own site-wide gutter is overridden to a
+     flat 16px right below -- matching .stack__panel's own edge margin
+     -- rather than left at its default clamp(20px,5vw,64px), which
+     previously left the card's rounded border touching the window edge
+     with no margin around it at all once .hero-glass-card had briefly
+     been combined directly onto .wrap instead of nested inside it (that
+     version replaced .wrap's gutter outright rather than adding this
+     fixed 16px outer margin back in). */
+  .page-hero--photo > .wrap { padding: 0 16px; }
   .hero-glass-card {
     position: relative;
     padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
@@ -2003,14 +2006,25 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   font-family: inherit;
 }
 
-.field { margin-bottom: 22px; }
+.field { margin-bottom: 14px; position: relative; }
+/* Label itself is hidden (off-screen, not display:none, so it stays in
+   the accessibility tree as the input's real label) on every viewport --
+   the placeholder text (set from data-placeholder-de/-en, see
+   js/main.js applyLang) shows faded inside the field instead. Originally
+   desktop-only (closing up the gap the labels left above the send
+   button); mobile used to keep the visible label above each field with
+   its own placeholder made invisible to avoid duplicating it -- now
+   unified to the same in-field-label treatment everywhere instead. */
 .field label {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
-  margin-bottom: 8px;
-  color: var(--color-text-muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .field input, .field textarea {
   width: 100%;
@@ -2021,31 +2035,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   font-size: 1.05rem;
 }
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-accent); }
-/* Desktop hides the label itself (off-screen, not display:none, so it
-   stays in the accessibility tree as the input's real label) and shows
-   the placeholder text (set from data-placeholder-de/-en, see
-   js/main.js applyLang) faded inside the field instead -- the field's
-   name doesn't need to sit above it as a permanent heading once there's
-   more vertical rhythm to protect (this was originally requested to
-   close up the gap the labels left above the send button lower down).
-   Mobile keeps the visible label above each field, unchanged; the
-   matching "make the now-redundant placeholder invisible there" rule
-   lives further down, after the three placeholder-colour rules below --
-   same specificity, has to come after them to actually win. */
-@media (min-width: 761px) {
-  .field { margin-bottom: 14px; position: relative; }
-  .field label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-}
 /* Browser autofill (name/email remembered from a previous visit) paints
    its own background colour straight over whatever's set here -- a
    yellow tint in Safari/Chrome, blue in some others -- ignoring normal
@@ -2135,23 +2124,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   -webkit-box-shadow: 0 0 0 1000px rgba(23,22,26,0.05) inset;
   box-shadow: 0 0 0 1000px rgba(23,22,26,0.05) inset;
   transition: background-color 5000s ease-in-out 0s;
-}
-/* Mobile: the label above each field stays visible (see .field label
-   near the top of this section), so the placeholder set from
-   data-placeholder-de/-en would otherwise just duplicate it -- made
-   invisible instead of removing the attribute so it's still there for
-   assistive tech. Has to repeat all three background variants above at
-   matching specificity, coming after them in source order, to actually
-   win over each one's own placeholder colour. */
-@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
-  .field input::placeholder,
-  .field textarea::placeholder,
-  .page-hero--photo .field input::placeholder,
-  .page-hero--photo .field textarea::placeholder,
-  .page-hero--photo.contrast-dark .field input::placeholder,
-  .page-hero--photo.contrast-dark .field textarea::placeholder {
-    color: transparent;
-  }
 }
 /* .stack__scrim (the dark gradient every photo panel already has, for the
    white-text case) works against dark text instead of for it -- fading
