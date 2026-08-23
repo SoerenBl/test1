@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+function main() {
   // --- Slide menu panel ---
   var menuBtn = document.getElementById('menuBtn');
   var menuPanel = document.getElementById('menuPanel');
@@ -2018,4 +2018,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateParallax();
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', main);
+} else {
+  main();
+}
