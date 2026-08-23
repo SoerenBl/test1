@@ -92,7 +92,7 @@ Das Formular auf der Kontaktseite verschickt nicht mehr per `mailto:` (öffnet n
 |---|---|
 | `IONOS_SMTP_HOST` | `smtp.ionos.de` (optional, das ist bereits der Standard) |
 | `IONOS_SMTP_PORT` | `587` (optional, ebenfalls Standard) |
-| `IONOS_SMTP_USER` | die volle IONOS-Postfach-Adresse, z. B. `hallo@soerenblaecker.com` |
+| `IONOS_SMTP_USER` | die volle IONOS-Postfach-Adresse, z. B. `info@soerenblaecker.com` |
 | `IONOS_SMTP_PASSWORD` | das Postfach-Passwort |
 | `CONTACT_TO_EMAIL` | Empfängeradresse fürs Formular (optional — fällt sonst auf `IONOS_SMTP_USER` zurück) |
 

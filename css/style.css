@@ -165,6 +165,16 @@ h1, h2, h3, h4 {
 .page-hero__title.has-umlaut {
   line-height: 1.15;
 }
+/* .hover-letters titles (About/Awards/Contact/Services page heroes) are
+   short, single-line headlines that never wrap, so the extra line-height
+   above buys them nothing -- it only shifts the title vertically when
+   switching language, since "Über mich" trips has-umlaut and "About Me"
+   doesn't. Three classes outranks the two-class rule above, pinning these
+   back to the base line-height regardless of has-umlaut. */
+.stack__title.hover-letters.has-umlaut,
+.page-hero__title.hover-letters.has-umlaut {
+  line-height: 0.92;
+}
 .page-title { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .page-title--sm { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .lede { max-width: 46ch; color: var(--color-text-muted); }
@@ -1390,6 +1400,39 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   14% { transform: translateY(-7px) rotate(225deg); opacity: 1; border-color: var(--color-panel-hover); }
   24% { transform: translateY(0) rotate(225deg); opacity: 0.55; border-color: #fff; }
   32% { transform: translateY(-3px) rotate(225deg); opacity: 0.85; border-color: var(--color-panel-hover); }
+}
+
+/* Horizontal cousin of .scroll-cue, used inline at the end of a linked
+   Awards title (see about.html) -- same hop/glow/grow language pointing
+   sideways instead of up/down, so a linked award reads as "leads
+   somewhere" without spelling out the URL. */
+.award-arrows {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 9px;
+  vertical-align: middle;
+}
+.award-arrows span {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: translateX(0) rotate(-45deg) scale(1);
+  opacity: 0.35;
+  animation: awardArrowHop 1.8s ease-in-out infinite;
+}
+.award-arrows span:nth-child(1) { animation-delay: 0s; }
+.award-arrows span:nth-child(2) { animation-delay: 0.12s; }
+.award-arrows span:nth-child(3) { animation-delay: 0.24s; }
+@keyframes awardArrowHop {
+  0%, 42%, 100% { transform: translateX(0) rotate(-45deg) scale(1); opacity: 0.35; border-color: #fff; }
+  14% { transform: translateX(6px) rotate(-45deg) scale(1.25); opacity: 1; border-color: var(--color-panel-hover); }
+  24% { transform: translateX(0) rotate(-45deg) scale(1); opacity: 0.55; border-color: #fff; }
+  32% { transform: translateX(3px) rotate(-45deg) scale(1.1); opacity: 0.85; border-color: var(--color-panel-hover); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .award-arrows span { animation: none; opacity: 0.6; }
 }
 
 .stack__content {
