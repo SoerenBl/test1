@@ -2086,6 +2086,54 @@ function main() {
     }
     updateParallax();
   }
+
+  // --- Contact form: submit via fetch to api/contact.js instead of the
+  // browser's own mailto: handling, which just hands off to whatever mail
+  // client is installed (or nothing, especially on mobile) instead of
+  // actually sending anything. action/method/enctype stay in the HTML as
+  // a fallback for the rare case JS fails to load. ---
+  var contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var submitBtn = contactForm.querySelector('button[type="submit"]');
+      var payload = {
+        name: contactForm.name.value,
+        email: contactForm.email.value,
+        subject: contactForm.subject.value,
+        message: contactForm.message.value,
+        company: contactForm.company.value,
+      };
+      contactForm.classList.remove('form--success', 'form--error');
+      contactForm.classList.add('form--sending');
+      submitBtn.disabled = true;
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (json) {
+            return r.ok && json.ok;
+          });
+        })
+        .then(function (ok) {
+          contactForm.classList.remove('form--sending');
+          if (ok) {
+            contactForm.classList.add('form--success');
+            contactForm.reset();
+          } else {
+            contactForm.classList.add('form--error');
+            submitBtn.disabled = false;
+          }
+        })
+        .catch(function () {
+          contactForm.classList.remove('form--sending');
+          contactForm.classList.add('form--error');
+          submitBtn.disabled = false;
+        });
+    });
+  }
 }
 
 if (document.readyState === 'loading') {

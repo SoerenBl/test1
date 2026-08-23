@@ -7,7 +7,7 @@
 <meta name="description" content="Kontakt — Sören Bläcker, Produktdesigner.">
 <script>(function(){function d(){var n=navigator.languages||[navigator.language||''];for(var i=0;i<n.length;i++){if((n[i]||'').toLowerCase().indexOf('de')===0)return'de';}return'en';}var l=localStorage.getItem('lang')||d();document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);var t=document.querySelector('title[data-title-de]');if(t){var v=t.getAttribute('data-title-'+l);if(v)document.title=v;}})();</script>
 <link rel="icon" href="favicon.svg" id="faviconLink" data-favicon-fallback="logo2">
-<link rel="stylesheet" href="css/style.css?v=144">
+<link rel="stylesheet" href="css/style.css?v=145">
 </head>
 <body>
 
@@ -81,7 +81,7 @@
             <li><span data-lang="de">Standort</span><span data-lang="en">Location</span> <span data-lang="de">Deutschland</span><span data-lang="en">Germany</span></li>
           </ul>
         </div>
-        <form action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
+        <form id="contactForm" action="mailto:hallo@soerenblaecker.com" method="post" enctype="text/plain">
           <div class="field">
             <label for="name"><span data-lang="de">Name</span><span data-lang="en">Name</span></label>
             <input type="text" id="name" name="name" required data-placeholder-de="Name" data-placeholder-en="Name">
@@ -98,9 +98,22 @@
             <label for="message"><span data-lang="de">Nachricht</span><span data-lang="en">Message</span></label>
             <textarea id="message" name="message" rows="5" required data-placeholder-de="Nachricht" data-placeholder-en="Message"></textarea>
           </div>
+          <div class="field field--hp" aria-hidden="true">
+            <label for="company">Company</label>
+            <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
+          </div>
           <button type="submit" class="link-arrow link-arrow--light">
             <span data-lang="de">Nachricht senden</span><span data-lang="en">Send message</span>
           </button>
+          <p class="form__status form__status--sending" aria-live="polite">
+            <span data-lang="de">Wird gesendet …</span><span data-lang="en">Sending …</span>
+          </p>
+          <p class="form__status form__status--success" aria-live="polite">
+            <span data-lang="de">Danke! Deine Nachricht ist angekommen.</span><span data-lang="en">Thanks! Your message has been sent.</span>
+          </p>
+          <p class="form__status form__status--error" aria-live="polite">
+            <span data-lang="de">Da ist etwas schiefgelaufen. Schreib mir gerne direkt an info@soerenblaecker.com.</span><span data-lang="en">Something went wrong. Feel free to email me directly at info@soerenblaecker.com.</span>
+          </p>
         </form>
       </div>
     </div>
@@ -120,6 +133,6 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=144" async></script>
+<script src="js/main.js?v=145" async></script>
 </body>
 </html>

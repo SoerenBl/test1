@@ -82,6 +82,22 @@ Alle liegen im Hauptverzeichnis bzw. im jeweiligen Seitenordner (also z. B. gena
 
 **`menu-content.txt`** (Hauptverzeichnis) ist eine Ausnahme: sie listet die Texte des Slide-Menüs (Start/Arbeiten/Service/Über mich/Kontakt, Fußzeile, Impressum/Datenschutz-Links) zum Nachschlagen und für spätere Änderungen — ist aber **noch nicht** an die Automatisierung angeschlossen, das Menü bleibt also unverändert, auch wenn diese Datei bearbeitet wird. Sag Bescheid, wenn sie live geschaltet werden soll.
 
+## Kontaktformular (IONOS-Mailversand)
+
+Das Formular auf der Kontaktseite verschickt nicht mehr per `mailto:` (öffnet nur das Mail-Programm des Besuchers, verschickt selbst nichts), sondern über eine kleine Vercel Serverless Function (`api/contact.js`), die per SMTP direkt über ein IONOS-Postfach sendet.
+
+**Einmalig in den Vercel-Projekteinstellungen unter „Environment Variables“ eintragen** (nie im Code oder Repo — nur dort):
+
+| Variable | Wert |
+|---|---|
+| `IONOS_SMTP_HOST` | `smtp.ionos.de` (optional, das ist bereits der Standard) |
+| `IONOS_SMTP_PORT` | `587` (optional, ebenfalls Standard) |
+| `IONOS_SMTP_USER` | die volle IONOS-Postfach-Adresse, z. B. `hallo@soerenblaecker.com` |
+| `IONOS_SMTP_PASSWORD` | das Postfach-Passwort |
+| `CONTACT_TO_EMAIL` | Empfängeradresse fürs Formular (optional — fällt sonst auf `IONOS_SMTP_USER` zurück) |
+
+Nach dem Eintragen einmal neu deployen (oder den nächsten Push abwarten), damit Vercel die Variablen in die Function lädt. Die Antwort des Besuchers geht per Reply-To direkt an seine eigene Adresse, nicht an das Postfach zurück.
+
 ## Wichtig für Claude (mich)
 
 Diese Datei bei jeder Änderung an Ordnerstruktur, Foto-Namenskonvention oder Automatisierung direkt mit aktualisieren, nicht erst wenn danach gefragt wird.

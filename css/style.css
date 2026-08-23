@@ -2035,6 +2035,30 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   font-size: 1.05rem;
 }
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--color-accent); }
+/* Honeypot: a field real visitors never see or reach (off-screen,
+   aria-hidden on the wrapper, no tab stop) that spam bots fill in anyway
+   because they read the raw HTML rather than render it -- a non-empty
+   value on submit is treated server-side (api/contact.js) as a bot and
+   silently dropped. */
+.field--hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+/* Status text (sending/success/error) toggled by main.js via a class on
+   the form itself -- only one of the three is ever shown at once. */
+.form__status { display: none; margin: 12px 0 0; font-size: 0.9rem; }
+.form--sending .form__status--sending,
+.form--success .form__status--success,
+.form--error .form__status--error {
+  display: block;
+}
+.form__status--success { color: #7ed492; }
+.form__status--error { color: #e58a8a; }
+.page-hero--photo.contrast-dark .form__status--success { color: #1c7a34; }
+.page-hero--photo.contrast-dark .form__status--error { color: #b3261e; }
 /* Browser autofill (name/email remembered from a previous visit) paints
    its own background colour straight over whatever's set here -- a
    yellow tint in Safari/Chrome, blue in some others -- ignoring normal
