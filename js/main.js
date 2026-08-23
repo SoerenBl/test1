@@ -1735,14 +1735,15 @@ function main() {
   var parallaxEls = document.querySelectorAll('.tile__caption');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
-  // About/Awards glass cards (mobile only -- desktop's two full-screen
-  // panels have no floating card to move, each *is* the whole screen).
-  // Same "how far through the viewport is this element" math as the tile
-  // captions above, just on the two cards directly instead of a caption
-  // relative to its tile -- only two elements total here, so no need for
-  // the IntersectionObserver-tracked active set that's worth it for a
-  // category page's couple dozen captions.
-  var stackCards = document.querySelectorAll('.stack__panel .stack__content');
+  // About/Awards/Service/Contact glass cards (mobile only -- desktop's
+  // two full-screen About/Awards panels have no floating card to move,
+  // each *is* the whole screen, and Service/Contact simply don't show a
+  // card at all on desktop). Same "how far through the viewport is this
+  // element" math as the tile captions above, just on the cards directly
+  // instead of a caption relative to its tile -- a handful of elements
+  // total here, so no need for the IntersectionObserver-tracked active
+  // set that's worth it for a category page's couple dozen captions.
+  var stackCards = document.querySelectorAll('.stack__panel .stack__content, .hero-glass-card');
   var stackCardMq = window.matchMedia('(max-width: 760px)');
 
   // --- Stack pages (About/Awards) ---
@@ -1986,7 +1987,7 @@ function main() {
             var rect = card.getBoundingClientRect();
             var center = rect.top + rect.height / 2;
             var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
-            var px = Math.max(-14, Math.min(14, offset * 18));
+            var px = Math.max(-20, Math.min(20, offset * 26));
             card.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
           });
         } else {
