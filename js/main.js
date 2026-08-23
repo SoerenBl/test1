@@ -589,16 +589,19 @@ function main() {
     applyBgContrast(img, 165);
   });
   // About/Awards' shared mobile photo sits *behind* a translucent white
-  // glass card (~0.3 opacity, see .stack__content) rather than directly
-  // under the text -- the tint itself always adds roughly 0.3*255 ≈ 76 of
-  // brightness to whatever shows through it, so the same raw-photo cutoff
-  // used above (165, calibrated for an untinted photo) would flip to dark
-  // text later than the card actually needs it to. ~127 is that same 165
-  // effective-brightness line solved backwards through the tint's own math
-  // (165 - 76) / 0.7 ≈ 127 -- everything else about the sampling is shared
-  // with applyBgContrast above.
+  // glass card (a 0.34 -> 0.08 diagonal gradient, see .stack__content)
+  // rather than directly under the text -- the tint adds brightness to
+  // whatever shows through it, so the same raw-photo cutoff used above
+  // (165, calibrated for an untinted photo) would flip to dark text later
+  // than the card actually needs it to. Calculated off the gradient's
+  // *lowest* point (0.08, not the 0.34 average) since that's the least
+  // forgiving corner text can still land in -- the top-heavier end only
+  // gets safer from there, never less. (165 - 0.08*255) / 0.92 ≈ 157 is
+  // that same 165 effective-brightness line solved backwards through the
+  // tint's own math -- everything else about the sampling is shared with
+  // applyBgContrast above.
   var stackPageBgImg = document.querySelector('.stack__page-bg img[data-photo]');
-  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 127);
+  if (stackPageBgImg) applyBgContrast(stackPageBgImg, 157);
 
   // --- Favicon: "SB" by default, swapped automatically for logo2.* if
   // that file exists (kept separate from logo.* so the nav mark and the

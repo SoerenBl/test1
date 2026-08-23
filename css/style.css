@@ -1509,22 +1509,31 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__content {
     margin: 0;
     padding: clamp(32px, 8vw, 44px) clamp(20px, 6vw, 28px) clamp(32px, 8vw, 44px);
-    /* Liquid-glass tint: much more transparent than the old 0.55 (closer
-       to iOS's own translucent-glass material) plus saturate() alongside
-       the blur -- blur alone flattens colour, saturate brings back some
-       of what's showing through instead of leaving it washed-out grey.
-       The thin, bright border plus soft shadow is the same "edge catches
-       the light, card floats above the photo" pairing that material
-       uses. Text colour itself is unaffected by any of this (see the
-       dark/white/.contrast-dark rules further down) -- it's not reacting
-       to the tint's opacity here, it's reacting to whether a photo is
-       even present at all and, once it is, how bright it turns out. */
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.55);
+    /* Liquid-glass tint, take two: less blur (16px, down from 28px) so
+       the photo behind reads as clear glass instead of frosted/matte,
+       and a diagonal gradient (0.34 down to 0.08) instead of a flat 0.3
+       -- lower on average, and unevenly so on purpose, the same way real
+       glass catches more light on one side than the other rather than
+       tinting uniformly. saturate() alongside the (now lighter) blur
+       still keeps colour from washing out grey. The gloss itself is the
+       two inset shadows: a bright line along the top edge (light hitting
+       the rim) and a faint dark one along the bottom (its own thickness
+       falling into shadow) -- together they read as a curved, polished
+       surface rather than a flat tinted panel. Text colour itself is
+       unaffected by any of this (see the dark/white/.contrast-dark rules
+       further down) -- it's not reacting to the tint here, it's reacting
+       to whether a photo is even present at all and, once it is, how
+       bright it turns out (recalculated for this lower tint -- see the
+       threshold passed to applyBgContrast in main.js). */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.16) 45%, rgba(255, 255, 255, 0.08) 100%);
+    backdrop-filter: blur(16px) saturate(190%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 20px;
-    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.16);
+    box-shadow:
+      0 10px 34px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   }
   /* backdrop-filter isn't universally supported (older Android WebView in
      particular) -- falls back to a solid, opaque card instead of a
