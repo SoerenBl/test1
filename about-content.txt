@@ -1,25 +1,33 @@
 --- DEUTSCH ---
 Titel: Über mich
-BioAbsatz1: Ich bin Produktdesigner mit einem fundierten Hintergrund im traditionellen Handwerk. Nach dem erfolgreichen Abschluss meiner Tischlerausbildung mit Auszeichnung im Jahr 2021 sammelte ich Erfahrungen im Möbelbau, bevor ich nach einem einjährigen Architekturstudium an der FH Münster meine wahre Berufung fand. Die Begeisterung für das Erschaffen und Entwickeln von Objekten begleitet mich seit meiner Kindheit. Von 2022 bis 2025 studierte ich Produktdesign an der Freien Universität Bozen und schloss dort meinen Bachelor erfolgreich ab.
-BioAbsatz2: Mein Arbeitsansatz verbindet technische Präzision und tiefes Materialverständnis mit einem ausgeprägten Gespür für Formgestaltung und Funktionalität. Das Ziel ist es stets, Ästhetik, Nutzbarkeit und technische Innovation nahtlos miteinander zu verbinden.
+BioAbsatz1: Ich bin Produktdesigner mit einem fundierten Hintergrund im traditionellen Handwerk. Nach dem erfolgreichen Abschluss meiner Tischlerausbildung mit Auszeichnung im Jahr 2021 sammelte ich wertvolle Erfahrungen im Möbelbau, bevor ich nach einem einjährigen Architekturstudium an der FH Münster meine wahre Berufung fand: die Begeisterung für das Erschaffen und Entwickeln von Objekten, die mich seit meiner Kindheit begleitet. Von 2023 bis 2025 studierte ich Produktdesign an der Freien Universität Bozen und schloss dort meinen Bachelor erfolgreich ab.
+BioAbsatz2: Mein Arbeitsansatz verbindet technische Präzision und tiefes Materialverständnis mit einem ausgeprägten Gespür für Formgestaltung und Funktionalität. Mein Ziel ist es stets, Ästhetik, Nutzbarkeit und technische Innovation nahtlos miteinander zu verbinden.
 Zeitstrahl:
-- 2026 | Platzhalter — Station/Ereignis
-- 20XX | Platzhalter — Station/Ereignis
-- 20XX | Platzhalter — Station/Ereignis
-AwardsText: Platzhalter — hier sollen später Auszeichnungen, Presse oder Anerkennungen aufgeführt werden, sobald es welche gibt. Sag mir einfach Bescheid, sobald du etwas hast.
+- 2023–2025 | Produktdesignstudium an der Freien Universität Bozen (Bachelor of Arts (B.A.) / Dottore in Design e Arti)
+- 2022–2023 | Architekturstudium an der FH Münster
+- 2018–2021 | Ausbildung zum Tischler (Geselle)
+AwardsText: Eine Auswahl an Auszeichnungen und Presseerwähnungen aus Ausbildung und Studium.
+ZitatIntro: Leo Lübke (COR, Interlübke), Jury-Mitglied bei „Die Gute Form" 2021, zu Sörens Gesellenstück:
+ZitatText: „Filigraner Ideenreichtum, stimmige Proportionen, steril komponiert – fast schon ein Meisterstück."
+ZitatLink: https://www.facebook.com/tischlerinnungguetersloh/posts/we-proudly-present-die-platzierten-des-wettbewerbs-die-gute-form-2021-in-den-sto/446934702965944/
 AwardsListe:
-- 20XX | Platzhalter — Auszeichnung/Presse
-- 20XX | Platzhalter — Auszeichnung/Presse
+- 2026 | DDN — Design Diffusion News Magazin, Young-Talents-Doppelseite mit „Legno Veloce"
+- 2024 | European Custombike Championship 2024 — Bester Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
+- 2021 | „Die Gute Form" 2021 — Platz 1, Tischlerinnung Gütersloh | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker
 
 --- ENGLISH ---
 Titel: About Me
-BioAbsatz1: I'm a product designer with a solid grounding in traditional craft. After completing my carpentry apprenticeship with distinction in 2021, I gained experience in furniture-making before finding my true calling during a year of architecture studies at FH Münster. A fascination with creating and developing objects has stayed with me since childhood. From 2022 to 2025 I studied product design at the Free University of Bozen-Bolzano, completing my Bachelor's degree there.
-BioAbsatz2: My approach combines technical precision and a deep understanding of materials with a strong sense for form and function. The goal is always to seamlessly bring together aesthetics, usability, and technical innovation.
+BioAbsatz1: I'm a product designer with a solid grounding in traditional craft. After completing my carpentry apprenticeship with distinction in 2021, I gained valuable experience in furniture-making before finding my true calling during a year of architecture studies at FH Münster: a fascination with creating and developing objects that has stayed with me since childhood. From 2023 to 2025 I studied product design at the Free University of Bozen-Bolzano, completing my Bachelor's degree there.
+BioAbsatz2: My approach combines technical precision and a deep understanding of materials with a strong sense for form and function. My goal is always to seamlessly bring together aesthetics, usability, and technical innovation.
 Zeitstrahl:
-- 2026 | Placeholder — milestone/event
-- 20XX | Placeholder — milestone/event
-- 20XX | Placeholder — milestone/event
-AwardsText: Placeholder — awards, press or recognitions will be listed here once there are any. Just let me know when you have something.
+- 2023–2025 | Product design studies at the Free University of Bozen-Bolzano (Bachelor of Arts (B.A.) / Dottore in Design e Arti)
+- 2022–2023 | Architecture studies at FH Münster
+- 2018–2021 | Carpentry apprenticeship (journeyman)
+AwardsText: A selection of awards and press mentions from my apprenticeship and studies.
+ZitatIntro: Leo Lübke (COR, Interlübke), jury member for "Die Gute Form" 2021, on Sören's journeyman's piece:
+ZitatText: "Filigree richness of ideas, harmonious proportions, cleanly composed – almost a masterpiece already."
+ZitatLink: https://www.facebook.com/tischlerinnungguetersloh/posts/we-proudly-present-die-platzierten-des-wettbewerbs-die-gute-form-2021-in-den-sto/446934702965944/
 AwardsListe:
-- 20XX | Placeholder — award/press
-- 20XX | Placeholder — award/press
+- 2026 | DDN — Design Diffusion News Magazine, Young Talents double-page feature with "Legno Veloce"
+- 2024 | European Custombike Championship 2024 — Best Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
+- 2021 | "Die Gute Form" 2021 — 1st place, Gütersloh Carpenters' Guild | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker
