@@ -443,6 +443,78 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   })();
 
+  // --- Footer picks up the colour its own page's background photo ends
+  // on --- rather than the page cutting straight back to plain white the
+  // moment the photo's section stops. Only makes sense for a page whose
+  // photo actually sits directly above the footer with nothing else (no
+  // separate long content area) in between -- true for Service/Contact/
+  // Impressum/Datenschutz's one photo, and for About/Awards' shared
+  // mobile photo, but on About/Awards' *desktop* two-photo layout, only
+  // Awards' (the very last panel before the footer) is relevant --
+  // About's own photo further up has nothing to do with what the footer
+  // sits against. Impressum/Datenschutz's full-page photo already ends
+  // wherever the legal text does, same idea either way: whatever's
+  // directly above the footer, not necessarily "this page's photo" in
+  // general.
+  (function () {
+    var footer = document.querySelector('footer');
+    if (!footer) return;
+    var img = null;
+    var stackGroup = document.querySelector('.stack__group');
+    if (stackGroup) {
+      if (window.matchMedia('(max-width: 760px)').matches) {
+        img = stackGroup.querySelector(':scope > .stack__page-bg img[data-photo]');
+      } else {
+        var panels = stackGroup.querySelectorAll(':scope > .stack__panel');
+        var lastPanel = panels[panels.length - 1];
+        img = lastPanel ? lastPanel.querySelector('.stack__bg img[data-photo]') : null;
+      }
+    } else {
+      img = document.querySelector('.page-hero__bg img[data-photo]');
+    }
+    if (!img) return;
+    function sample() {
+      if (!img.naturalWidth) return;
+      try {
+        var w = 32, h = 4;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        // Just the bottom few percent -- the one sliver actually
+        // touching the footer, not an average of the whole photo (which
+        // could easily be a completely different tone further up).
+        var sourceY = img.naturalHeight * 0.94;
+        var sourceH = img.naturalHeight * 0.06;
+        ctx.drawImage(img, 0, sourceY, img.naturalWidth, sourceH, 0, 0, w, h);
+        var data = ctx.getImageData(0, 0, w, h).data;
+        var r = 0, g = 0, b = 0;
+        for (var i = 0; i < data.length; i += 4) {
+          r += data[i]; g += data[i + 1]; b += data[i + 2];
+        }
+        var n = data.length / 4;
+        r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
+        footer.style.backgroundColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+        var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        footer.classList.add('footer--tinted');
+        footer.classList.toggle('footer--tinted-dark', lum <= 165);
+      } catch (e) {
+        // getImageData can throw on a tainted canvas -- leave the footer
+        // as plain white rather than guessing.
+      }
+    }
+    if (img.complete && img.naturalWidth) sample();
+    else img.addEventListener('load', sample);
+    // Photo turned out missing (404) -- back to the plain white footer
+    // rather than staying tinted from a stale/previous page's photo.
+    img.addEventListener('photoresolved', function (e) {
+      if (!e.detail.found) {
+        footer.style.backgroundColor = '';
+        footer.classList.remove('footer--tinted', 'footer--tinted-dark');
+      }
+    });
+  })();
+
   // --- Auto text contrast on hero photos (Service/About/Awards/Contact) ---
   // These sections all assume a dark background photo and set their text
   // white -- true for every photo the site ships with today, but not
@@ -1596,6 +1668,15 @@ document.addEventListener('DOMContentLoaded', function () {
   var parallaxEls = document.querySelectorAll('.tile__caption');
   var heroContent = document.querySelector('.hero-tile__content');
   var heroTile = document.querySelector('.hero-tile');
+  // About/Awards glass cards (mobile only -- desktop's two full-screen
+  // panels have no floating card to move, each *is* the whole screen).
+  // Same "how far through the viewport is this element" math as the tile
+  // captions above, just on the two cards directly instead of a caption
+  // relative to its tile -- only two elements total here, so no need for
+  // the IntersectionObserver-tracked active set that's worth it for a
+  // category page's couple dozen captions.
+  var stackCards = document.querySelectorAll('.stack__panel .stack__content');
+  var stackCardMq = window.matchMedia('(max-width: 760px)');
 
   // --- Stack pages (About/Awards) ---
   // The "stop exactly at each panel, never overshoot into the footer"
@@ -1813,7 +1894,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // a reported real-device scroll glitch.
   var projectHeroDockMq = window.matchMedia('(max-width: 760px)');
 
-  if (!reduceMotion && (parallaxEls.length || heroContent || projectHero)) {
+  if (!reduceMotion && (parallaxEls.length || heroContent || projectHero || stackCards.length)) {
     // A persistent rAF loop, not 'scroll'-event-triggered — on mobile,
     // 'scroll' events during momentum/inertial scrolling can fire less
     // often than the browser actually paints, so a handler gated on them
@@ -1832,6 +1913,22 @@ document.addEventListener('DOMContentLoaded', function () {
         var px = Math.max(-16, Math.min(16, offset * 26));
         el.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
       });
+      if (stackCards.length) {
+        if (stackCardMq.matches) {
+          stackCards.forEach(function (card) {
+            var rect = card.getBoundingClientRect();
+            var center = rect.top + rect.height / 2;
+            var offset = (center - vh / 2) / vh; // -0.5 .. 0.5 roughly
+            var px = Math.max(-14, Math.min(14, offset * 18));
+            card.style.transform = 'translateY(' + px.toFixed(1) + 'px)';
+          });
+        } else {
+          // Desktop: no card to move (see the var's own comment) -- clears
+          // any transform left over from a resize down from mobile rather
+          // than leaving the card stuck at its last mobile offset.
+          stackCards.forEach(function (card) { card.style.transform = ''; });
+        }
+      }
       if (heroContent && heroTile) {
         var heroHeight = heroTile.offsetHeight || vh;
         var progress = Math.max(0, Math.min(1, window.scrollY / heroHeight));

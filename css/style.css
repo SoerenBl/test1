@@ -1448,7 +1448,12 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .stack__panel {
     min-height: 0;
     background: none;
-    overflow: hidden;
+    /* Was hidden to clip the old per-panel photo to the panel's own
+       bounds -- that photo is gone now (.stack__panel > .stack__bg above
+       is display:none here), and the card's own gentle scroll-parallax
+       transform (main.js) needs to be free to drift a few pixels past
+       the panel's edges without getting cut off. */
+    overflow: visible;
     display: block;
     padding: 0 16px;
     margin: 0 0 28px;
@@ -1980,7 +1985,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    revealed, no more — which is the same natural behaviour the Awards fix
    now matches once its own snap disarms. */
 
-footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
+/* .footer--tinted (see the sampling IIFE in main.js) sets background-color
+   directly (an actual sampled colour, not a variable/class -- endless
+   possible photos, not a fixed palette) via inline style, so it's the one
+   thing intentionally left off this transition-eligible list below. */
+footer { border-top: 1px solid var(--color-line); padding: 30px 0; transition: border-color 0.4s ease; }
 .footer__inner {
   display: flex;
   justify-content: space-between;
@@ -1989,10 +1998,21 @@ footer { border-top: 1px solid var(--color-line); padding: 30px 0; }
   gap: 12px;
   font-size: 0.85rem;
   color: var(--color-text-muted);
+  transition: color 0.4s ease;
 }
 .footer__social { display: flex; gap: 18px; }
 .footer__social a { transition: color 0.2s ease; }
 .footer__social a:hover { color: var(--color-panel-hover); }
+/* Whatever colour the last bit of this page's own background photo
+   happens to end on (sampled from its very bottom edge), continued
+   straight through as the footer's own background instead of the page
+   cutting hard back to plain white right where the photo stops --
+   .footer--tinted-dark on top of that switches the footer's own text to
+   match, the same white-on-dark/dark-on-light split every other photo
+   section on the site already uses. */
+footer.footer--tinted { border-top-color: transparent; }
+footer.footer--tinted-dark .footer__inner { color: rgba(250,248,245,0.75); }
+footer.footer--tinted-dark .footer__social a:hover { color: #fff; }
 
 /* ---------- Title hover glow (About/Awards/Service/Contact titles) ----------
    Replaces an earlier per-letter bounce+colour-flash (asked for something
