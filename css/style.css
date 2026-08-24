@@ -123,16 +123,6 @@ body {
   to { opacity: 1; filter: none; }
 }
 
-body.nav-pad { padding-top: var(--nav-h); }
-/* Impressum/Datenschutz only (the only body.nav-pad pages). Their nav
-   floats on mobile now instead of reserving this space -- .page-hero
-   itself (below) provides its own clearance via --mobile-hero-top-pad,
-   same as every other page here, since it may have a photo behind the
-   nav to float over. */
-@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
-  body.nav-pad { padding-top: 0; }
-}
-
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 
@@ -248,20 +238,6 @@ p { margin: 0 0 1em; }
     transition: transform 0.3s ease;
   }
   .nav.is-hidden { transform: translateY(-100%); }
-}
-/* Desktop only -- Impressum/Datenschutz are the only pages that ever set
-   this, and only for their solid, no-photo desktop nav. Their mobile
-   layout now optionally shows a background photo of its own (like every
-   other page here), so their nav needs to be able to go back to the
-   default white/floating look there too -- .nav--solid-mobile (below,
-   already mobile-only) is what actually governs mobile nav colour now,
-   toggled dynamically by js/main.js based on whether that page's own
-   photo loaded, not hardcoded to always-dark like this used to be. */
-@media (min-width: 761px) {
-  .nav.nav--solid {
-    --nav-fg: var(--color-text);
-    --nav-fg-muted: var(--color-text-muted);
-  }
 }
 /* Dark nav text for whichever mobile page currently has no background
    photo to sit over (white text there would be invisible against the
@@ -1738,16 +1714,18 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    being full-viewport themselves. */
 .section--gray { background: var(--color-bg-gray); }
 .page-hero {
-  padding: var(--editorial-top-pad) 0 clamp(50px, 8vh, 90px);
-  /* Fills the window on its own (body.nav-pad already reserves --nav-h
-     above it) so short content still reads as "one screen, then scroll
-     once for the footer" instead of leaving a stub of empty space.
-     Plain block layout (not flex) so the title still starts at the top,
-     matching the About/Awards grid — any extra space lands below the
-     content, not by centring it. */
+  padding: calc(var(--editorial-top-pad) + var(--nav-h)) 0 clamp(50px, 8vh, 90px);
+  /* Nav floats (transparent, position:fixed) over this section instead of
+     body reserving space above it — same as every other page-hero page —
+     so the clearance has to come from this section's own top padding
+     instead. Fills the window on its own so short content still reads as
+     "one screen, then scroll once for the footer" instead of leaving a
+     stub of empty space. Plain block layout (not flex) so the title still
+     starts at the top, matching the About/Awards grid — any extra space
+     lands below the content, not by centring it. */
   box-sizing: border-box;
-  min-height: calc(100vh - var(--nav-h));
-  min-height: calc(100dvh - var(--nav-h));
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 .page-hero__title {
   font-family: var(--font-display);
