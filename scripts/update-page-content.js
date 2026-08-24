@@ -332,7 +332,7 @@ function updateServices(html, data) {
 
 const IMPRESSUM_KEYS = [
   'Name', 'Anschrift', 'Telefon', 'EMail', 'Website',
-  'Berufsbezeichnung', 'Umsatzsteuer', 'Verbraucherstreitbeilegung',
+  'Berufsbezeichnung', 'Verbraucherstreitbeilegung',
   'HaftungInhalte', 'HaftungLinks', 'Urheberrecht',
 ];
 
@@ -352,9 +352,10 @@ function updateImpressum(html, data) {
   html = patchBilingual(html,
     '<h2><span data-lang="de">Berufsbezeichnung und berufsrechtliche Regelungen</span><span data-lang="en">Professional title and regulations</span></h2>\n    <p>\n      ',
     '\n    </p>', data.de.Berufsbezeichnung, data.en.Berufsbezeichnung, 'Berufsbezeichnung');
-  html = patchBilingual(html,
-    '<h2><span data-lang="de">Umsatzsteuer</span><span data-lang="en">VAT</span></h2>\n    <p>\n      ',
-    '\n    </p>', data.de.Umsatzsteuer, data.en.Umsatzsteuer, 'Umsatzsteuer');
+  // No Umsatzsteuer/VAT section -- § 5 DDG only requires disclosing a VAT
+  // ID if one actually exists; without one there's nothing mandated to
+  // say here, so the heading is dropped rather than filled with a
+  // placeholder or "applied for" note.
 
   // "Verantwortlich fuer den Inhalt" reuses Name/Anschrift rather than its
   // own fields -- same legal name and address, not separate content, so
