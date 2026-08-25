@@ -1,0 +1,66 @@
+Diese Datei steuert die Texte in den automatischen E-Mails: der
+Bestätigungsmail, die jemand bekommt, nachdem er das Kontaktformular
+abgeschickt hat (zweisprachig), und der Benachrichtigungsmail, die DU
+bekommst, wenn jemand schreibt (nur Deutsch, da nur du sie liest).
+
+Format: "Schlüssel: Text" -- den Schlüssel (das Wort vor dem Doppelpunkt)
+nicht verändern, nur den Text danach. {name} und {jahr} sind Platzhalter,
+die das System automatisch durch den echten Namen bzw. das aktuelle Jahr
+ersetzt -- die geschweiften Klammern samt Wort so stehen lassen.
+
+Die Zeilen mit den drei Strichen (--- ... ---) bitte nicht umbenennen
+oder löschen, nur die Key:-Zeilen darunter anpassen.
+
+Was hier NICHT steht (Bild, Farben, Schriftart, Layout): siehe README.md
+in diesem Ordner.
+
+--- BESTÄTIGUNGSMAIL AN DEN ABSENDER — DEUTSCH ---
+Betreffzeile: Deine Nachricht ist angekommen
+HeaderZeile1: Nachricht
+HeaderZeile2: angekommen.
+Begruessung: Hallo {name},
+BegruessungOhneName: Hallo,
+Text1: vielen Dank für Deine Nachricht über soerenblaecker.com.
+Text2: Das hier ist nur eine automatische Bestätigung, dass sie bei mir angekommen ist. Ich melde mich so schnell wie möglich persönlich bei Dir zurück, meist innerhalb von 1–2 Werktagen.
+RecapUeberschrift: Das hast du geschickt
+RecapBetreffLabel: Betreff
+RecapNachrichtLabel: Nachricht
+Verabschiedung: Bis bald,
+EMailLabel: E-Mail
+TelefonLabel: Telefon
+StandortLabel: Standort
+StandortWert: Deutschland
+ImpressumLabel: Impressum
+DatenschutzLabel: Datenschutz
+Fussnote: © {jahr} Sören Bläcker — Produktdesign. Diese E-Mail wurde automatisch als Antwort auf eine Anfrage über das Kontaktformular auf soerenblaecker.com versendet.
+
+--- BESTÄTIGUNGSMAIL AN DEN ABSENDER — ENGLISH ---
+Betreffzeile: Your message has arrived
+HeaderZeile1: Message
+HeaderZeile2: received.
+Begruessung: Hi {name},
+BegruessungOhneName: Hi,
+Text1: thanks for reaching out through soerenblaecker.com.
+Text2: This is just an automatic confirmation that your message has arrived. I’ll get back to you personally as soon as I can, usually within 1–2 business days.
+RecapUeberschrift: What you sent
+RecapBetreffLabel: Subject
+RecapNachrichtLabel: Message
+Verabschiedung: Talk soon,
+EMailLabel: Email
+TelefonLabel: Phone
+StandortLabel: Location
+StandortWert: Germany
+ImpressumLabel: Legal Notice
+DatenschutzLabel: Privacy
+Fussnote: © {jahr} Sören Bläcker — Product Design. This email was sent automatically in response to a request submitted through the contact form on soerenblaecker.com.
+
+--- BENACHRICHTIGUNGSMAIL AN DICH (nur Deutsch) ---
+HeaderZeile1: Neue
+HeaderZeile2: Anfrage.
+Einleitung: jemand hat gerade über das Kontaktformular auf soerenblaecker.com geschrieben:
+RecapUeberschrift: Anfrage
+NameLabel: Name
+EMailLabel: E-Mail
+BetreffLabel: Betreff
+NachrichtLabel: Nachricht
+Hinweis: Antworten geht direkt auf diese Mail -- die Antwort-Adresse ist bereits auf die anfragende Person gesetzt.
