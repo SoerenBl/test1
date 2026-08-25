@@ -477,6 +477,8 @@ body.is-menu-open .project-hero__overlay {
   border: none;
   padding: 0;
   cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .lang-toggle button[data-set-lang="de"] { left: 0; }
 .lang-toggle button[data-set-lang="en"] { right: 0; }

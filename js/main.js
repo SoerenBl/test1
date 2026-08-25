@@ -99,9 +99,16 @@ function main() {
     });
     updateUmlautSpacing(lang);
   }
+  // Both buttons together fill the entire track (see .lang-toggle button
+  // in style.css), so whichever one a click actually lands on shouldn't
+  // matter -- always flip to the opposite of the current language rather
+  // than setting this button's own data-set-lang value, otherwise a click
+  // on the half the thumb already sits over (i.e. the already-active
+  // language) was a silent no-op and the control only ever seemed to
+  // respond on its other half.
   langButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var lang = btn.getAttribute('data-set-lang');
+      var lang = document.documentElement.getAttribute('lang') === 'de' ? 'en' : 'de';
       localStorage.setItem('lang', lang);
       applyLang(lang);
     });
