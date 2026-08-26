@@ -1923,12 +1923,16 @@ function main() {
   var projectHeroNav = document.querySelector('.nav__mark');
   // Distance over which the big overlay title docks into the nav bar — a
   // fixed value (not tied to the title's own height) so the motion feels
-  // the same regardless of how long the title text is. Deliberately short
-  // (rather than the old 200px): below this, the title sits in a single
-  // static docked state the whole time you're scrolling the rest of the
-  // page (see is-docked-static below) — scrolling up from deep in the
-  // page doesn't grow it back until you're nearly at the very top.
-  var PROJECT_DOCK_RANGE = 120;
+  // the same regardless of how long the title text is. Was shortened from
+  // 200 to 120 at one point specifically so scrolling back up from deep in
+  // the page wouldn't grow the title back until nearly at the very top
+  // (see is-docked-static below) -- raised partway back up per a later
+  // request for the initial dock-in (and, on category pages, the new
+  // intro text's fade-out) to read less abrupt. Trade-off is the same
+  // scroll-up threshold widening back out a bit with it, since both
+  // directions share this one value -- 180 splits the difference rather
+  // than reverting to the full 200.
+  var PROJECT_DOCK_RANGE = 180;
   var projectHeroNatural = null;
   var projectHeroDock = null;
   var projectHeroTitleEl = projectHero ? projectHero.querySelector('.project-hero__title') : null;
