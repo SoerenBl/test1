@@ -1933,6 +1933,14 @@ function main() {
   // directions share this one value -- 180 splits the difference rather
   // than reverting to the full 200.
   var PROJECT_DOCK_RANGE = 180;
+  // Mobile only (see the dockMq branch in updateParallax below) -- there's
+  // no docking there, but the title/intro still get a small extra upward
+  // drift on top of their normal document-flow scroll movement, so they
+  // read as exiting the top of the screen a bit faster than the rest of
+  // the page instead of moving at exactly the same rate as everything
+  // else. 0.22 means "22% faster than the page" -- kept deliberately
+  // subtle per request ("leicht").
+  var MOBILE_HERO_PARALLAX = 0.22;
   var projectHeroNatural = null;
   var projectHeroDock = null;
   var projectHeroTitleEl = projectHero ? projectHero.querySelector('.project-hero__title') : null;
@@ -2246,6 +2254,32 @@ function main() {
             projectHeroIntroEl.style.transform = 'translate(' + introTranslateX.toFixed(1) + 'px, ' + introTranslateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
             projectHeroIntroEl.style.opacity = String(1 - dockProgress);
           }
+        }
+      } else if (projectHero && projectHeroTitleEl && projectHeroDockMq.matches) {
+        // Mobile: no docking (desktop-only, see the branch above). The
+        // title/intro already move with the page for free just by being
+        // normal document flow inside .project-hero -- this only adds a
+        // small extra upward drift on top of that, so they read as exiting
+        // the top of the screen a bit faster than everything else instead
+        // of at the exact same rate. Also clears any position:fixed/top/
+        // left/opacity a previous desktop-docked state may have left
+        // behind (e.g. resizing down from a docked desktop window) --
+        // this branch is otherwise the only thing touching these elements
+        // once the media query flips, so a leftover fixed position would
+        // never get cleared on its own.
+        if (projectHeroDockedStatic !== false) {
+          projectHeroTitleEl.style.position = '';
+          projectHeroTitleEl.style.top = '';
+          projectHeroTitleEl.style.left = '';
+          projectHeroTitleEl.style.opacity = '';
+          projectHeroTitleEl.style.pointerEvents = '';
+          projectHeroDockedStatic = false;
+        }
+        var mobileParallaxY = (-window.scrollY * MOBILE_HERO_PARALLAX).toFixed(1) + 'px';
+        projectHeroTitleEl.style.transform = 'translateY(' + mobileParallaxY + ')';
+        if (projectHeroIntroEl) {
+          projectHeroIntroEl.style.opacity = '';
+          projectHeroIntroEl.style.transform = 'translateY(' + mobileParallaxY + ')';
         }
       }
       window.requestAnimationFrame(updateParallax);
