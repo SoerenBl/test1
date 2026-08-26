@@ -2045,6 +2045,22 @@ function main() {
     // already ran, so it needs to trigger a re-measurement once the real
     // title text (and therefore the element's real size) is in place.
     window.__remeasureProjectHero = measureProjectHero;
+    // Anton (the title/intro font) loads via font-display:swap (see
+    // css/style.css) -- text first renders in the fallback stack, then
+    // reflows once the real woff2 finishes fetching, at whatever moment
+    // that happens to land relative to this script's own (async) run.
+    // Measuring before that swap records the fallback font's (wider/
+    // narrower) box as "natural", so the whole dock animation -- title
+    // and intro both -- animates toward/from a stale reference point:
+    // reported as the docked block drifting sideways instead of
+    // straight up, direction varying run to run with the network race.
+    // document.fonts.ready resolves once every @font-face actually used
+    // on the page has finished loading (or immediately, if it already
+    // has by this point) -- re-measuring then always captures the
+    // final, post-swap layout regardless of which happened first.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measureProjectHero);
+    }
   }
 
   // Only tile captions actually near the viewport are tracked here — on a
