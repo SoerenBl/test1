@@ -845,8 +845,26 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   grid-row: 1 / -1 !important;
 }
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
-  .tile-grid--duo { grid-template-rows: 1fr 1fr; }
-  .tile-grid--duo .tile { grid-column: 1 / -1 !important; grid-row: span 1 !important; }
+  /* The base (unscoped) .tile-grid--duo rule above sets grid-template-rows:
+     1fr and grid-row: 1 / -1 !important on both tiles -- meant for the
+     desktop side-by-side layout, but with no media condition it still
+     applies on mobile too. Left alone, that collapses both tiles into the
+     same single 1fr row (overlapping) instead of letting them fall through
+     to the plain .tile-grid mobile rule below. This override restores
+     normal full-width stacking for a two-project category, matching every
+     other category grid, and then applies the same first-tile-tall
+     treatment as .category-grid-section .tile-grid--projects > .tile:
+     first-child further down -- needed here explicitly (with !important)
+     because that rule's plain specificity can't beat the base duo rule's
+     !important on its own. */
+  .tile-grid--duo { grid-template-rows: 300px 300px; }
+  .tile-grid--duo .tile {
+    grid-column: 1 / -1 !important;
+    grid-row: span 1 !important;
+  }
+  .category-grid-section .tile-grid--duo .tile:first-child {
+    grid-row: span 2 !important;
+  }
 }
 
 .tile { position: relative; display: block; grid-column: span 1; }
