@@ -867,6 +867,16 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   .tile-grid { grid-template-columns: 1fr; grid-auto-rows: 300px; }
   .tile { grid-column: span 1 !important; }
   .tile--tall, .tile--portrait { grid-row: span 1; }
+  /* Category-listing pages only (not the homepage grid, not a project's
+     own photo gallery — both use .tile-grid--projects too, neither sits
+     inside .category-grid-section) -- the opening project gets a double
+     row so its photo reads as a proper lead image and the next tile still
+     peeks in underneath, instead of every mobile tile being the same
+     size. .tile__caption is bottom-anchored (see its own rule) regardless
+     of the tile's height, so the title/year/country still sits in the
+     same normal single-tile-sized band at the bottom, not stretched or
+     centred across the taller tile. */
+  .category-grid-section .tile-grid--projects > .tile:first-child { grid-row: span 2; }
 }
 
 .tile__media {
