@@ -3,7 +3,7 @@ Land: IT
 Jahr: 2023
 
 --- DEUTSCH ---
-Beschreibung: Ein Tisch aus massivem Kirschholz mit klassisch verjüngten Beinen und sichtbaren, handwerklich gefertigten Eckverbindungen — die Fügetechnik bleibt bewusst ablesbar statt versteckt. Zurückhaltende, zeitlose Formensprache mit Schweizer Kante, die dem Material und seiner Maserung den Vortritt lässt, aber dennoch Leichtigkeit und Stabilität mittels durchdachter Konstruktion verspricht.
+Beschreibung: Ein Tisch aus massivem Kirschholz mit klassisch verjüngten Beinen und sichtbaren, handwerklich gefertigten Eckverbindungen - die Fügetechnik bleibt bewusst ablesbar statt versteckt. Zurückhaltende, zeitlose Formensprache mit Schweizer Kante, die dem Material und seiner Maserung den Vortritt lässt, aber dennoch Leichtigkeit und Stabilität mittels durchdachter Konstruktion verspricht.
 Material: 100 % Kirsche Massivholz
 Fertigungstechniken: Fräsen, Eckverbindungen, Stollenverbindungen, Gravurfräsen, Ölen
 Besonderheiten:
@@ -13,7 +13,7 @@ Besonderheiten:
 
 --- ENGLISH ---
 Titel: Solid Cherry Dining Table
-Beschreibung: A table in solid cherry with classically tapered legs and visible, hand-cut corner joinery — the construction stays legible instead of being hidden away. A restrained, timeless form with a Swiss edge that lets the material and its grain lead, while still promising lightness and stability through considered construction.
+Beschreibung: A table in solid cherry with classically tapered legs and visible, hand-cut corner joinery - the construction stays legible instead of being hidden away. A restrained, timeless form with a Swiss edge that lets the material and its grain lead, while still promising lightness and stability through considered construction.
 Material: 100% solid cherry wood
 Fertigungstechniken: Milling, corner joints, leg-to-frame joinery, engraving, oiling
 Besonderheiten:

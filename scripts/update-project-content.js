@@ -189,8 +189,8 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title} — Sören Bläcker</title>
-<meta name="description" content="${title} — Projekt von Sören Bläcker.">
+<title>${title} - Sören Bläcker</title>
+<meta name="description" content="${title} - Projekt von Sören Bläcker.">
 <script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
 <link rel="icon" href="../../../favicon.svg" id="faviconLink" data-favicon-fallback="../../../logo2">
 <link rel="stylesheet" href="../../../css/style.css?v=${assetVersion}">
@@ -233,8 +233,8 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
     <a href="../../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
   </nav>
   <div class="menu-panel__foot">
-    <span data-lang="de">Deutschland — weltweit verfügbar</span>
-    <span data-lang="en">Germany — available worldwide</span>
+    <span data-lang="de">Deutschland - weltweit verfügbar</span>
+    <span data-lang="en">Germany - available worldwide</span>
     <div class="menu-panel__social">
       <a href="https://www.youtube.com/@soerenblaecker.design" target="_blank" rel="noopener">YouTube</a>
       <a href="https://www.linkedin.com/in/soerenblaecker" target="_blank" rel="noopener">LinkedIn</a>
@@ -249,7 +249,7 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
   <div class="project-stack">
     <div class="project-hero-panel">
       <div class="tile__media">
-        <div class="ph"><span data-lang="de">Projektfoto — Hauptbild</span><span data-lang="en">Project photo — main image</span></div>
+        <div class="ph"><span data-lang="de">Projektfoto - Hauptbild</span><span data-lang="en">Project photo - main image</span></div>
         <img data-photo="1" alt="">
       </div>
     </div>

@@ -4,7 +4,7 @@ NavArbeiten: Arbeiten
 NavService: Service
 NavUeberMich: Über mich
 NavKontakt: Kontakt
-Fusszeile: Deutschland — weltweit verfügbar
+Fusszeile: Deutschland - weltweit verfügbar
 FussImpressum: Impressum
 FussDatenschutz: Datenschutz
 
@@ -14,6 +14,6 @@ NavArbeiten: Work
 NavService: Services
 NavUeberMich: About Me
 NavKontakt: Contact
-Fusszeile: Germany — available worldwide
+Fusszeile: Germany - available worldwide
 FussImpressum: Legal Notice
 FussDatenschutz: Privacy

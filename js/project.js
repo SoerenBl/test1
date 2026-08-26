@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
   heroLink.setAttribute('href', categoryHref);
 
   function applyTitle(title) {
-    document.getElementById('pageTitle').textContent = title + ' — Sören Bläcker';
+    document.getElementById('pageTitle').textContent = title + ' - Sören Bläcker';
     heroLink.textContent = title;
     // The hover/dock animation (js/main.js) measured this element's size
     // before this text was set — it was empty at that point, so tell it

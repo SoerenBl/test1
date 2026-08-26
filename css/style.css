@@ -375,6 +375,25 @@ body.is-menu-open .project-hero__overlay {
   transition: opacity 0.2s ease;
 }
 .project-hero__title a:hover { opacity: 0.75; }
+/* Category pages only (project detail pages have no .project-hero__intro
+   at all, so this never applies there) -- short intro paragraph under the
+   category title, over the same photo. Desktop: js/main.js mirrors the
+   title's own dock transform onto this element every frame and fades its
+   opacity in lockstep, so it visually "rides along" with the title and is
+   fully gone by the moment docking completes. Mobile: no JS touches it
+   (the title itself has no dock effect on mobile), so it just sits here
+   normally and scrolls away with the rest of the page like any other
+   text. */
+.project-hero__intro {
+  max-width: 46ch;
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5), 0 2px 14px rgba(0,0,0,0.35);
+  transform-origin: left top;
+  will-change: transform;
+}
 
 /* Project detail pages: photo 1 is a full-viewport sticky hero, photos 2+
    sit in a normal (non-sticky) tile grid directly after it — same "cover

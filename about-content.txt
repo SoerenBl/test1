@@ -11,9 +11,9 @@ ZitatIntro: Leo Lübke (COR, Interlübke), Jury-Mitglied bei „Die Gute Form" 2
 ZitatText: „Filigraner Ideenreichtum, stimmige Proportionen, steril komponiert – fast schon ein Meisterstück."
 ZitatLink: https://www.facebook.com/tischlerinnungguetersloh/posts/we-proudly-present-die-platzierten-des-wettbewerbs-die-gute-form-2021-in-den-sto/446934702965944/
 AwardsListe:
-- 2026 | DDN — Design Diffusion News Magazin, Young-Talents-Doppelseite mit „Legno Veloce"
-- 2024 | European Custombike Championship 2024 — Bester Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
-- 2021 | „Die Gute Form" 2021 — Platz 1, Tischlerinnung Gütersloh | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker
+- 2026 | DDN - Design Diffusion News Magazin, Young-Talents-Doppelseite mit „Legno Veloce"
+- 2024 | European Custombike Championship 2024 - Bester Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
+- 2021 | „Die Gute Form" 2021 - Platz 1, Tischlerinnung Gütersloh | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker
 
 --- ENGLISH ---
 Titel: About Me
@@ -28,6 +28,6 @@ ZitatIntro: Leo Lübke (COR, Interlübke), jury member for "Die Gute Form" 2021,
 ZitatText: "Filigree richness of ideas, harmonious proportions, cleanly composed – almost a masterpiece already."
 ZitatLink: https://www.facebook.com/tischlerinnungguetersloh/posts/we-proudly-present-die-platzierten-des-wettbewerbs-die-gute-form-2021-in-den-sto/446934702965944/
 AwardsListe:
-- 2026 | DDN — Design Diffusion News Magazine, Young Talents double-page feature with "Legno Veloce"
-- 2024 | European Custombike Championship 2024 — Best Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
-- 2021 | "Die Gute Form" 2021 — 1st place, Gütersloh Carpenters' Guild | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker
+- 2026 | DDN - Design Diffusion News Magazine, Young Talents double-page feature with "Legno Veloce"
+- 2024 | European Custombike Championship 2024 - Best Café Racer, Custombike Show Bad Salzuflen | https://www.custombike-show.de/gewinner-european-custombike-championship-2024/
+- 2021 | "Die Gute Form" 2021 - 1st place, Gütersloh Carpenters' Guild | https://www.tischlerkoeln.org/aus-weiterbildung/die-gute-form-nrw/dgf-innungen-2021/guetersloh-2021/blaecker

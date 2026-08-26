@@ -795,7 +795,7 @@ function main() {
         var p = r.p;
         return '<a class="tile" href="' + p.slug + '/" data-row-span="' + r.span + '">' +
           '<div class="tile__media">' +
-          '<div class="ph"><span data-lang="de">Projektfoto — ' + p.titleDe + '</span><span data-lang="en">Project photo — ' + p.titleEn + '</span></div>' +
+          '<div class="ph"><span data-lang="de">Projektfoto - ' + p.titleDe + '</span><span data-lang="en">Project photo - ' + p.titleEn + '</span></div>' +
           '<img data-photo="' + p.slug + '/cover" data-photo-fallback="' + p.slug + '/1" alt="">' +
           '<div class="tile__caption">' +
           '<h3 class="tile__title display"><span data-lang="de">' + p.titleDe + '</span><span data-lang="en">' + p.titleEn + '</span></h3>' +
@@ -1932,6 +1932,11 @@ function main() {
   var projectHeroNatural = null;
   var projectHeroDock = null;
   var projectHeroTitleEl = projectHero ? projectHero.querySelector('.project-hero__title') : null;
+  // Category pages only (see .project-hero__intro in style.css) -- null on
+  // every project detail page, which the code below already treats as
+  // "nothing to do" everywhere it's checked.
+  var projectHeroIntroEl = projectHero ? projectHero.querySelector('.project-hero__intro') : null;
+  var projectHeroIntroNatural = null;
   // Once fully docked, the title is switched to position:fixed at the
   // exact on-screen spot the live transform would otherwise keep
   // recomputing every frame to hold it at — mathematically identical
@@ -1969,6 +1974,20 @@ function main() {
       fontSize: parseFloat(getComputedStyle(projectHeroTitleEl).fontSize)
     };
     projectHeroTitleEl.style.transform = prevTransform;
+    // Same idea as the title measurement above, kept separate rather than
+    // folded into one loop since the two elements need different stored
+    // fields (the title also tracks fontSize/height for the dock-target
+    // math, the intro doesn't need either).
+    if (projectHeroIntroEl) {
+      var prevIntroTransform = projectHeroIntroEl.style.transform;
+      var prevIntroOpacity = projectHeroIntroEl.style.opacity;
+      projectHeroIntroEl.style.transform = 'none';
+      projectHeroIntroEl.style.opacity = '';
+      var introRect = projectHeroIntroEl.getBoundingClientRect();
+      projectHeroIntroNatural = { top: introRect.top + window.scrollY, left: introRect.left };
+      projectHeroIntroEl.style.transform = prevIntroTransform;
+      projectHeroIntroEl.style.opacity = prevIntroOpacity;
+    }
     // Docked target is measured once here (and again on resize) rather
     // than every scroll frame — .nav__mark only actually moves on resize
     // (this whole dock system is desktop-only, where the nav itself never
@@ -2122,6 +2141,12 @@ function main() {
             projectHeroTitleEl.style.top = projectHeroDock.top.toFixed(1) + 'px';
             projectHeroTitleEl.style.left = projectHeroDock.left.toFixed(1) + 'px';
             projectHeroTitleEl.style.transform = 'scale(' + projectHeroDock.scale.toFixed(3) + ')';
+            // Category pages only (see .project-hero__intro) -- by
+            // dockProgress === 1 it's already faded to opacity 0 in the
+            // live branch below, this just parks it there for the same
+            // reason the title gets parked as position:fixed above (no
+            // per-frame work needed once it can't move any further).
+            if (projectHeroIntroEl) projectHeroIntroEl.style.opacity = '0';
             projectHeroDockedStatic = true;
           }
           // The one thing a parked position:fixed title can't do on its
@@ -2184,6 +2209,23 @@ function main() {
           var translateY = dockProgress * (projectHeroDock.top - projectHeroNatural.top) + window.scrollY;
           var scale = 1 - dockProgress * (1 - projectHeroDock.scale);
           projectHeroTitleEl.style.transform = 'translate(' + translateX.toFixed(1) + 'px, ' + translateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+          // Category pages only -- mirrors the exact same formula shape as
+          // the title's own transform just above (same dockProgress/scale,
+          // its own natural top/left), so it reads as "riding along with"
+          // the title rather than a second, independent motion. Docked
+          // target's top sits just under where the title will land once
+          // fully docked (natural title height scaled down the same
+          // amount) -- doesn't need to be exact since opacity has already
+          // reached 0 by the time it would matter. Opacity fades in exact
+          // lockstep with dockProgress, so it's fully gone the instant the
+          // title finishes docking, never before or after.
+          if (projectHeroIntroEl && projectHeroIntroNatural) {
+            var introTargetTop = projectHeroDock.top + projectHeroNatural.height * projectHeroDock.scale + 6;
+            var introTranslateX = dockProgress * (projectHeroDock.left - projectHeroIntroNatural.left);
+            var introTranslateY = dockProgress * (introTargetTop - projectHeroIntroNatural.top) + window.scrollY;
+            projectHeroIntroEl.style.transform = 'translate(' + introTranslateX.toFixed(1) + 'px, ' + introTranslateY.toFixed(1) + 'px) scale(' + scale.toFixed(3) + ')';
+            projectHeroIntroEl.style.opacity = String(1 - dockProgress);
+          }
         }
       }
       window.requestAnimationFrame(updateParallax);
