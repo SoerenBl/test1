@@ -3,7 +3,7 @@ Land: DE
 Jahr: 2025
 
 --- DEUTSCH ---
-Beschreibung: Ein Esstisch aus massiver Eiche mit natürlich belassener Baumkante, kombiniert mit einem skulpturalen, gewinkelten Stahlfuß in Schwarz. Der Kontrast aus warmem Massivholz und präzise gefertigtem Metall steht im Zentrum des Entwurfs — gefertigt für eine private Wohnung in Zusammenarbeit mit einer Metallwerkstatt. Der aufwendig gefaltete, 10 mm starke Stahl verleiht dem Tisch nicht nur extreme Stabilität, sondern vermittelt auch das Gefühl von Unverwüstlichkeit. Die Oberfläche ist bewusst stark gebürstet und mit Naturholzöl behandelt, was ein einfaches Aufarbeiten ermöglicht — so erstrahlt der Tisch sein Leben lang in frischem Glanz.
+Beschreibung: Ein Esstisch aus massiver Eiche mit natürlich belassener Baumkante, kombiniert mit einem skulpturalen, gewinkelten Stahlfuß in Schwarz. Der Kontrast aus warmem Massivholz und präzise gefertigtem Metall steht im Zentrum des Entwurfs - gefertigt für eine private Wohnung in Zusammenarbeit mit einer Metallwerkstatt. Der aufwendig gefaltete, 10 mm starke Stahl verleiht dem Tisch nicht nur extreme Stabilität, sondern vermittelt auch das Gefühl von Unverwüstlichkeit. Die Oberfläche ist bewusst stark gebürstet und mit Naturholzöl behandelt, was ein einfaches Aufarbeiten ermöglicht - so erstrahlt der Tisch sein Leben lang in frischem Glanz.
 Material: Eiche Massivholz gebürstet und geölt, Stahl 10 mm schwarz lackiert
 Fertigungstechniken: Massivholzverarbeitung, Ölen, Stahlverarbeitung
 Besonderheiten:
@@ -12,7 +12,7 @@ Besonderheiten:
 
 --- ENGLISH ---
 Titel: Solid Oak Dining Table
-Beschreibung: A dining table in solid oak with its natural live edge left untouched, paired with a sculptural, angled black steel base. The contrast between warm solid wood and precisely fabricated metal is the core of the design — built for a private home in collaboration with a metalworking shop. The elaborately folded, 10mm-thick steel not only gives the table extreme stability but also conveys a sense of indestructibility. The surface is deliberately heavily brushed and treated with natural wood oil, allowing it to be easily refinished — so the table keeps a fresh shine for life.
+Beschreibung: A dining table in solid oak with its natural live edge left untouched, paired with a sculptural, angled black steel base. The contrast between warm solid wood and precisely fabricated metal is the core of the design - built for a private home in collaboration with a metalworking shop. The elaborately folded, 10mm-thick steel not only gives the table extreme stability but also conveys a sense of indestructibility. The surface is deliberately heavily brushed and treated with natural wood oil, allowing it to be easily refinished - so the table keeps a fresh shine for life.
 Material: Solid oak, brushed and oiled, 10mm black-lacquered steel
 Fertigungstechniken: Solid-wood processing, oiling, steelwork
 Besonderheiten:

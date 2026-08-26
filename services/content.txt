@@ -1,19 +1,19 @@
 --- DEUTSCH ---
 Titel: Service
-Untertitel: Von der ersten Skizze bis zur Fertigung — drei Leistungsfelder, ein Ansatz.
+Untertitel: Von der ersten Skizze bis zur Fertigung - drei Leistungsfelder, ein Ansatz.
 Abschnitt1Titel: Produktdesign
-Abschnitt1Text: Konzept, Formfindung und Entwicklung für Produkte und Objekte — über alle Kategorien hinweg, von Möbeln bis Konsumgütern. Von der ersten Skizze über Prototypen bis zur fertigungsreifen Ausarbeitung.
+Abschnitt1Text: Konzept, Formfindung und Entwicklung für Produkte und Objekte - über alle Kategorien hinweg, von Möbeln bis Konsumgütern. Von der ersten Skizze über Prototypen bis zur fertigungsreifen Ausarbeitung.
 Abschnitt2Titel: Möbel nach Maß
-Abschnitt2Text: Individuelle Entwürfe auf Anfrage, gefertigt in Zusammenarbeit mit ausgewählten Partnerwerkstätten. Nachttische, Sideboards, Tische und Leuchten — abgestimmt auf Raum, Material und Budget.
+Abschnitt2Text: Individuelle Entwürfe auf Anfrage, gefertigt in Zusammenarbeit mit ausgewählten Partnerwerkstätten. Nachttische, Sideboards, Tische und Leuchten - abgestimmt auf Raum, Material und Budget.
 Abschnitt3Titel: Interior Design
-Abschnitt3Text: Raum- und Einrichtungskonzepte für Privat- und Geschäftskunden — als Entwurf zur eigenen Umsetzung oder begleitet bis zur Ausführung.
+Abschnitt3Text: Raum- und Einrichtungskonzepte für Privat- und Geschäftskunden - als Entwurf zur eigenen Umsetzung oder begleitet bis zur Ausführung.
 
 --- ENGLISH ---
 Titel: Services
-Untertitel: From the first sketch to production — three areas of work, one approach.
+Untertitel: From the first sketch to production - three areas of work, one approach.
 Abschnitt1Titel: Product Design
-Abschnitt1Text: Concept, form-finding and development for products and objects — across all categories, from furniture to consumer goods. From the first sketch through prototyping to production-ready detailing.
+Abschnitt1Text: Concept, form-finding and development for products and objects - across all categories, from furniture to consumer goods. From the first sketch through prototyping to production-ready detailing.
 Abschnitt2Titel: Bespoke Furniture
-Abschnitt2Text: Custom designs on request, built in collaboration with selected partner workshops. Nightstands, sideboards, tables and lighting — matched to space, material and budget.
+Abschnitt2Text: Custom designs on request, built in collaboration with selected partner workshops. Nightstands, sideboards, tables and lighting - matched to space, material and budget.
 Abschnitt3Titel: Interior Design
-Abschnitt3Text: Spatial and interior concepts for private and business clients — as a design for self-execution or guided through to completion.
+Abschnitt3Text: Spatial and interior concepts for private and business clients - as a design for self-execution or guided through to completion.

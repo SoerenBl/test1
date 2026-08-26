@@ -14,7 +14,7 @@ oder löschen, nur die Key:-Zeilen darunter anpassen.
 Was hier NICHT steht (Bild, Farben, Schriftart, Layout): siehe README.md
 in diesem Ordner.
 
---- BESTÄTIGUNGSMAIL AN DEN ABSENDER — DEUTSCH ---
+--- BESTÄTIGUNGSMAIL AN DEN ABSENDER - DEUTSCH ---
 Betreffzeile: Deine Nachricht ist angekommen
 HeaderZeile1: Nachricht
 HeaderZeile2: angekommen.
@@ -32,9 +32,9 @@ StandortLabel: Standort
 StandortWert: Deutschland
 ImpressumLabel: Impressum
 DatenschutzLabel: Datenschutz
-Fussnote: © {jahr} Sören Bläcker — Produktdesign. Diese E-Mail wurde automatisch als Antwort auf eine Anfrage über das Kontaktformular auf soerenblaecker.com versendet.
+Fussnote: © {jahr} Sören Bläcker - Produktdesign. Diese E-Mail wurde automatisch als Antwort auf eine Anfrage über das Kontaktformular auf soerenblaecker.com versendet.
 
---- BESTÄTIGUNGSMAIL AN DEN ABSENDER — ENGLISH ---
+--- BESTÄTIGUNGSMAIL AN DEN ABSENDER - ENGLISH ---
 Betreffzeile: Your message has arrived
 HeaderZeile1: Message
 HeaderZeile2: received.
@@ -52,7 +52,7 @@ StandortLabel: Location
 StandortWert: Germany
 ImpressumLabel: Legal Notice
 DatenschutzLabel: Privacy
-Fussnote: © {jahr} Sören Bläcker — Product Design. This email was sent automatically in response to a request submitted through the contact form on soerenblaecker.com.
+Fussnote: © {jahr} Sören Bläcker - Product Design. This email was sent automatically in response to a request submitted through the contact form on soerenblaecker.com.
 
 --- BENACHRICHTIGUNGSMAIL AN DICH (nur Deutsch) ---
 HeaderZeile1: Neue
