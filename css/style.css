@@ -1910,7 +1910,20 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   object-fit: cover;
   display: block;
 }
-.page-hero--photo > .wrap { position: relative; z-index: 1; }
+/* width:100% -- without it, this being a flex item (.page-hero--photo is
+   display:flex; flex-direction:column) combined with its own margin:0 auto
+   (from the shared .wrap rule) makes it shrink-to-fit its content's
+   unwrapped max-content width instead of filling the available space (CSS
+   flexbox spec: auto margins on the cross axis opt an item out of
+   align-items:stretch). The widest thing inside is .page-hero__title at
+   the big display font-size -- its un-wrapped single-line width differs a
+   lot between languages (e.g. "LASS UNS REDEN." vs "LET'S TALK."), which
+   was making the whole card -- and every percentage-width field inside the
+   contact form -- visibly narrower after switching to English. Service
+   never showed it because its longer body copy already saturates the
+   max-width cap in both languages, masking the exact same underlying
+   sizing behaviour. */
+.page-hero--photo > .wrap { position: relative; z-index: 1; width: 100%; }
 .page-hero--photo .lede { color: rgba(250,248,245,0.85); }
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   /* clamp(210px, 18vh + 120px, 260px) computes the same range as the
