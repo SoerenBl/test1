@@ -284,7 +284,7 @@ ${buildContactList(data, categoryLabelDe, categoryLabelEn)}
   </div>
 </footer>
 
-<script src="../../../js/main.js?v=${assetVersion}"></script>
+<script src="../../../js/main.js?v=${assetVersion}" async></script>
 </body>
 </html>
 `;
