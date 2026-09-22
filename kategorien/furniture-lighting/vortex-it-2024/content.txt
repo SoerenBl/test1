@@ -3,15 +3,15 @@ Land: IT
 Jahr: 2024
 
 --- DEUTSCH ---
-Beschreibung: Eine Tischleuchte aus mattiertem und klarem Glas, gefasst in einem schwarz verchromten Stahlgestell. Die Glaskuppel öffnet sich zu einem trichterförmigen Vortex nach innen, das Leuchtmittel sitzt bewusst im oberen Kuppelbereich - für eine ungewöhnliche, vielschichtige Lichtstreuung.
-Material: Glas (getönt, matt und klar), schwarz verchromtes Stahlgestell
+Beschreibung: Eine Tischleuchte aus mattiertem und klarem Glas, gefasst in einem Stahlgestell, erhältlich in Chrom oder Schwarzchrom. Die Glaskuppel öffnet sich zu einem trichterförmigen Vortex nach innen, das Leuchtmittel sitzt bewusst im oberen Kuppelbereich - für eine ungewöhnliche, vielschichtige Lichtstreuung.
+Material: Glas (getönt, matt und klar), Stahlgestell in Chrom oder Schwarzchrom
 Besonderheiten:
 - Glaskuppel mit trichterförmigem Vortex, der den Blick nach innen führt
 - Leuchtmittel im oberen Kuppelbereich für eine vielschichtige Lichtstreuung
 
 --- ENGLISH ---
-Beschreibung: A table lamp in matte and clear tinted glass, set in a black chrome-plated steel frame. The glass dome opens into a funnel-shaped vortex turned inward, with the light source placed deliberately in the upper dome for an unusual, layered diffusion of light.
-Material: Glass (tinted, matte and clear), black chrome-plated steel frame
+Beschreibung: A table lamp in matte and clear tinted glass, set in a steel frame available in chrome or black chrome. The glass dome opens into a funnel-shaped vortex turned inward, with the light source placed deliberately in the upper dome for an unusual, layered diffusion of light.
+Material: Glass (tinted, matte and clear), steel frame in chrome or black chrome
 Besonderheiten:
 - Glass dome with a funnel-shaped vortex drawing the eye inward
 - Light source placed in the upper dome for layered light diffusion
