@@ -267,6 +267,44 @@ function updateAbout(html, data) {
   return html;
 }
 
+// ------------------------------------------------------------------ News --
+
+const NEWS_KEYS = ['Titel', 'IntroText', 'Eintraege'];
+const NEWS_LIST_KEYS = ['Eintraege'];
+
+// Same row shape and optional-link behaviour as Awards (splitAwardEntry/
+// renderAwardsRows above, reused as-is) -- a News entry with a "| Link"
+// third field renders exactly like a linked award: wrapped in <a>, three
+// pulsing arrow chevrons appended. No link just renders a plain row.
+function updateNews(html, data) {
+  html = patchBilingual(html,
+    '<img data-photo="news/cover" data-photo-optional alt="">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
+    data.de.Titel, data.en.Titel, 'Titel (News)');
+
+  const titelEnHtml = escapeHtml(data.en.Titel);
+  const titelDeHtml = escapeHtml(data.de.Titel);
+  html = patchBilingual(html,
+    titelEnHtml + '</span></h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
+    '\n          </p>', data.de.IntroText, data.en.IntroText, 'IntroText');
+
+  const deEntries = data.de.Eintraege.map((l) => splitAwardEntry(l, 'Eintraege (DE)'));
+  const enEntries = data.en.Eintraege.map((l) => splitAwardEntry(l, 'Eintraege (EN)'));
+  if (deEntries.length !== enEntries.length) throw new Error('Eintraege: DE und EN haben unterschiedlich viele Eintraege.');
+  deEntries.forEach((d, i) => {
+    if ((d.url || '') !== (enEntries[i].url || '')) {
+      throw new Error(`Eintraege: Eintrag ${i + 1} hat unterschiedliche Links in DE ("${d.url || ''}") und EN ("${enEntries[i].url || ''}").`);
+    }
+  });
+  html = patchContainer(html,
+    '<h1 class="stack__title hover-letters"><span data-lang="de">' + titelDeHtml + '</span><span data-lang="en">' + titelEnHtml + '</span></h1>',
+    '<div class="timeline" id="newsTimeline">\n', '\n        </div>',
+    renderAwardsRows(deEntries.map((d, i) => ({ jahr: d.jahr, de: d.text, en: enEntries[i].text, url: d.url }))),
+    'Eintraege');
+
+  return html;
+}
+
 // -------------------------------------------------------------- Kontakt --
 
 const CONTACT_KEYS = ['Titel', 'Untertitel', 'EMail', 'Telefon', 'Standort'];
@@ -451,6 +489,7 @@ function updateDatenschutz(html, data) {
 
 const PAGES = [
   { contentFile: 'about-content.txt', htmlFile: 'about.html', keys: ABOUT_KEYS, listKeys: ABOUT_LIST_KEYS, update: updateAbout },
+  { contentFile: 'news/content.txt', htmlFile: 'news/index.html', keys: NEWS_KEYS, listKeys: NEWS_LIST_KEYS, update: updateNews },
   { contentFile: 'contact-content.txt', htmlFile: 'contact.html', keys: CONTACT_KEYS, listKeys: [], update: updateContact },
   { contentFile: 'home-content.txt', htmlFile: 'index.html', keys: HOME_KEYS, listKeys: [], update: updateHome },
   { contentFile: 'services/content.txt', htmlFile: 'services/index.html', keys: SERVICES_KEYS, listKeys: [], update: updateServices },
@@ -481,4 +520,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseTwoLangContentTxt, updateAbout, updateContact, updateHome, updateServices, updateImpressum, updateDatenschutz, PAGES };
+module.exports = { parseTwoLangContentTxt, updateAbout, updateNews, updateContact, updateHome, updateServices, updateImpressum, updateDatenschutz, PAGES };
