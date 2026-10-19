@@ -191,7 +191,7 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${title} - Sören Bläcker</title>
 <meta name="description" content="${title} - Projekt von Sören Bläcker.">
-<script>(function(){var l=localStorage.getItem('lang')||'de';document.documentElement.setAttribute('data-lang',l);})();</script>
+<script>(function(){function d(){var n=navigator.languages||[navigator.language||''];for(var i=0;i<n.length;i++){if((n[i]||'').toLowerCase().indexOf('de')===0)return'de';}return'en';}var l=localStorage.getItem('lang')||d();document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);})();</script>
 <link rel="icon" href="../../../favicon.svg" id="faviconLink" data-favicon-fallback="../../../logo2">
 <link rel="stylesheet" href="../../../css/style.css?v=${assetVersion}">
 </head>
