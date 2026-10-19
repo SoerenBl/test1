@@ -1,0 +1,11 @@
+--- DEUTSCH ---
+Titel: News
+IntroText: Aktuelles aus Studio, Projekten und Presse.
+Eintraege:
+- 2026 | Legno Veloce ist Teil des ADI Design Index 2026 - der jährlichen Auswahl des Verbands ADI (Associazione per il Disegno Industriale), die als Vorauswahl für den Compasso d'Oro dient und im ADI Design Museum in Mailand präsentiert wurde. Was ADI ist, zur Auswahl und zur Ausstellung folgen weitere Details, sobald sie bestätigt sind.
+
+--- ENGLISH ---
+Titel: News
+IntroText: Updates from the studio, projects and press.
+Eintraege:
+- 2026 | Legno Veloce is part of the ADI Design Index 2026 - the annual selection by ADI (Associazione per il Disegno Industriale), which serves as a shortlist for the Compasso d'Oro and was presented at the ADI Design Museum in Milan. Further details on ADI, the selection and the exhibition will follow once confirmed.

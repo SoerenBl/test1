@@ -61,28 +61,43 @@
   </div>
 </div>
 
-<section class="page-hero">
-  <div class="page-hero__bg">
-    <div class="ph"><span data-lang="de">Optionales Hintergrundfoto - geht über die ganze Seite, hochformatig, wird oben bündig angesetzt</span><span data-lang="en">Optional background photo - spans the whole page, portrait orientation, flush with the top</span></div>
-    <img data-photo="news/cover" data-photo-optional alt="">
-    <div class="stack__scrim"></div>
-  </div>
-  <div class="wrap">
-    <h1 class="page-hero__title">News</h1>
-    <p class="lede">
-      <span data-lang="de">Aktuelles aus Studio, Projekten und Presse.</span><span data-lang="en">Updates from the studio, projects and press.</span>
-    </p>
+<div class="stack">
+
+  <div class="stack__group">
+    <div class="stack__page-bg">
+      <div class="ph"><span data-lang="de">Hintergrundfoto (nur mobil) - querformatig</span><span data-lang="en">Background photo (mobile only) - landscape orientation</span></div>
+      <img data-photo="news/cover" data-photo-optional alt="">
+      <div class="stack__scrim"></div>
+    </div>
+
+  <section class="stack__panel">
+    <div class="stack__bg">
+      <div class="ph"><span data-lang="de">Hintergrundfoto - querformatig</span><span data-lang="en">Background photo - landscape orientation</span></div>
+      <img data-photo="news/cover" data-photo-optional alt="">
+      <div class="stack__scrim"></div>
+    </div>
+    <div class="stack__content wrap">
+      <h1 class="stack__title hover-letters"><span data-lang="de">News</span><span data-lang="en">News</span></h1>
+      <div class="about-grid stack__body">
+        <div>
+          <p>
+            <span data-lang="de">Aktuelles aus Studio, Projekten und Presse.</span><span data-lang="en">Updates from the studio, projects and press.</span>
+          </p>
+        </div>
+        <div class="timeline" id="newsTimeline">
+          <div class="timeline__row">
+            <time>2026</time>
+            <span data-lang="de">Legno Veloce ist Teil des ADI Design Index 2026 - der jährlichen Auswahl des Verbands ADI (Associazione per il Disegno Industriale), die als Vorauswahl für den Compasso d'Oro dient und im ADI Design Museum in Mailand präsentiert wurde. Was ADI ist, zur Auswahl und zur Ausstellung folgen weitere Details, sobald sie bestätigt sind.</span><span data-lang="en">Legno Veloce is part of the ADI Design Index 2026 - the annual selection by ADI (Associazione per il Disegno Industriale), which serves as a shortlist for the Compasso d'Oro and was presented at the ADI Design Museum in Milan. Further details on ADI, the selection and the exhibition will follow once confirmed.</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
   </div>
 
-  <div class="wrap">
-    <!-- Neuer Eintrag: Zeile duplizieren, Datum + Text anpassen, oben einfügen
-         (neueste zuerst). Diese Liste wird von Hand gepflegt, nicht
-         automatisch erzeugt -- siehe die News-Planung im Chat. -->
-    <div class="timeline" id="newsTimeline">
-      <p><span data-lang="de">Hier folgen in Kürze die ersten Neuigkeiten.</span><span data-lang="en">The first updates will follow here shortly.</span></p>
-    </div>
-  </div>
-</section>
+</div>
 
 <footer>
   <div class="wrap footer__inner">
