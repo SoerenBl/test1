@@ -1721,6 +1721,21 @@ function main() {
     if (!nav) return;
     var lastY = window.scrollY;
     var navTicking = false;
+    // Was reacting to the raw, single-frame y-vs-previous-y delta -- on a
+    // real touch/trackpad gesture that's never perfectly monotonic (hand
+    // tremor, momentum deceleration, elastic overshoot all cause tiny
+    // reversals mid-gesture), so the slide-out kept re-triggering and
+    // reversing several times within one scroll, reading as "dragged along
+    // with the finger" rather than a clean, committed animation. The CSS
+    // transition itself (see .nav.is-hidden, style.css) was always a fixed
+    // 0.3s animation, not finger-coupled -- what needed fixing was this
+    // trigger logic re-firing on every one of those micro-reversals. Fix:
+    // only commit to hide/show once scroll has moved NAV_HIDE_TOLERANCE px
+    // in one direction since the last commit (not since the last frame),
+    // so a small, deliberate scroll still triggers it quickly, but the
+    // in-between wobble that used to flip it back and forth no longer
+    // does -- lastY only advances on an actual commit, not every frame.
+    var NAV_HIDE_TOLERANCE = 12;
     function updateNavVisibility() {
       // Width-only wasn't enough: a phone in landscape is often wider
       // than 760px (reported: the nav then never hid on scroll there) --
@@ -1730,14 +1745,22 @@ function main() {
       var isMobile = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)').matches;
       var menuOpen = menuPanel && menuPanel.classList.contains('is-open');
       var y = window.scrollY;
-      var hide = isMobile && !menuOpen && y > lastY && y > 80;
-      var show = !isMobile || menuOpen || y < lastY;
-      if (hide) {
-        nav.classList.add('is-hidden');
-      } else if (show) {
+      if (!isMobile || menuOpen || y <= 80) {
         nav.classList.remove('is-hidden');
+        lastY = y;
+        navTicking = false;
+        return;
       }
-      lastY = y;
+      var delta = y - lastY;
+      if (delta > NAV_HIDE_TOLERANCE) {
+        nav.classList.add('is-hidden');
+        lastY = y;
+      } else if (delta < -NAV_HIDE_TOLERANCE) {
+        nav.classList.remove('is-hidden');
+        lastY = y;
+      }
+      // Within tolerance: leave lastY untouched so the next frame's delta
+      // keeps accumulating from the same baseline instead of resetting.
       navTicking = false;
     }
     window.addEventListener('scroll', function () {
