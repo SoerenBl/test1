@@ -2492,6 +2492,7 @@ function main() {
     var TARGET_COL_PX = 150;
     var MIN_SPEED_PX_S = 5;
     var MAX_SPEED_PX_S = 9;
+    var DOT_BLEED_PX = 0.75;
     function buildColumnTracker(container) {
       container.innerHTML = '';
       var wrapH = container.clientHeight;
@@ -2523,9 +2524,19 @@ function main() {
               var d = document.createElement('div');
               d.className = 'dot' + (item.entry.t === 'a' || item.entry.bonusAccent ? ' is-accent' : '');
               d.style.left = item.localX + '%';
-              d.style.top = (copy * unitPx + (item.y / 100) * unitPx) + 'px';
+              // +/- DOT_BLEED_PX: two shapes meant to sit flush against
+              // each other (e.g. a dome-up directly under a dome-down) are
+              // each computed from their own y/h independently -- summing
+              // one's top+height doesn't always land on the exact same
+              // float as the other's top (binary floating point, e.g.
+              // 33.8/100 + 7.75/100 !== 41.55/100), which the browser can
+              // then round to adjacent shapes landing a device-pixel apart
+              // -- a hairline gap, worst right at a flat half-circle edge.
+              // A small symmetric bleed guarantees a touch of overlap
+              // instead, regardless of that rounding.
+              d.style.top = (copy * unitPx + (item.y / 100) * unitPx - DOT_BLEED_PX) + 'px';
               d.style.width = item.localW + '%';
-              d.style.height = ((item.h / 100) * unitPx) + 'px';
+              d.style.height = ((item.h / 100) * unitPx + DOT_BLEED_PX * 2) + 'px';
               d.innerHTML = '<span style="display:block;width:100%;height:100%;transform:rotate(' + shapeRot(item.entry) + 'deg)">' + shapeSvg(item.entry) + '</span>';
               track.appendChild(d);
             });
