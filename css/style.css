@@ -2660,12 +2660,12 @@ body.lightbox-open { overflow: hidden; }
   mix-blend-mode: screen;
   background: radial-gradient(circle at 28% 18%, rgba(255,255,255,0.55), rgba(255,255,255,0.1) 55%, transparent 80%);
 }
-/* Crisp, solid dots -- matching the artefact's own mockup -- not blurred
-   into soft grey blobs. Legibility for the real text on top is now the
-   .hero-glass-card's job (see below), not a blur/white-wash smeared over
-   the whole pattern -- that previously had to be heavy enough to make
-   *bare* text readable, which also dulled the dots into grey. */
-.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; }
+/* The artefact's own "Mattglas" toggle (3.5px) blurred the dots just a
+   touch, not into grey blobs -- removing the blur entirely last round
+   overcorrected past that. A light touch here, legibility for the real
+   text on top is the .hero-glass-card's job (see below), not a heavy
+   blur/white-wash smeared over the whole pattern. */
+.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; filter: blur(3px); }
 .site-pattern-bg .col-track-wrap { position: absolute; top: 0; height: 100%; overflow: hidden; }
 /* height is set per-instance in px by js/main.js (enough laps to cover
    the actual page height twice over, for the seamless loop) -- not a
