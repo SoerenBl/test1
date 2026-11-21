@@ -44,6 +44,19 @@ function escapeHtml(s) {
 function escapeRegex(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+// Anchors are hand-typed to match the template's current formatting
+// exactly -- fragile against two kinds of drift that keep happening in
+// practice: indentation shifting a little when a line is hand-edited
+// later, and a variable-length attribute value (like an alt text) sitting
+// inside an otherwise-fixed anchor. escapeAnchor() is escapeRegex() plus
+// two tolerances for exactly those: any run of literal whitespace in the
+// anchor becomes \s+ (matches regardless of exact indentation), and a
+// literal "\0" placeholder becomes a non-greedy [\s\S]*? wildcard a call
+// site can drop into the one spot it genuinely can't pin down (e.g. an
+// img's alt="..." value) without hand-writing its own regex.
+function escapeAnchor(s) {
+  return escapeRegex(s).replace(/\s+/g, '\\s+').replace(/\0/g, '[\\s\\S]*?');
+}
 function bilingualSpan(de, en) {
   return `<span data-lang="de">${escapeHtml(de)}</span><span data-lang="en">${escapeHtml(en)}</span>`;
 }
@@ -102,21 +115,31 @@ function parseTwoLangContentTxt(text, knownKeys, listKeys) {
 // tags sitting between two fixed pieces of surrounding markup. `before`/`after`
 // are matched literally so they only need to be unique together with the
 // span pattern between them, never dependent on the current (editable) text.
+// `before`/`after` are wrapped in their own capturing groups so the
+// replacement splices back whatever the anchor *actually* matched in the
+// real file, never the literal before/after strings themselves -- those
+// can differ from the real text in two tolerated-but-real ways (escapeAnchor
+// above): looser whitespace, and a \0 wildcard standing in for a value this
+// script doesn't know ahead of time (e.g. an alt="..." it isn't touching).
+// Reusing the literal anchor text in the replacement would either silently
+// reformat incidental whitespace back to whatever's hardcoded here, or --
+// far worse, and how this was actually caught -- write the literal \0
+// byte straight into the output HTML wherever a wildcard sat.
 function patchBilingual(html, before, after, deVal, enVal, label) {
   const re = new RegExp(
-    escapeRegex(before) + '<span data-lang="de">[\\s\\S]*?<\\/span>\\s*<span data-lang="en">[\\s\\S]*?<\\/span>' + escapeRegex(after)
+    '(' + escapeAnchor(before) + ')<span data-lang="de">[\\s\\S]*?<\\/span>\\s*<span data-lang="en">[\\s\\S]*?<\\/span>(' + escapeAnchor(after) + ')'
   );
   const count = (html.match(new RegExp(re.source, 'g')) || []).length;
   if (count !== 1) throw new Error(`"${label}" nicht eindeutig im Template gefunden (${count} Treffer statt 1) -- Seitenstruktur hat sich vermutlich geaendert, bitte pruefen.`);
-  return html.replace(re, before + bilingualSpan(deVal, enVal) + after);
+  return html.replace(re, (m, beforeMatch, afterMatch) => beforeMatch + bilingualSpan(deVal, enVal) + afterMatch);
 }
 
 // Same idea but for a single (non-bilingual) value, e.g. an email address.
 function patchPlain(html, before, after, val, label) {
-  const re = new RegExp(escapeRegex(before) + '[\\s\\S]*?' + escapeRegex(after));
+  const re = new RegExp('(' + escapeAnchor(before) + ')[\\s\\S]*?(' + escapeAnchor(after) + ')');
   const count = (html.match(new RegExp(re.source, 'g')) || []).length;
   if (count !== 1) throw new Error(`"${label}" nicht eindeutig gefunden (${count} Treffer statt 1) -- Seitenstruktur hat sich vermutlich geaendert, bitte pruefen.`);
-  return html.replace(re, before + escapeHtml(val) + after);
+  return html.replace(re, (m, beforeMatch, afterMatch) => beforeMatch + escapeHtml(val) + afterMatch);
 }
 
 // For a repeatable block (e.g. timeline rows): finds the region between a
@@ -125,12 +148,23 @@ function patchPlain(html, before, after, val, label) {
 // closing tag with freshly rendered rows -- works no matter how many rows
 // content.txt asks for, not just however many are currently on the page.
 function patchContainer(html, headingLiteral, containerOpen, containerClose, newInnerHtml, label) {
+  // Deliberately plain escapeRegex here, not escapeAnchor -- this is the
+  // one anchor shape where \s+ tolerance actively backfires: containerOpen/
+  // containerClose sit right next to a non-greedy wildcard skipping over a
+  // run of *structurally repeated* rows (timeline__row, each ending in its
+  // own </div> at a shallower indent than the container's own closing
+  // </div>). Loosening containerClose's exact indentation to \s+ lets that
+  // wildcard match the FIRST row's own </div> instead of the container's
+  // -- confirmed by testing: rows came out duplicated, with the first row's
+  // indentation doubled on top of it. The exact-whitespace literal is what
+  // keeps that disambiguation working, so this one anchor intentionally
+  // keeps the old, stricter matching instead of the general fix above.
   const re = new RegExp(
-    escapeRegex(headingLiteral) + '([\\s\\S]*?)' + escapeRegex(containerOpen) + '[\\s\\S]*?' + escapeRegex(containerClose)
+    '(' + escapeRegex(headingLiteral) + ')([\\s\\S]*?)(' + escapeRegex(containerOpen) + ')[\\s\\S]*?(' + escapeRegex(containerClose) + ')'
   );
   const count = (html.match(new RegExp(re.source, 'g')) || []).length;
   if (count !== 1) throw new Error(`"${label}" nicht eindeutig gefunden (${count} Treffer statt 1) -- Seitenstruktur hat sich vermutlich geaendert, bitte pruefen.`);
-  return html.replace(re, (m, between) => headingLiteral + between + containerOpen + newInnerHtml + containerClose);
+  return html.replace(re, (m, headingMatch, between, openMatch, closeMatch) => headingMatch + between + openMatch + newInnerHtml + closeMatch);
 }
 
 function requireSame(data, key, pageLabel) {
@@ -213,7 +247,7 @@ function updateAbout(html, data) {
   // on its photo path instead (data-photo="about/about", never itself
   // edited), which stays a valid anchor no matter what the title says.
   html = patchBilingual(html,
-    '<img data-photo="about/about" alt="">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '<img data-photo="about/about" alt="\0">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
     '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
     data.de.Titel, data.en.Titel, 'Titel (About)');
 
@@ -278,7 +312,7 @@ const NEWS_LIST_KEYS = ['Eintraege'];
 // pulsing arrow chevrons appended. No link just renders a plain row.
 function updateNews(html, data) {
   html = patchBilingual(html,
-    '<img data-photo="news/cover" data-photo-optional alt="">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '<img data-photo="\0" alt="\0">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
     '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
     data.de.Titel, data.en.Titel, 'Titel (News)');
 
@@ -342,14 +376,14 @@ const SERVICES_KEYS = ['Titel', 'Untertitel', 'Abschnitt1Titel', 'Abschnitt1Text
 // category page) and never edited by this script.
 function patchServiceRow(html, precedingHrefAnchor, deTitle, enTitle, deText, enText, label) {
   const re = new RegExp(
-    escapeRegex(precedingHrefAnchor) +
+    '(' + escapeAnchor(precedingHrefAnchor) + ')' +
     '([\\s\\S]*?)' +
     '<div class="editorial-row">\\s*<h3><span data-lang="de">[\\s\\S]*?<\\/span><span data-lang="en">[\\s\\S]*?<\\/span><\\/h3>\\s*<p>\\s*<span data-lang="de">[\\s\\S]*?<\\/span>\\s*<span data-lang="en">[\\s\\S]*?<\\/span>\\s*<\\/p>'
   );
   const count = (html.match(new RegExp(re.source, 'g')) || []).length;
   if (count !== 1) throw new Error(`"${label}" nicht eindeutig gefunden (${count} Treffer statt 1) -- Seitenstruktur hat sich vermutlich geaendert, bitte pruefen.`);
-  return html.replace(re, (m, bridge) =>
-    precedingHrefAnchor + bridge +
+  return html.replace(re, (m, hrefMatch, bridge) =>
+    hrefMatch + bridge +
     `<div class="editorial-row">\n      <h3>${bilingualSpan(deTitle, enTitle)}</h3>\n      <p>\n        ${bilingualSpan(deText, enText)}\n      </p>`
   );
 }
