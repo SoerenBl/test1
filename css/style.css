@@ -37,11 +37,11 @@
   --color-bg-gray: #e2e2e2;
 
   --cat-1: #000000;
-  --cat-2: #33538f;
-  --cat-3: #d9a12b;
-  --cat-4: #b23b3b;
-  --cat-5: #cf6a2c;
-  --cat-6: #2f9a9a;
+  --cat-2: #e85a4f;
+  --cat-3: #4cc6d1;
+  --cat-4: #4a36a0;
+  --cat-5: #f06a30;
+  --cat-6: #3268e0;
 
   /* Shared grid for Service/Contact/About/Awards: same title size and
      the same distance from the top, so all four read as one system. */
@@ -934,6 +934,17 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
 #categories .tile:nth-of-type(6) { --tile-hover: var(--cat-6); }
 #categories .tile:hover .tile__media { background-color: var(--tile-hover, var(--color-accent)); }
 #categories .tile:hover .ph { opacity: 0.22; border-color: rgba(255,255,255,0.6); color: rgba(255,255,255,0.9); }
+
+/* Mobile: no hover, so the tile nearest the screen's vertical centre gets
+   the category colour instead (js/main.js toggles .is-focused on scroll) --
+   same mechanism as the :hover rule above, just a slower/gentler transition
+   since it triggers passively while scrolling, not from a deliberate
+   pointer-over. Placed after the nth-of-type(odd/even) idle-background
+   rule above so it wins at equal specificity regardless of tile index. */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  #categories .tile__media { transition: background-color 0.7s ease; }
+  #categories .tile.is-focused .tile__media { background-color: var(--tile-hover, var(--color-accent)); }
+}
 
 /* Service tile: a permanent white "drafting paper" CTA banner — no
    colour-reveal on hover (that's for the photographed categories above).

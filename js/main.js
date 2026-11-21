@@ -1692,6 +1692,40 @@ function main() {
     });
   }
 
+  // --- Mobile: no hover, so the category tile nearest the screen's
+  // vertical centre gets the category colour instead (desktop keeps the
+  // existing :hover rule in style.css unchanged). Re-evaluated on every
+  // scroll/resize; .tile--cta (the service tile) has no category colour
+  // of its own and is left out. ---
+  (function () {
+    var catTiles = Array.prototype.slice.call(document.querySelectorAll('#categories .tile:not(.tile--cta)'));
+    if (!catTiles.length) return;
+    var mobileQuery = window.matchMedia('(max-width: 760px), (max-height: 600px) and (orientation: landscape)');
+    var ticking = false;
+    function updateFocusedTile() {
+      ticking = false;
+      if (!mobileQuery.matches) {
+        catTiles.forEach(function (t) { t.classList.remove('is-focused'); });
+        return;
+      }
+      var centerY = window.innerHeight / 2;
+      var nearest = null, nearestDist = Infinity;
+      catTiles.forEach(function (t) {
+        var r = t.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        var dist = Math.abs((r.top + r.height / 2) - centerY);
+        if (dist < nearestDist) { nearestDist = dist; nearest = t; }
+      });
+      catTiles.forEach(function (t) { t.classList.toggle('is-focused', t === nearest); });
+    }
+    function requestUpdate() {
+      if (!ticking) { window.requestAnimationFrame(updateFocusedTile); ticking = true; }
+    }
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    requestUpdate();
+  })();
+
   // --- Service tile's chair blueprint: draws itself once, the first time
   // it scrolls into view (unlike the photo fade above, it doesn't replay
   // on every re-entry — a several-second multi-stage draw-in is a once-off
