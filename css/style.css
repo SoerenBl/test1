@@ -2613,6 +2613,81 @@ body.lightbox-open { overflow: hidden; }
   .pdfv__arrow { width: 26px; height: 26px; }
 }
 
+/* ---------- Hintergrund-Muster (Impressum/Datenschutz): Drift2 + Mattglas ----------
+   Portiert aus dem Farbpalette-Artefakt: 24 Kreise/Halbkreise, exakt aus der
+   echten Vektordatei ausgelesen (getBBox je Pfad, mit dem Original-Poster
+   verglichen), in 4 Spalten laufend (Spalte 1+3 nach oben, 2+4 nach unten).
+   Jede Spalte zwei gestapelte Kopien (height:200%, Inhalt bei top:0%/100%),
+   per translateY(-50%) nahtlos endlos -- kein Erscheinen/Ausblenden, kein
+   Rücksprung. linear statt ease-in-out: eine Easing-Funktion bremst am
+   Zyklusende ab und beschleunigt am Zyklusanfang neu -- bei einer endlosen
+   Schleife wiederholt sich das an jedem Übergang als Ruckler, obwohl die
+   Position selbst nahtlos ist. Welche der 4 Original-Spalten auf welche der
+   4 Positionen läuft, wird von js/main.js beim Seitenaufruf als zufällige
+   Permutation bestimmt (nicht 4x unabhängig gewürfelt) -- so taucht der
+   blaue Akzent-Punkt garantiert irgendwo auf, nie ganz. */
+/* Fixed aspect-ratio (the poster's own 1984.25:2834.65), not inset:0 --
+   these legal pages are much taller than one screen and .page-hero__bg
+   stretches to the whole section's height, not just one viewport; percentage
+   widths/heights computed against that arbitrary, very tall box would stop
+   corresponding to each other at the poster's real ratio and turn every
+   circle into a tall, warped oval the further down the page the section
+   runs. Pinned to the top instead -- covers title+lede and a good first
+   stretch of the legal text, same as a real photo would start at the top;
+   the rest of these text-heavy pages reads on plain white beneath it. */
+.site-pattern-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1984.25 / 2834.65;
+  overflow: hidden;
+  background: #fff;
+}
+/* .page-hero__bg itself defaults to opacity:0 + a blur, only cleared once
+   main.js's attachPhotoReveal() sees an <img data-photo> inside it finish
+   loading (the blur-in reveal every real hero photo gets) -- there's no
+   img here at all, nothing would ever trigger that reveal, so it would
+   otherwise stay invisible forever. The pattern is drawn by CSS, not a
+   photo loading over the network, so there's nothing to blur in from --
+   it should just always be there. */
+.page-hero--pattern .page-hero__bg { opacity: 1; filter: none; }
+.site-pattern-bg .dot { position: absolute; color: #0a0a0c; }
+.site-pattern-bg .dot.is-accent { color: #4ca1e0; }
+.site-pattern-bg .dot svg { width: 100%; height: 100%; display: block; }
+/* Die Unschärfe (das eigentliche "Mattglas") sitzt auf den Punkten selbst;
+   das .glass-veil darunter (DOM-Reihenfolge vor .drift2-tracks, zeichnet
+   also zuerst/unten) hellt nur die Lücken zwischen den Punkten auf, ohne
+   deren Farbe selbst zu verwaschen -- lag das Veil stattdessen oben, wurden
+   die Punkte sichtbar grau statt schwarz/blau. */
+.site-pattern-bg .glass-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(circle at 28% 18%, rgba(255,255,255,0.55), rgba(255,255,255,0.1) 55%, transparent 80%);
+}
+.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; filter: blur(11px); }
+/* Real legal-page text (title, lede, and on Impressum/Datenschutz also a
+   long list of fields) sits directly over this, with no separate card of
+   its own the way the artifact's test preview had -- softens/lightens the
+   pattern enough that dark text on top stays legible, and fades the band
+   out to plain white toward its own bottom edge so none of the actual
+   legal text below ever sits over an unreadably busy background. */
+.site-pattern-bg .content-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.72) 45%, #fff 92%);
+}
+.site-pattern-bg .col-track-wrap { position: absolute; top: 0; height: 100%; overflow: hidden; }
+.site-pattern-bg .col-track { position: absolute; left: 0; width: 100%; height: 200%; will-change: transform; }
+.site-pattern-bg .col-track.dir-up { animation: patternTickUp var(--tdur, 60s) linear infinite; }
+.site-pattern-bg .col-track.dir-down { animation: patternTickDown var(--tdur, 60s) linear infinite; }
+@keyframes patternTickUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes patternTickDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .site-pattern-bg .col-track { animation: none !important; } }
+
 /* ---------- i18n ---------- */
 /* Content elements are duplicated with [data-lang="de"] / [data-lang="en"];
    the inactive language is hidden via attribute on <html>. */

@@ -2397,6 +2397,107 @@ function main() {
         });
     });
   }
+
+  // --- Hintergrund-Muster (Impressum/Datenschutz): Drift2 + Mattglas ---
+  // Aus dem Farbpalette-Artefakt übernommen -- siehe die großen Kommentare
+  // bei .site-pattern-bg in style.css für die Loop-/Permutations-Logik.
+  (function () {
+    var mounts = document.querySelectorAll('[data-pattern-tracks]');
+    if (!mounts.length) return;
+
+    var LAYOUT = [
+      { x: 0, y: 0, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 25.66, y: 0, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 88.49, y: 0, w: 11.51, h: 15.51, t: 'h', r: 90 },
+      { x: 51.32, y: 7.75, w: 23.02, h: 7.75, t: 'h', r: 180 },
+      { x: 0.28, y: 16.9, w: 11.51, h: 15.51, t: 'h', r: 270 },
+      { x: 11.79, y: 16.9, w: 11.51, h: 15.51, t: 'h', r: 90 },
+      { x: 25.66, y: 16.9, w: 11.51, h: 15.51, t: 'h', r: 270 },
+      { x: 51.32, y: 16.9, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 76.98, y: 16.9, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 0, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0, bonusAccent: true },
+      { x: 25.66, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 51.32, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 76.98, y: 33.8, w: 23.02, h: 7.75, t: 'h', r: 0 },
+      { x: 76.98, y: 41.55, w: 23.02, h: 7.75, t: 'h', r: 180 },
+      { x: 51.32, y: 50.69, w: 11.51, h: 15.51, t: 'h', r: 270 },
+      { x: 0, y: 50.7, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 76.98, y: 50.7, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 25.66, y: 58.45, w: 23.02, h: 7.75, t: 'h', r: 180 },
+      { x: 11.51, y: 67.59, w: 11.51, h: 15.51, t: 'h', r: 90 },
+      { x: 25.66, y: 67.59, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 51.32, y: 67.59, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 76.98, y: 67.59, w: 23.02, h: 7.75, t: 'h', r: 0 },
+      { x: 51.32, y: 84.49, w: 23.02, h: 15.51, t: 'c', r: 0 },
+      { x: 76.98, y: 84.49, w: 23.02, h: 15.51, t: 'a', r: 0 }
+    ];
+    var CIRCLE_SVG = '<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="50"/></svg>';
+    var DOME_SVG = '<svg viewBox="0 0 100 50" fill="currentColor"><path d="M0,50 A50,50 0 0 1 100,50 Z"/></svg>';
+    var BULGE_SVG = '<svg viewBox="0 0 50 100" fill="currentColor"><path d="M50,0 A50,50 0 0 0 50,100 Z"/></svg>';
+    var COL_DEFS = [
+      { start: 0, width: 23.02 },
+      { start: 25.66, width: 23.02 },
+      { start: 51.32, width: 23.02 },
+      { start: 76.98, width: 23.02 }
+    ];
+    function shapeSvg(entry) {
+      if (entry.t === 'c' || entry.t === 'a') return CIRCLE_SVG;
+      return entry.w < entry.h ? BULGE_SVG : DOME_SVG;
+    }
+    function shapeRot(entry) {
+      if (entry.t === 'c' || entry.t === 'a') return 0;
+      if (entry.w < entry.h) return entry.r === 90 ? 0 : 180;
+      return entry.r;
+    }
+    var COLUMN_CONTENT = COL_DEFS.map(function (col) {
+      return LAYOUT.filter(function (e) { return (e.x + e.w / 2) > col.start && (e.x + e.w / 2) < col.start + col.width; })
+        .map(function (e) {
+          return { localX: (e.x - col.start) / col.width * 100, localW: e.w / col.width * 100, y: e.y, h: e.h, entry: e };
+        });
+    });
+    function shuffledCols(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    }
+    function buildColumnTracker(container) {
+      var order = shuffledCols([0, 1, 2, 3]);
+      COL_DEFS.forEach(function (col, slot) {
+        var srcIdx = order[slot];
+        var wrap = document.createElement('div');
+        wrap.className = 'col-track-wrap';
+        wrap.style.left = col.start + '%';
+        wrap.style.width = col.width + '%';
+        var track = document.createElement('div');
+        track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
+        track.style.setProperty('--tdur', (48 + Math.random() * 36).toFixed(1) + 's');
+        [0, 1].forEach(function (copy) {
+          COLUMN_CONTENT[srcIdx].forEach(function (item) {
+            var d = document.createElement('div');
+            d.className = 'dot' + (item.entry.t === 'a' || item.entry.bonusAccent ? ' is-accent' : '');
+            d.style.left = item.localX + '%';
+            // top/height are percentages of .col-track, which is 200% tall
+            // (two stacked copies for the seamless loop) -- halved here so
+            // they still resolve against the *wrap's* (one copy's) actual
+            // height, matching the ratio the shapes were authored in.
+            // Without this every circle rendered twice as tall as it
+            // should (confirmed via getBoundingClientRect: exactly 2x).
+            d.style.top = ((item.y + copy * 100) / 2) + '%';
+            d.style.width = item.localW + '%';
+            d.style.height = (item.h / 2) + '%';
+            d.innerHTML = '<span style="display:block;width:100%;height:100%;transform:rotate(' + shapeRot(item.entry) + 'deg)">' + shapeSvg(item.entry) + '</span>';
+            track.appendChild(d);
+          });
+        });
+        wrap.appendChild(track);
+        container.appendChild(wrap);
+      });
+    }
+    mounts.forEach(function (el) { buildColumnTracker(el); });
+  })();
 }
 
 if (document.readyState === 'loading') {
