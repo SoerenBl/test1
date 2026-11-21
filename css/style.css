@@ -2645,7 +2645,7 @@ body.lightbox-open { overflow: hidden; }
    photo loading over the network, so there's nothing to blur in from --
    it should just always be there. */
 .page-hero--pattern .page-hero__bg { opacity: 1; filter: none; }
-.site-pattern-bg .dot { position: absolute; color: #0a0a0c; transform: scale(1.08); }
+.site-pattern-bg .dot { position: absolute; color: #0a0a0c; }
 .site-pattern-bg .dot.is-accent { color: #4ca1e0; }
 .site-pattern-bg .dot svg { width: 100%; height: 100%; display: block; }
 /* Die Unschärfe (das eigentliche "Mattglas") sitzt auf den Punkten selbst;
@@ -2660,7 +2660,7 @@ body.lightbox-open { overflow: hidden; }
   mix-blend-mode: screen;
   background: radial-gradient(circle at 28% 18%, rgba(255,255,255,0.55), rgba(255,255,255,0.1) 55%, transparent 80%);
 }
-.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; filter: blur(7px); }
+.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; filter: blur(5px); }
 /* Real legal-page text (title, lede, and on Impressum/Datenschutz also a
    long list of fields) sits directly over this, with no separate card of
    its own the way the artifact's test preview had -- softens/lightens the

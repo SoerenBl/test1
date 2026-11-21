@@ -2478,26 +2478,53 @@ function main() {
     // getBoundingClientRect) by never using percentage sizing for height
     // at all once tiling.
     var POSTER_RATIO = 2834.65 / 1984.25;
+    var POSTER_COL_UNITS = COL_DEFS[0].width; // 23.02 -- the poster's own column width, in LAYOUT's x/w units
+    // On-screen column target width, in px -- the 4 poster columns alone
+    // rendered way too large/few on a wide desktop viewport (circles the
+    // size of a third of the screen). Repeating the same 4 source columns
+    // across more, narrower on-screen slots keeps the design's proportions
+    // (unitPx below is still derived straight from each slot's own real
+    // width) while making every individual shape noticeably smaller.
+    var TARGET_COL_PX = 150;
+    var MIN_COLS = 4;
+    var MAX_COLS = 16;
+    // Absolute px/sec, not a fixed seconds-per-lap -- a fixed duration
+    // (e.g. "48-84s") made the drift's actual on-screen speed scale with
+    // however wide a column rendered, since one "lap" is more pixels on a
+    // wide desktop column than a narrow mobile one at the same duration --
+    // confirmed via a desktop/mobile comparison: desktop visibly raced,
+    // mobile crawled, same code. Tying it to a constant px/sec keeps the
+    // drift reading equally calm at any column width.
+    var MIN_SPEED_PX_S = 5;
+    var MAX_SPEED_PX_S = 9;
+    function pickSlotOrder(m) {
+      var picks = shuffledCols([0, 1, 2, 3]); // guarantees each source column (incl. the accent one) appears at least once
+      while (picks.length < m) picks.push(Math.floor(Math.random() * 4));
+      return shuffledCols(picks);
+    }
     function buildColumnTracker(container) {
       container.innerHTML = '';
-      var order = shuffledCols([0, 1, 2, 3]);
       var wrapH = container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return;
-      COL_DEFS.forEach(function (col, slot) {
+      var m = Math.min(MAX_COLS, Math.max(MIN_COLS, Math.round(containerW / TARGET_COL_PX)));
+      var order = pickSlotOrder(m);
+      var slotWidthPct = 100 / m;
+      for (var slot = 0; slot < m; slot++) {
         var srcIdx = order[slot];
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
-        wrap.style.left = col.start + '%';
-        wrap.style.width = col.width + '%';
-        var colWidthPx = containerW * (col.width / 100);
-        // px for one full 0-100 lap of y/h, at this column's actual width.
-        var unitPx = (colWidthPx / col.width * 100) * POSTER_RATIO;
+        wrap.style.left = (slot * slotWidthPct) + '%';
+        wrap.style.width = slotWidthPct + '%';
+        var colWidthPx = containerW * (slotWidthPct / 100);
+        // px for one full 0-100 lap of y/h, at this slot's actual width.
+        var unitPx = (colWidthPx / POSTER_COL_UNITS * 100) * POSTER_RATIO;
         var laps = Math.max(2, Math.ceil(wrapH / unitPx) + 1);
+        var speed = MIN_SPEED_PX_S + Math.random() * (MAX_SPEED_PX_S - MIN_SPEED_PX_S);
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
         track.style.height = (laps * 2 * unitPx) + 'px';
-        track.style.setProperty('--tdur', (48 + Math.random() * 36).toFixed(1) + 's');
+        track.style.setProperty('--tdur', (unitPx / speed).toFixed(1) + 's');
         for (var copy = 0; copy < laps * 2; copy++) {
           (function (copy) {
             COLUMN_CONTENT[srcIdx].forEach(function (item) {
@@ -2514,7 +2541,7 @@ function main() {
         }
         wrap.appendChild(track);
         container.appendChild(wrap);
-      });
+      }
     }
     function rebuildAll() { mounts.forEach(function (el) { buildColumnTracker(el); }); }
     rebuildAll();
