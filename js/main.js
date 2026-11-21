@@ -2479,39 +2479,31 @@ function main() {
     // at all once tiling.
     var POSTER_RATIO = 2834.65 / 1984.25;
     var POSTER_COL_UNITS = COL_DEFS[0].width; // 23.02 -- the poster's own column width, in LAYOUT's x/w units
-    // On-screen column target width, in px -- the 4 poster columns alone
-    // rendered way too large/few on a wide desktop viewport (circles the
-    // size of a third of the screen). Repeating the same 4 source columns
-    // across more, narrower on-screen slots keeps the design's proportions
-    // (unitPx below is still derived straight from each slot's own real
-    // width) while making every individual shape noticeably smaller.
+    // Independently randomizing which source column lands in which on-
+    // screen slot (the previous approach) reads as arbitrary copy-paste --
+    // two slots next to each other can end up showing the exact same
+    // source column's content twice in a row, or the sequence just looks
+    // jumbled rather than designed. Repeating the poster's own 4-column
+    // left-to-right order as one tiled "block" instead -- still randomised
+    // once per page load (which of the 4 columns starts the sequence), but
+    // every block after that repeats the *same* order, so adjacent slots
+    // never clash and the repeat reads as an intentional tile, the way a
+    // printed pattern repeats, not a shuffle.
     var TARGET_COL_PX = 150;
-    var MIN_COLS = 4;
-    var MAX_COLS = 16;
-    // Absolute px/sec, not a fixed seconds-per-lap -- a fixed duration
-    // (e.g. "48-84s") made the drift's actual on-screen speed scale with
-    // however wide a column rendered, since one "lap" is more pixels on a
-    // wide desktop column than a narrow mobile one at the same duration --
-    // confirmed via a desktop/mobile comparison: desktop visibly raced,
-    // mobile crawled, same code. Tying it to a constant px/sec keeps the
-    // drift reading equally calm at any column width.
     var MIN_SPEED_PX_S = 5;
     var MAX_SPEED_PX_S = 9;
-    function pickSlotOrder(m) {
-      var picks = shuffledCols([0, 1, 2, 3]); // guarantees each source column (incl. the accent one) appears at least once
-      while (picks.length < m) picks.push(Math.floor(Math.random() * 4));
-      return shuffledCols(picks);
-    }
     function buildColumnTracker(container) {
       container.innerHTML = '';
       var wrapH = container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return;
-      var m = Math.min(MAX_COLS, Math.max(MIN_COLS, Math.round(containerW / TARGET_COL_PX)));
-      var order = pickSlotOrder(m);
+      var blockWidthPx = TARGET_COL_PX * 4;
+      var numBlocks = Math.max(1, Math.ceil(containerW / blockWidthPx));
+      var m = numBlocks * 4;
+      var blockOrder = shuffledCols([0, 1, 2, 3]);
       var slotWidthPct = 100 / m;
       for (var slot = 0; slot < m; slot++) {
-        var srcIdx = order[slot];
+        var srcIdx = blockOrder[slot % 4];
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
         wrap.style.left = (slot * slotWidthPct) + '%';
