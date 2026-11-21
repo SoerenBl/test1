@@ -2463,40 +2463,77 @@ function main() {
       }
       return a;
     }
+    // The poster's own aspect ratio -- one "lap" through a column's content
+    // (0-100% in x/y/w/h) always corresponds to this many px of height per
+    // px of column width, wherever that column actually renders. Needed
+    // because these pages span their *entire*, very different-per-language
+    // height (a GDPR privacy page in German is much longer than in
+    // English), not one fixed card -- so, unlike the original artefact's
+    // fixed-aspect-ratio preview box, there's no single container height
+    // percentages can resolve against. Each column's content is instead
+    // tiled in *pixels*, repeating as many times (laps) as the page is
+    // tall, which also sidesteps the 200%-tall-track percentage trap
+    // (item.y/item.h used to resolve against the track's own doubled
+    // height, rendering every circle 2x too tall -- confirmed via
+    // getBoundingClientRect) by never using percentage sizing for height
+    // at all once tiling.
+    var POSTER_RATIO = 2834.65 / 1984.25;
     function buildColumnTracker(container) {
+      container.innerHTML = '';
       var order = shuffledCols([0, 1, 2, 3]);
+      var wrapH = container.clientHeight;
+      var containerW = container.clientWidth;
+      if (!wrapH || !containerW) return;
       COL_DEFS.forEach(function (col, slot) {
         var srcIdx = order[slot];
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
         wrap.style.left = col.start + '%';
         wrap.style.width = col.width + '%';
+        var colWidthPx = containerW * (col.width / 100);
+        // px for one full 0-100 lap of y/h, at this column's actual width.
+        var unitPx = (colWidthPx / col.width * 100) * POSTER_RATIO;
+        var laps = Math.max(2, Math.ceil(wrapH / unitPx) + 1);
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
+        track.style.height = (laps * 2 * unitPx) + 'px';
         track.style.setProperty('--tdur', (48 + Math.random() * 36).toFixed(1) + 's');
-        [0, 1].forEach(function (copy) {
-          COLUMN_CONTENT[srcIdx].forEach(function (item) {
-            var d = document.createElement('div');
-            d.className = 'dot' + (item.entry.t === 'a' || item.entry.bonusAccent ? ' is-accent' : '');
-            d.style.left = item.localX + '%';
-            // top/height are percentages of .col-track, which is 200% tall
-            // (two stacked copies for the seamless loop) -- halved here so
-            // they still resolve against the *wrap's* (one copy's) actual
-            // height, matching the ratio the shapes were authored in.
-            // Without this every circle rendered twice as tall as it
-            // should (confirmed via getBoundingClientRect: exactly 2x).
-            d.style.top = ((item.y + copy * 100) / 2) + '%';
-            d.style.width = item.localW + '%';
-            d.style.height = (item.h / 2) + '%';
-            d.innerHTML = '<span style="display:block;width:100%;height:100%;transform:rotate(' + shapeRot(item.entry) + 'deg)">' + shapeSvg(item.entry) + '</span>';
-            track.appendChild(d);
-          });
-        });
+        for (var copy = 0; copy < laps * 2; copy++) {
+          (function (copy) {
+            COLUMN_CONTENT[srcIdx].forEach(function (item) {
+              var d = document.createElement('div');
+              d.className = 'dot' + (item.entry.t === 'a' || item.entry.bonusAccent ? ' is-accent' : '');
+              d.style.left = item.localX + '%';
+              d.style.top = (copy * unitPx + (item.y / 100) * unitPx) + 'px';
+              d.style.width = item.localW + '%';
+              d.style.height = ((item.h / 100) * unitPx) + 'px';
+              d.innerHTML = '<span style="display:block;width:100%;height:100%;transform:rotate(' + shapeRot(item.entry) + 'deg)">' + shapeSvg(item.entry) + '</span>';
+              track.appendChild(d);
+            });
+          })(copy);
+        }
         wrap.appendChild(track);
         container.appendChild(wrap);
       });
     }
-    mounts.forEach(function (el) { buildColumnTracker(el); });
+    function rebuildAll() { mounts.forEach(function (el) { buildColumnTracker(el); }); }
+    rebuildAll();
+    // Re-tile whenever the page's actual height changes -- window resize,
+    // but also a language toggle on these text-heavy pages (German legal
+    // copy runs noticeably longer than English), which changes page height
+    // without ever firing a resize event.
+    if ('ResizeObserver' in window) {
+      var roScheduled = false;
+      var ro = new ResizeObserver(function () {
+        if (roScheduled) return;
+        roScheduled = true;
+        requestAnimationFrame(function () { roScheduled = false; rebuildAll(); });
+      });
+      mounts.forEach(function (el) {
+        var section = el.closest('.page-hero') || el.parentElement;
+        if (section) ro.observe(section);
+      });
+    }
   })();
 }
 
