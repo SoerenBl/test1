@@ -1769,6 +1769,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      that unrelated, equally-specific-but-later rule would silently win
      and react to the wrong photo. */
   .stack .stack__group .stack__panel .stack__title { font-size: clamp(2.4rem, 13vw, 5.5rem); line-height: 0.98; color: var(--color-text); }
+  /* "Auszeichnungen" (German) is one long compound word with no spaces to
+     break at -- at the shared 13vw size it ran out of room and
+     overflow-wrap:anywhere (needed elsewhere for other long words) broke
+     it mid-word instead of wrapping at a natural point. Same fix as
+     .page-hero__title--compact: a smaller size just for this title,
+     chosen to keep it on one line down to a 320px-wide phone. */
+  .stack .stack__group .stack__panel .stack__title--compact { font-size: clamp(2rem, 10vw, 4rem); }
   .stack .stack__group .stack__panel .stack__body { color: var(--color-text); }
   .stack .stack__group .stack__panel .stack__body .eyebrow { color: var(--color-accent); }
   .stack .stack__group .stack__panel .stack__body .timeline__row time { color: var(--color-text-muted); }
