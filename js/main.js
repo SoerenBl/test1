@@ -2503,12 +2503,32 @@ function main() {
     function buildCols(containerW) {
       if (containerW >= DESKTOP_WIDE_PX) {
         var numBlocks = Math.max(1, Math.round(containerW / (TARGET_COL_PX * 4)));
-        var slotWidthPct = 100 / (numBlocks * 4);
+        var blockWidthPct = 100 / numBlocks;
+        // COL_DEFS' own consecutive columns are each this far apart (same
+        // gap all 3 times: 25.66 - 23.02 = 2.64, confirmed below). Treating
+        // the block's natural span as 100+GUTTER (not 100) leaves exactly
+        // one more such gutter trailing after the last column, so the next
+        // repeated block's first column picks up at the same spacing
+        // instead of sitting flush against the previous block's last one.
+        var GUTTER = COL_DEFS[1].start - (COL_DEFS[0].start + COL_DEFS[0].width);
+        var UNIT_SPAN = 100 + GUTTER;
         var cols = [];
+        // Scale COL_DEFS' own start/width (gutters included) down into
+        // each block rather than dividing the block evenly into 4 -- an
+        // even split had zero gap between columns at all (each ~100% width
+        // internally), circles almost touching. COL_DEFS already has the
+        // real poster's own gutter built in (column 1 starts at 25.66, not
+        // 23.02 where column 0 ends) -- carrying that same proportion into
+        // every repeated block keeps the real gap, just scaled to the
+        // block's own width, consistent on both sides of every column.
         for (var b = 0; b < numBlocks; b++) {
-          for (var k = 0; k < 4; k++) {
-            cols.push({ start: (b * 4 + k) * slotWidthPct, width: slotWidthPct, srcIdx: k });
-          }
+          COL_DEFS.forEach(function (col, k) {
+            cols.push({
+              start: b * blockWidthPct + (col.start / UNIT_SPAN) * blockWidthPct,
+              width: (col.width / UNIT_SPAN) * blockWidthPct,
+              srcIdx: k
+            });
+          });
         }
         return cols;
       }
@@ -2523,11 +2543,12 @@ function main() {
     // it to a constant px/sec instead (an earlier attempt) made whichever
     // column happened to be *narrower* -- mobile -- finish its lap sooner
     // at the same px/sec, reading as faster there specifically. Doubled
-    // from the artefact's own 48-84s per the "half speed" request, then
-    // doubled again (mobile only) per a later "still too fast on mobile"
-    // follow-up.
-    var MIN_DUR_S = 96;
-    var MAX_DUR_S = 168;
+    // from the artefact's own 48-84s per the "half speed" request, doubled
+    // again (mobile only) per "still too fast on mobile", then doubled
+    // again here (desktop too, so both base values) per "halve desktop
+    // too" -- 4x the artefact's original on desktop, 8x on mobile.
+    var MIN_DUR_S = 192;
+    var MAX_DUR_S = 336;
     var DOT_BLEED_PX = 0.75;
     function buildColumnTracker(container) {
       container.innerHTML = '';

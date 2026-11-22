@@ -2666,7 +2666,7 @@ body.lightbox-open { overflow: hidden; }
    overcorrected past that. A light touch here, legibility for the real
    text on top is the .hero-glass-card's job (see below), not a heavy
    blur/white-wash smeared over the whole pattern. */
-.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; filter: blur(3px); }
+.site-pattern-bg .drift2-tracks { position: absolute; inset: 0; }
 .site-pattern-bg .col-track-wrap { position: absolute; top: 0; height: 100%; overflow: hidden; }
 /* height is set per-instance in px by js/main.js (enough laps to cover
    the actual page height twice over, for the seamless loop) -- not a
