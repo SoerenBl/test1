@@ -2335,6 +2335,35 @@ footer.footer--pattern .footer__social a {
   transition: opacity 0.2s ease;
 }
 footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
+/* Mobile: five separate pills (Contact/Legal Notice/Privacy/YouTube/
+   LinkedIn) wrapped unevenly across two ragged, differently-sized rows
+   at this width -- merged into the one shared pill the copyright span
+   already gets below, with the links as plain inline text and a thin
+   dot between them instead of each carrying its own chip. Reads as one
+   continuous line (wrapping like ordinary text if it still doesn't fit)
+   rather than a jagged stack of pill fragments. */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  footer.footer--pattern .footer__social {
+    display: block;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+  }
+  footer.footer--pattern .footer__social a {
+    display: inline;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  footer.footer--pattern .footer__social a:not(:last-child)::after {
+    content: '·';
+    margin: 0 7px;
+    color: rgba(23,22,26,0.35);
+    font-weight: 400;
+  }
+}
 /* Same floating-chip treatment for the copyright line -- plain text here
    would randomly land on a dark circle or a light gap depending on where
    the pattern happens to be, legible on one, not the other. */
