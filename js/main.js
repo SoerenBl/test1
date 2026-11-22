@@ -2598,14 +2598,30 @@ function main() {
       }
       return null;
     }
+    // .stack's own scrollHeight still counts stackBg's *own* forced height
+    // towards its total (confirmed: toggling German then back to English
+    // left .stack.scrollHeight stuck at German's taller value -- shrinking
+    // it back down is impossible if the one thing being measured is also
+    // the one thing whose own size was last written here). Collapsing it
+    // to 0 immediately before reading, then restoring whatever height the
+    // caller sets right after, breaks that circularity -- the read always
+    // reflects .stack's *other* children (the panels/footer) only, never
+    // its own previous measurement.
+    function naturalStackHeight(stackBg) {
+      var prev = stackBg.style.height;
+      stackBg.style.height = '0px';
+      var h = stackBg.parentElement.scrollHeight;
+      stackBg.style.height = prev;
+      return h;
+    }
     function liveHeightFor(el) {
       var stackBg = stackBgHost(el);
-      return stackBg ? stackBg.parentElement.scrollHeight : el.clientHeight;
+      return stackBg ? naturalStackHeight(stackBg) : el.clientHeight;
     }
     function buildColumnTracker(container, continueFrom) {
       container.innerHTML = '';
       var stackBg = stackBgHost(container);
-      var wrapH = stackBg ? stackBg.parentElement.scrollHeight : container.clientHeight;
+      var wrapH = stackBg ? naturalStackHeight(stackBg) : container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return null;
       if (stackBg) stackBg.style.height = wrapH + 'px';
@@ -2705,7 +2721,7 @@ function main() {
     // runs unconditionally every pass rather than only on a full rebuild.
     function syncStackBgHeight(el) {
       var stackBg = stackBgHost(el);
-      if (stackBg) stackBg.style.height = stackBg.parentElement.scrollHeight + 'px';
+      if (stackBg) stackBg.style.height = naturalStackHeight(stackBg) + 'px';
     }
     // Processes mounts in DOM order (hero/stack sections before the footer
     // that follows them), only rebuilding a mount when it actually needs
