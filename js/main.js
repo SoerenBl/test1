@@ -2415,7 +2415,7 @@ function main() {
       { x: 25.66, y: 16.9, w: 11.51, h: 15.51, t: 'h', r: 270 },
       { x: 51.32, y: 16.9, w: 23.02, h: 15.51, t: 'c', r: 0 },
       { x: 76.98, y: 16.9, w: 23.02, h: 15.51, t: 'c', r: 0 },
-      { x: 0, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0, bonusAccent: true },
+      { x: 0, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0 },
       { x: 25.66, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0 },
       { x: 51.32, y: 33.8, w: 23.02, h: 15.51, t: 'c', r: 0 },
       { x: 76.98, y: 33.8, w: 23.02, h: 7.75, t: 'h', r: 0 },
@@ -2470,6 +2470,7 @@ function main() {
     // getBoundingClientRect) by never using percentage sizing for height
     // at all once tiling.
     var POSTER_RATIO = 2834.65 / 1984.25;
+    var POSTER_COL_UNITS = COL_DEFS[0].width; // 23.02 -- every source column's own real width, regardless of how wide it ends up rendered on screen
     // Back to exactly the poster's own 4 columns, at their own real
     // positions/widths (COL_DEFS, gutters included) -- no re-tiling into
     // extra, narrower on-screen slots. That earlier attempt at "smaller
@@ -2479,29 +2480,54 @@ function main() {
     // original design ever had, reading as cluttered rather than calm.
     // Matching the real poster's own 4 columns 1:1 (srcIdx === slot, no
     // shuffle) keeps it exactly as designed.
-    var MIN_SPEED_PX_S = 2.5;
-    var MAX_SPEED_PX_S = 4.5;
+    // On a narrow (mobile) viewport, cramming all 4 real columns in still
+    // reads as cluttered -- the design was never meant to be viewed that
+    // narrow. Showing only columns 0 and 3 there instead, stretched across
+    // half the width each, keeps the same per-shape proportions (the
+    // column's own width still drives its own unitPx below) just bigger
+    // and with real breathing room between them, closer to how the
+    // artefact's own mockup actually looked. Column 0 (never 3, which
+    // carries the real accent dot) is deliberately still the leftmost --
+    // the logo sits over that column, see the dot-color comment below.
+    var NARROW_PX = 600;
+    // A fixed duration (not px/sec) -- the artefact's own Drift2 used a
+    // flat random range regardless of how wide a column rendered, and a
+    // fixed *duration* is what actually reads as equally calm at any
+    // size: a wide desktop column and a narrow mobile one each complete
+    // one lap in the same time, so the motion feels the same pace on
+    // both, even though the wide one physically moves more px/sec. Tying
+    // it to a constant px/sec instead (an earlier attempt) made whichever
+    // column happened to be *narrower* -- mobile -- finish its lap sooner
+    // at the same px/sec, reading as faster there specifically. Doubled
+    // from the artefact's own 48-84s per the "half speed" request.
+    var MIN_DUR_S = 96;
+    var MAX_DUR_S = 168;
     var DOT_BLEED_PX = 0.75;
     function buildColumnTracker(container) {
       container.innerHTML = '';
       var wrapH = container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return;
-      COL_DEFS.forEach(function (col, slot) {
-        var srcIdx = slot;
+      var cols = containerW < NARROW_PX
+        ? [{ start: 0, width: 50, srcIdx: 0 }, { start: 50, width: 50, srcIdx: 3 }]
+        : COL_DEFS.map(function (col, i) { return { start: col.start, width: col.width, srcIdx: i }; });
+      cols.forEach(function (col, slot) {
+        var srcIdx = col.srcIdx;
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
         wrap.style.left = col.start + '%';
         wrap.style.width = col.width + '%';
         var colWidthPx = containerW * (col.width / 100);
-        // px for one full 0-100 lap of y/h, at this column's actual width.
-        var unitPx = (colWidthPx / col.width * 100) * POSTER_RATIO;
+        // px for one full 0-100 lap of y/h, at this column's actual
+        // *source* width (POSTER_COL_UNITS, not its on-screen width,
+        // which can be wider in narrow/2-column mode) -- what the
+        // shapes were actually authored at.
+        var unitPx = (colWidthPx / POSTER_COL_UNITS * 100) * POSTER_RATIO;
         var laps = Math.max(2, Math.ceil(wrapH / unitPx) + 1);
-        var speed = MIN_SPEED_PX_S + Math.random() * (MAX_SPEED_PX_S - MIN_SPEED_PX_S);
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
         track.style.height = (laps * 2 * unitPx) + 'px';
-        track.style.setProperty('--tdur', (unitPx / speed).toFixed(1) + 's');
+        track.style.setProperty('--tdur', (MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)).toFixed(1) + 's');
         for (var copy = 0; copy < laps * 2; copy++) {
           (function (copy) {
             COLUMN_CONTENT[srcIdx].forEach(function (item) {
