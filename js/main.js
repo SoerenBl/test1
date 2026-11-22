@@ -2039,8 +2039,7 @@ function main() {
       // scrollY correction — horizontal scroll position never changes.
       top: rect.top + window.scrollY,
       left: rect.left,
-      height: rect.height,
-      fontSize: parseFloat(getComputedStyle(projectHeroTitleEl).fontSize)
+      height: rect.height
     };
     projectHeroTitleEl.style.transform = prevTransform;
     // Same idea as the title measurement above, kept separate rather than
@@ -2064,9 +2063,22 @@ function main() {
     // wasted layout work.
     if (projectHeroNav) {
       var navRect = projectHeroNav.getBoundingClientRect();
-      var navFontPx = parseFloat(getComputedStyle(projectHeroNav).fontSize) || 24;
-      var targetFontPx = navFontPx * 2;
-      var minScale = Math.min(1, targetFontPx / projectHeroNatural.fontSize);
+      // The logo's own *rendered* height, not nav__mark's text font-size
+      // (1.5rem, carried over from when the mark was still plain text --
+      // it wraps an <img> now and that value has nothing left to do with
+      // its actual on-screen size, which is what threw off the docked
+      // title's scale here: "logo and title size/arrangement mixed up").
+      // Scaling the docked title to match the logo's real height directly
+      // is what keeps the two in proportion regardless of how the logo
+      // image itself is later resized in CSS.
+      var navLogoImg = projectHeroNav.querySelector('img');
+      var navLogoH = navLogoImg ? navLogoImg.getBoundingClientRect().height : 44;
+      // Docked title's line-height targets slightly *larger* than the
+      // logo, not equal to it -- a title that's merely the same size as
+      // a small wordmark reads as an afterthought; a touch bigger reads
+      // as the actual page label the logo sits beside.
+      var targetHeightPx = navLogoH * 1.2;
+      var minScale = Math.min(1, targetHeightPx / projectHeroNatural.height);
       // Desktop docks to the right of the nav name instead of the title's
       // own natural left gutter, which would otherwise land both at the
       // same x position and read as overlapping/smashed-together text.
@@ -2084,9 +2096,17 @@ function main() {
       // up as the title sitting right on top of it.
       var isDesktop = window.matchMedia('(min-width: 761px)').matches;
       var navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 92;
+      // Both vertically centred on the same line -- the logo's own
+      // vertical centre, which (being flex-centred inside .nav__inner
+      // alongside the language toggle and menu button) is also theirs.
+      // Centring the docked title against that shared line, rather than
+      // the previous top-edge-flush alignment, is what actually reads as
+      // "logo and title sit on one line together" instead of offset from
+      // each other.
+      var navMidY = navRect.top + navRect.height / 2;
+      var dockedTitleH = projectHeroNatural.height * minScale;
       projectHeroDock = {
-        // Top edges of both text boxes flush, not vertically centred.
-        top: isDesktop ? navRect.top : navH + 12,
+        top: isDesktop ? (navMidY - dockedTitleH / 2) : navH + 12,
         left: isDesktop ? navRect.right + 24 : projectHeroNatural.left,
         scale: minScale
       };
@@ -2550,14 +2570,27 @@ function main() {
     var MIN_DUR_S = 192;
     var MAX_DUR_S = 336;
     var DOT_BLEED_PX = 0.75;
-    function buildColumnTracker(container) {
+    // continueFrom (footer mounts only): the immediately preceding
+    // hero/stack mount's own spec {cols, perCol, heightPx}. CSS animations
+    // are a deterministic function of elapsed time since page load, so
+    // reusing the exact same per-column {srcIdx, dur, delay} keeps the
+    // footer's loop permanently in phase with the section above it instead
+    // of running as its own independently-randomised (and visibly
+    // disconnected) loop; offsetting every dot's top by heightSoFar%unitPx
+    // continues the tiling exactly where that section's own infinite
+    // pattern conceptually left off, so the seam at the hero/footer
+    // boundary disappears.
+    function buildColumnTracker(container, continueFrom) {
       container.innerHTML = '';
       var wrapH = container.clientHeight;
       var containerW = container.clientWidth;
-      if (!wrapH || !containerW) return;
+      if (!wrapH || !containerW) return null;
       var narrow = containerW < NARROW_PX;
       var durMultiplier = narrow ? 2 : 1;
-      buildCols(containerW).forEach(function (col, slot) {
+      var cols = continueFrom ? continueFrom.cols : buildCols(containerW);
+      var perCol = [];
+      var minCoverage = Infinity;
+      cols.forEach(function (col, slot) {
         var srcIdx = col.srcIdx;
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
@@ -2566,11 +2599,17 @@ function main() {
         var colWidthPx = containerW * (col.width / 100);
         // px for one full 0-100 lap of y/h, at this column's actual width.
         var unitPx = (colWidthPx / POSTER_COL_UNITS * 100) * POSTER_RATIO;
-        var laps = Math.max(2, Math.ceil(wrapH / unitPx) + 1);
+        // One extra lap of slack when continuing a phase offset: shifting
+        // every copy up by phaseOffsetPx (always < unitPx) trims that much
+        // off the bottom of the already-tiled region, so the existing
+        // "+1 lap" buffer alone might not be enough.
+        var laps = Math.max(2, Math.ceil(wrapH / unitPx) + (continueFrom ? 2 : 1));
+        minCoverage = Math.min(minCoverage, laps * 2 * unitPx);
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
         track.style.height = (laps * 2 * unitPx) + 'px';
-        var dur = (MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)) * durMultiplier;
+        var prevCol = continueFrom && continueFrom.perCol[slot];
+        var dur = prevCol ? prevCol.dur : (MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)) * durMultiplier;
         track.style.setProperty('--tdur', dur.toFixed(1) + 's');
         // A negative delay starts the animation partway through its own
         // loop instead of at frame zero -- without it, repeated desktop
@@ -2578,7 +2617,10 @@ function main() {
         // block) all began the identical animation at the identical
         // moment on page load, reading as an obvious copy running in
         // lockstep rather than an independent column.
-        track.style.animationDelay = '-' + (Math.random() * dur).toFixed(1) + 's';
+        var delay = prevCol ? prevCol.delay : -(Math.random() * dur);
+        track.style.animationDelay = delay.toFixed(1) + 's';
+        perCol.push({ dur: dur, delay: delay });
+        var phaseOffsetPx = continueFrom ? (continueFrom.heightPx % unitPx) : 0;
         var content = narrow ? thinForNarrow(COLUMN_CONTENT[srcIdx]) : COLUMN_CONTENT[srcIdx];
         for (var copy = 0; copy < laps * 2; copy++) {
           (function (copy) {
@@ -2596,7 +2638,7 @@ function main() {
               // -- a hairline gap, worst right at a flat half-circle edge.
               // A small symmetric bleed guarantees a touch of overlap
               // instead, regardless of that rounding.
-              d.style.top = (copy * unitPx + (item.y / 100) * unitPx - DOT_BLEED_PX) + 'px';
+              d.style.top = (copy * unitPx + (item.y / 100) * unitPx - DOT_BLEED_PX - phaseOffsetPx) + 'px';
               d.style.width = item.localW + '%';
               d.style.height = ((item.h / 100) * unitPx + DOT_BLEED_PX * 2) + 'px';
               d.innerHTML = '<span style="display:block;width:100%;height:100%;transform:rotate(' + shapeRot(item.entry) + 'deg)">' + shapeSvg(item.entry) + '</span>';
@@ -2607,22 +2649,62 @@ function main() {
         wrap.appendChild(track);
         container.appendChild(wrap);
       });
+      return { cols: cols, perCol: perCol, heightPx: wrapH, containerW: containerW, coveragePx: minCoverage };
     }
-    function rebuildAll() { mounts.forEach(function (el) { buildColumnTracker(el); }); }
-    rebuildAll();
+    // Per-mount build state, so a resize/rebuild pass can tell whether a
+    // given mount actually needs rebuilding at all.
+    var mountSpecs = new Map();
+    function isFooterMount(el) { return !!el.closest('footer'); }
+    function needsRebuild(el) {
+      var prev = mountSpecs.get(el);
+      if (!prev) return true;
+      var w = el.clientWidth, h = el.clientHeight;
+      if (Math.abs(prev.containerW - w) > 1) return true;
+      // Height only *grew* beyond what's already tiled -- a shrink (e.g.
+      // switching back to the shorter-language copy) leaves the existing,
+      // already-animating DOM alone rather than resetting it, which is
+      // exactly what stops a language toggle from visibly restarting the
+      // whole pattern.
+      if (h > prev.coveragePx) return true;
+      return false;
+    }
+    // Processes mounts in DOM order (hero/stack sections before the footer
+    // that follows them), only rebuilding a mount when it actually needs
+    // it -- except a footer mount, which is also force-rebuilt whenever the
+    // section feeding it was just rebuilt, so the two never fall out of
+    // the shared phase that keeps them looking like one continuous loop.
+    function processMounts() {
+      var lastMainSpec = null;
+      var lastMainRebuilt = false;
+      mounts.forEach(function (el) {
+        var isFooter = isFooterMount(el);
+        var must = isFooter ? (lastMainRebuilt || needsRebuild(el)) : needsRebuild(el);
+        if (must) {
+          var spec = buildColumnTracker(el, isFooter ? lastMainSpec : null);
+          if (spec) mountSpecs.set(el, spec);
+          else mountSpecs.delete(el);
+          if (!isFooter) lastMainRebuilt = true;
+        } else if (!isFooter) {
+          lastMainRebuilt = false;
+        }
+        if (!isFooter) lastMainSpec = mountSpecs.get(el) || lastMainSpec;
+      });
+    }
+    processMounts();
     // Re-tile whenever the page's actual height changes -- window resize,
     // but also a language toggle on these text-heavy pages (German legal
     // copy runs noticeably longer than English), which changes page height
-    // without ever firing a resize event.
+    // without ever firing a resize event. processMounts() itself decides,
+    // per mount, whether that change actually requires a rebuild.
     if ('ResizeObserver' in window) {
       var roScheduled = false;
       var ro = new ResizeObserver(function () {
         if (roScheduled) return;
         roScheduled = true;
-        requestAnimationFrame(function () { roScheduled = false; rebuildAll(); });
+        requestAnimationFrame(function () { roScheduled = false; processMounts(); });
       });
       mounts.forEach(function (el) {
-        var section = el.closest('.page-hero') || el.parentElement;
+        var section = el.closest('.page-hero') || el.closest('footer') || el.parentElement;
         if (section) ro.observe(section);
       });
     }
