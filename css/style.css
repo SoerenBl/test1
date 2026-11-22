@@ -2343,8 +2343,21 @@ footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
    continuous line (wrapping like ordinary text if it still doesn't fit)
    rather than a jagged stack of pill fragments. */
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  /* Both pills now span the same full width/edge inset as every other
+     mobile element on these pages (.hero-glass-card, .stack__card) --
+     .footer__inner is itself a .wrap, so 100% here already lands on
+     exactly that shared gutter, not a separate one. Previously these
+     stayed shrink-to-fit (a flex item's default), reading as two oddly
+     narrow chips adrift with empty space beside them instead of lining
+     up with the rest of the page. */
+  footer.footer--pattern .footer__inner > span:first-child,
   footer.footer--pattern .footer__social {
     display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  footer.footer--pattern .footer__social {
     /* The markup's own line breaks/indentation between each <a> render as
        an ordinary breakable space once they're display:inline (confirmed
        via getBoundingClientRect: the pill was wrapping to two lines even
@@ -2357,11 +2370,9 @@ footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
     background: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.14);
     white-space: nowrap;
-    /* Comfortably one line down to a 375px-wide phone (measured); a
-       narrower/older device or a future longer translation scrolls
+    /* A narrower/older device or a future longer translation scrolls
        sideways within the pill itself instead of ever breaking the
        page's own layout or wrapping back to two ragged lines. */
-    max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
   }
