@@ -2569,7 +2569,7 @@ function main() {
     // too" -- 4x the artefact's original on desktop, 8x on mobile.
     var MIN_DUR_S = 192;
     var MAX_DUR_S = 336;
-    var DOT_BLEED_PX = 0.75;
+    var DOT_BLEED_PX = 1.5;
     // continueFrom (footer mounts only): the immediately preceding
     // hero/stack mount's own spec {cols, perCol, heightPx}. CSS animations
     // are a deterministic function of elapsed time since page load, so

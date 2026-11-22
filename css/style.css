@@ -2345,13 +2345,30 @@ footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
 @media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
   footer.footer--pattern .footer__social {
     display: block;
-    padding: 10px 18px;
+    /* The markup's own line breaks/indentation between each <a> render as
+       an ordinary breakable space once they're display:inline (confirmed
+       via getBoundingClientRect: the pill was wrapping to two lines even
+       though the text itself measured well within one line's width) --
+       collapsed to zero width here, with font-size restored on the links
+       and the separator below, rather than reformatting the HTML itself. */
+    font-size: 0;
+    padding: 9px 16px;
     border-radius: 999px;
     background: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    white-space: nowrap;
+    /* Comfortably one line down to a 375px-wide phone (measured); a
+       narrower/older device or a future longer translation scrolls
+       sideways within the pill itself instead of ever breaking the
+       page's own layout or wrapping back to two ragged lines. */
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  footer.footer--pattern .footer__social::-webkit-scrollbar { display: none; }
   footer.footer--pattern .footer__social a {
     display: inline;
+    font-size: 10.5px;
     padding: 0;
     border-radius: 0;
     background: none;
@@ -2359,7 +2376,8 @@ footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
   }
   footer.footer--pattern .footer__social a:not(:last-child)::after {
     content: '·';
-    margin: 0 7px;
+    font-size: 10.5px;
+    margin: 0 5px;
     color: rgba(23,22,26,0.35);
     font-weight: 400;
   }
