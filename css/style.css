@@ -2687,28 +2687,35 @@ body.lightbox-open { overflow: hidden; }
    instead: near-opaque white rather than those two's barely-there tint
    (which assumes a dark photo doing the legibility work), dark text stays
    the default (no bg-active/white-text switch needed here at all). */
+/* Unified direction across every page using this pattern: white
+   background + black dots everywhere (not a separate light/dark pattern
+   per page), but the card itself always dark/opaque with white text --
+   including here, where the pattern is light. Impressum/Datenschutz don't
+   have Service/Contact's unconditional white-text rules (they're the
+   plain, non --photo .page-hero variant), so .page-hero--bg-active is set
+   statically in the markup to borrow that existing white-text path
+   instead of duplicating it. */
 .page-hero--pattern .hero-glass-card {
   position: relative;
   z-index: 1;
-  background: rgba(255,255,255,0.86);
+  background: rgba(14,13,17,0.84);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.14);
   border-radius: 20px;
-  box-shadow: 0 10px 34px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  box-shadow: 0 10px 34px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
   padding: clamp(28px, 5vw, 48px) clamp(20px, 5.5vw, 44px);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .page-hero--pattern .hero-glass-card { background: #fff; }
+  .page-hero--pattern .hero-glass-card { background: #121117; }
 }
 
-/* ---------- Hintergrund-Muster, dunkle Variante (Service/Contact) ----------
+/* ---------- Hintergrund-Muster, Service/Contact ----------
    Service/Contact assume a dark photo and set their text permanently white
-   (.page-hero--photo's own rules, untouched) -- the light pattern above
-   would make that white text unreadable, so this is the same drift2/
-   mattglas mechanism with an inverted palette (dark background, light
-   dots) instead, replacing their real photo the same way .page-hero--pattern
-   replaced Impressum/Datenschutz's.
+   (.page-hero--photo's own rules, untouched). The pattern itself is the
+   same light one everywhere now (one look sitewide, not a separate light/
+   dark palette per page) -- only the card stays dark here, to go with
+   this section's white text.
    Tried reusing the existing *clear*, barely-tinted .hero-glass-card here
    first (same recipe Service/About already use over a photo) -- looked
    right in principle, but a bold graphic pattern of alternating light/dark
@@ -2718,10 +2725,6 @@ body.lightbox-open { overflow: hidden; }
    treatment as .page-hero--pattern's card, just dark-toned to match this
    section's white text instead of overriding it to dark. */
 .page-hero--pattern-dark .page-hero__bg { opacity: 1; filter: none; }
-.site-pattern-bg--dark { background: #121117; }
-.site-pattern-bg--dark .dot { color: #f1efe9; }
-.site-pattern-bg--dark .dot.is-accent { color: #6fb6ef; }
-.site-pattern-bg--dark .glass-veil { background: radial-gradient(circle at 28% 18%, rgba(255,255,255,0.35), rgba(255,255,255,0.08) 55%, transparent 80%); }
 .page-hero--pattern-dark .hero-glass-card {
   position: relative;
   z-index: 1;
@@ -2777,6 +2780,17 @@ body.lightbox-open { overflow: hidden; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .stack--pattern-dark .stack__card { background: #121117; }
 }
+/* Scroll-cue arrows moved onto the card itself (were floating at the
+   panel's own bottom-right corner, sometimes landing directly over the
+   moving pattern -- poor contrast there, and disconnected from the
+   content they belong to). Pulled in from the card's own corner rather
+   than flush against it, and a size down from the default so they read
+   as a small detail of the card, not a competing element. */
+.stack__card .scroll-cue {
+  right: clamp(14px, 3vw, 28px);
+  bottom: clamp(14px, 3vw, 24px);
+}
+.stack__card .scroll-cue span { width: 13px; height: 13px; border-width: 2.5px; }
 
 /* ---------- i18n ---------- */
 /* Content elements are duplicated with [data-lang="de"] / [data-lang="en"];

@@ -2480,17 +2480,39 @@ function main() {
     // original design ever had, reading as cluttered rather than calm.
     // Matching the real poster's own 4 columns 1:1 (srcIdx === slot, no
     // shuffle) keeps it exactly as designed.
-    // Still all 4 real columns at any width (reverted a "2 wide columns on
-    // mobile" attempt -- four was the actual ask). Narrow viewports
-    // instead show fewer shapes *per* column -- every other entry, always
-    // keeping any accent one regardless of which slot that lands on --
-    // closer to the artefact's own mockup, which never looked this
-    // densely packed vertically on a narrow card either.
+    // Narrow (mobile) viewports show fewer shapes *per* column -- every
+    // other entry, always keeping any accent one regardless of which slot
+    // that lands on -- closer to the artefact's own mockup, which never
+    // looked this densely packed vertically on a narrow card either.
     var NARROW_PX = 600;
     function thinForNarrow(items) {
       return items.filter(function (item, i) {
         return i % 2 === 0 || item.entry.t === 'a' || item.entry.bonusAccent;
       });
+    }
+    // Wide (desktop) viewports instead repeat the poster's own 4-column
+    // order as a tiled block (same technique as the column-order fix
+    // earlier, just now *multiple* blocks side by side) -- a handful of
+    // columns at ~330px each rendered as a few huge circles; repeating
+    // the same real sequence at a calmer, smaller target width gives a
+    // proper grid (more columns *and* more rows, since a smaller column
+    // also means a smaller unitPx, i.e. more laps fit per screen) without
+    // reintroducing the jumbled look independent-per-slot randomising had.
+    var DESKTOP_WIDE_PX = 900;
+    var TARGET_COL_PX = 165;
+    function buildCols(containerW) {
+      if (containerW >= DESKTOP_WIDE_PX) {
+        var numBlocks = Math.max(1, Math.round(containerW / (TARGET_COL_PX * 4)));
+        var slotWidthPct = 100 / (numBlocks * 4);
+        var cols = [];
+        for (var b = 0; b < numBlocks; b++) {
+          for (var k = 0; k < 4; k++) {
+            cols.push({ start: (b * 4 + k) * slotWidthPct, width: slotWidthPct, srcIdx: k });
+          }
+        }
+        return cols;
+      }
+      return COL_DEFS.map(function (col, i) { return { start: col.start, width: col.width, srcIdx: i }; });
     }
     // A fixed duration (not px/sec) -- the artefact's own Drift2 used a
     // flat random range regardless of how wide a column rendered, and a
@@ -2501,7 +2523,9 @@ function main() {
     // it to a constant px/sec instead (an earlier attempt) made whichever
     // column happened to be *narrower* -- mobile -- finish its lap sooner
     // at the same px/sec, reading as faster there specifically. Doubled
-    // from the artefact's own 48-84s per the "half speed" request.
+    // from the artefact's own 48-84s per the "half speed" request, then
+    // doubled again (mobile only) per a later "still too fast on mobile"
+    // follow-up.
     var MIN_DUR_S = 96;
     var MAX_DUR_S = 168;
     var DOT_BLEED_PX = 0.75;
@@ -2511,8 +2535,9 @@ function main() {
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return;
       var narrow = containerW < NARROW_PX;
-      COL_DEFS.forEach(function (col, slot) {
-        var srcIdx = slot;
+      var durMultiplier = narrow ? 2 : 1;
+      buildCols(containerW).forEach(function (col, slot) {
+        var srcIdx = col.srcIdx;
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
         wrap.style.left = col.start + '%';
@@ -2524,7 +2549,7 @@ function main() {
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
         track.style.height = (laps * 2 * unitPx) + 'px';
-        track.style.setProperty('--tdur', (MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)).toFixed(1) + 's');
+        track.style.setProperty('--tdur', ((MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)) * durMultiplier).toFixed(1) + 's');
         var content = narrow ? thinForNarrow(COLUMN_CONTENT[srcIdx]) : COLUMN_CONTENT[srcIdx];
         for (var copy = 0; copy < laps * 2; copy++) {
           (function (copy) {
