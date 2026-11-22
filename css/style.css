@@ -2736,6 +2736,27 @@ body.lightbox-open { overflow: hidden; }
   .page-hero--pattern-dark .hero-glass-card { background: #121117; }
 }
 
+/* Same idea again for About/Awards/News (.stack): .stack__content is
+   already both the text wrapper *and* (on mobile only, see its own
+   further down) a tinted glass card over its panel's real photo -- here
+   it becomes an always-opaque dark card directly (no extra wrapper div
+   needed, unlike Service/Contact's separate .hero-glass-card) once that
+   panel's photo is replaced by the pattern via .stack--pattern-dark. */
+.stack--pattern-dark .stack__bg,
+.stack--pattern-dark .stack__page-bg { opacity: 1; filter: none; }
+.stack--pattern-dark .stack__content {
+  background: rgba(14,13,17,0.84);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 20px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  margin: clamp(16px, 4vw, 32px) clamp(8px, 2vw, 16px);
+  padding-bottom: clamp(28px, 6vw, 48px);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .stack--pattern-dark .stack__content { background: #121117; }
+}
+
 /* ---------- i18n ---------- */
 /* Content elements are duplicated with [data-lang="de"] / [data-lang="en"];
    the inactive language is hidden via attribute on <html>. */
