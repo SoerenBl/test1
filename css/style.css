@@ -2701,6 +2701,41 @@ body.lightbox-open { overflow: hidden; }
   .page-hero--pattern .hero-glass-card { background: #fff; }
 }
 
+/* ---------- Hintergrund-Muster, dunkle Variante (Service/Contact) ----------
+   Service/Contact assume a dark photo and set their text permanently white
+   (.page-hero--photo's own rules, untouched) -- the light pattern above
+   would make that white text unreadable, so this is the same drift2/
+   mattglas mechanism with an inverted palette (dark background, light
+   dots) instead, replacing their real photo the same way .page-hero--pattern
+   replaced Impressum/Datenschutz's.
+   Tried reusing the existing *clear*, barely-tinted .hero-glass-card here
+   first (same recipe Service/About already use over a photo) -- looked
+   right in principle, but a bold graphic pattern of alternating light/dark
+   shapes bleeds straight through a 3-16% tint far more than a photo's soft
+   tonal gradients ever would (confirmed via screenshot: individual words
+   sitting over a light dot were unreadable). Needs the same *opaque*
+   treatment as .page-hero--pattern's card, just dark-toned to match this
+   section's white text instead of overriding it to dark. */
+.page-hero--pattern-dark .page-hero__bg { opacity: 1; filter: none; }
+.site-pattern-bg--dark { background: #121117; }
+.site-pattern-bg--dark .dot { color: #f1efe9; }
+.site-pattern-bg--dark .dot.is-accent { color: #6fb6ef; }
+.site-pattern-bg--dark .glass-veil { background: radial-gradient(circle at 28% 18%, rgba(255,255,255,0.35), rgba(255,255,255,0.08) 55%, transparent 80%); }
+.page-hero--pattern-dark .hero-glass-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(14,13,17,0.84);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: clamp(28px, 5vw, 48px) clamp(20px, 5.5vw, 44px);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .page-hero--pattern-dark .hero-glass-card { background: #121117; }
+}
+
 /* ---------- i18n ---------- */
 /* Content elements are duplicated with [data-lang="de"] / [data-lang="en"];
    the inactive language is hidden via attribute on <html>. */

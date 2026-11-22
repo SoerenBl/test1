@@ -2455,14 +2455,6 @@ function main() {
           return { localX: (e.x - col.start) / col.width * 100, localW: e.w / col.width * 100, y: e.y, h: e.h, entry: e };
         });
     });
-    function shuffledCols(arr) {
-      var a = arr.slice();
-      for (var i = a.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-      }
-      return a;
-    }
     // The poster's own aspect ratio -- one "lap" through a column's content
     // (0-100% in x/y/w/h) always corresponds to this many px of height per
     // px of column width, wherever that column actually renders. Needed
@@ -2478,40 +2470,32 @@ function main() {
     // getBoundingClientRect) by never using percentage sizing for height
     // at all once tiling.
     var POSTER_RATIO = 2834.65 / 1984.25;
-    var POSTER_COL_UNITS = COL_DEFS[0].width; // 23.02 -- the poster's own column width, in LAYOUT's x/w units
-    // Independently randomizing which source column lands in which on-
-    // screen slot (the previous approach) reads as arbitrary copy-paste --
-    // two slots next to each other can end up showing the exact same
-    // source column's content twice in a row, or the sequence just looks
-    // jumbled rather than designed. Repeating the poster's own 4-column
-    // left-to-right order as one tiled "block" instead -- still randomised
-    // once per page load (which of the 4 columns starts the sequence), but
-    // every block after that repeats the *same* order, so adjacent slots
-    // never clash and the repeat reads as an intentional tile, the way a
-    // printed pattern repeats, not a shuffle.
-    var TARGET_COL_PX = 150;
-    var MIN_SPEED_PX_S = 5;
-    var MAX_SPEED_PX_S = 9;
+    // Back to exactly the poster's own 4 columns, at their own real
+    // positions/widths (COL_DEFS, gutters included) -- no re-tiling into
+    // extra, narrower on-screen slots. That earlier attempt at "smaller
+    // circles" multiplied both the column count *and*, since each lap
+    // still has to cover the full page height, the number of vertically
+    // stacked repeats -- far more total shapes on screen than the
+    // original design ever had, reading as cluttered rather than calm.
+    // Matching the real poster's own 4 columns 1:1 (srcIdx === slot, no
+    // shuffle) keeps it exactly as designed.
+    var MIN_SPEED_PX_S = 2.5;
+    var MAX_SPEED_PX_S = 4.5;
     var DOT_BLEED_PX = 0.75;
     function buildColumnTracker(container) {
       container.innerHTML = '';
       var wrapH = container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return;
-      var blockWidthPx = TARGET_COL_PX * 4;
-      var numBlocks = Math.max(1, Math.ceil(containerW / blockWidthPx));
-      var m = numBlocks * 4;
-      var blockOrder = shuffledCols([0, 1, 2, 3]);
-      var slotWidthPct = 100 / m;
-      for (var slot = 0; slot < m; slot++) {
-        var srcIdx = blockOrder[slot % 4];
+      COL_DEFS.forEach(function (col, slot) {
+        var srcIdx = slot;
         var wrap = document.createElement('div');
         wrap.className = 'col-track-wrap';
-        wrap.style.left = (slot * slotWidthPct) + '%';
-        wrap.style.width = slotWidthPct + '%';
-        var colWidthPx = containerW * (slotWidthPct / 100);
-        // px for one full 0-100 lap of y/h, at this slot's actual width.
-        var unitPx = (colWidthPx / POSTER_COL_UNITS * 100) * POSTER_RATIO;
+        wrap.style.left = col.start + '%';
+        wrap.style.width = col.width + '%';
+        var colWidthPx = containerW * (col.width / 100);
+        // px for one full 0-100 lap of y/h, at this column's actual width.
+        var unitPx = (colWidthPx / col.width * 100) * POSTER_RATIO;
         var laps = Math.max(2, Math.ceil(wrapH / unitPx) + 1);
         var speed = MIN_SPEED_PX_S + Math.random() * (MAX_SPEED_PX_S - MIN_SPEED_PX_S);
         var track = document.createElement('div');
@@ -2544,7 +2528,7 @@ function main() {
         }
         wrap.appendChild(track);
         container.appendChild(wrap);
-      }
+      });
     }
     function rebuildAll() { mounts.forEach(function (el) { buildColumnTracker(el); }); }
     rebuildAll();
