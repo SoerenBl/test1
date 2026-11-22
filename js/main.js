@@ -2692,6 +2692,21 @@ function main() {
       if (h > prev.coveragePx) return true;
       return false;
     }
+    // A grown .stack can leave its mount's own box too short to show it,
+    // independently of whether the tracks themselves need rebuilding --
+    // confirmed: toggling to German (longer copy) grew .stack.scrollHeight
+    // by 100+px, needsRebuild correctly saw enough already-built buffer to
+    // not bother rebuilding the tracks, but the mount's own forced height
+    // (see buildColumnTracker's stackBg branch) still only reached the
+    // *old*, shorter scrollHeight -- overflow:hidden on .site-pattern-bg
+    // then clipped the pattern right there, a plain white gap for the
+    // rest of the now-taller page. Cheap and non-destructive (just a CSS
+    // height, not touching any of the already-animating dots), so this
+    // runs unconditionally every pass rather than only on a full rebuild.
+    function syncStackBgHeight(el) {
+      var stackBg = stackBgHost(el);
+      if (stackBg) stackBg.style.height = stackBg.parentElement.scrollHeight + 'px';
+    }
     // Processes mounts in DOM order (hero/stack sections before the footer
     // that follows them), only rebuilding a mount when it actually needs
     // it -- except a footer mount, which is also force-rebuilt whenever the
@@ -2701,6 +2716,7 @@ function main() {
       var lastMainSpec = null;
       var lastMainRebuilt = false;
       mounts.forEach(function (el) {
+        syncStackBgHeight(el);
         var isFooter = isFooterMount(el);
         var must = isFooter ? (lastMainRebuilt || needsRebuild(el)) : needsRebuild(el);
         if (must) {
@@ -2728,6 +2744,22 @@ function main() {
         requestAnimationFrame(function () { roScheduled = false; processMounts(); });
       });
       mounts.forEach(function (el) {
+        var stackBg = stackBgHost(el);
+        if (stackBg) {
+          // .stack itself is the wrong thing to watch here -- on desktop
+          // it has a *fixed* 100vh height (its own box never changes size
+          // even though its scrollable content does), so a ResizeObserver
+          // on .stack never fires when a language toggle makes the text
+          // longer (confirmed: .stack.scrollHeight grew 1287 -> 1390px on
+          // toggling to German, but the mount's own forced height stayed
+          // at the old 1287 -- nothing ever told it to re-measure). Each
+          // .stack__panel, by contrast, uses min-height (not a fixed
+          // height), so its own box genuinely does grow with its content
+          // -- observing those instead gives ResizeObserver something
+          // that actually changes size to fire on.
+          stackBg.parentElement.querySelectorAll('.stack__panel').forEach(function (panel) { ro.observe(panel); });
+          return;
+        }
         var section = el.closest('.page-hero') || el.closest('footer') || el.parentElement;
         if (section) ro.observe(section);
       });
