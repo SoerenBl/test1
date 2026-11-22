@@ -2580,11 +2580,35 @@ function main() {
     // continues the tiling exactly where that section's own infinite
     // pattern conceptually left off, so the seam at the hero/footer
     // boundary disappears.
+    // About/News: the pattern is a single mount shared across every panel
+    // of the .stack (and, where the footer lives inside that same .stack,
+    // the footer too) instead of one separate mount per panel -- .stack is
+    // its own independent scroll container (desktop: fixed 100vh,
+    // overflow-y:auto), so a plain inset:0 here would only ever span one
+    // viewport-height of it, not the full scrollable content underneath.
+    // container itself (the .drift2-tracks div main.js builds into) can't
+    // just be given an explicit height instead -- its immediate parent,
+    // .site-pattern-bg, still clips to its own box via overflow:hidden
+    // regardless of what height the grandchild claims, so the explicit
+    // height has to go on *that* element.
+    function stackBgHost(container) {
+      var bg = container.parentElement;
+      if (bg && bg.classList.contains('site-pattern-bg') && bg.parentElement && bg.parentElement.classList.contains('stack')) {
+        return bg;
+      }
+      return null;
+    }
+    function liveHeightFor(el) {
+      var stackBg = stackBgHost(el);
+      return stackBg ? stackBg.parentElement.scrollHeight : el.clientHeight;
+    }
     function buildColumnTracker(container, continueFrom) {
       container.innerHTML = '';
-      var wrapH = container.clientHeight;
+      var stackBg = stackBgHost(container);
+      var wrapH = stackBg ? stackBg.parentElement.scrollHeight : container.clientHeight;
       var containerW = container.clientWidth;
       if (!wrapH || !containerW) return null;
+      if (stackBg) stackBg.style.height = wrapH + 'px';
       var narrow = containerW < NARROW_PX;
       var durMultiplier = narrow ? 2 : 1;
       var cols = continueFrom ? continueFrom.cols : buildCols(containerW);
@@ -2658,7 +2682,7 @@ function main() {
     function needsRebuild(el) {
       var prev = mountSpecs.get(el);
       if (!prev) return true;
-      var w = el.clientWidth, h = el.clientHeight;
+      var w = el.clientWidth, h = liveHeightFor(el);
       if (Math.abs(prev.containerW - w) > 1) return true;
       // Height only *grew* beyond what's already tiled -- a shrink (e.g.
       // switching back to the shorter-language copy) leaves the existing,

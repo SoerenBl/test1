@@ -1567,7 +1567,12 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
      noticeably more underneath than that, so the photo has room to read
      as a deliberate margin instead of the card just stopping at the very
      edge of the page. */
-  .stack__page-bg + .stack__panel { margin-top: var(--mobile-hero-top-pad); }
+  /* .stack__page-bg (the old shared-photo div this used to hang off of
+     as a sibling selector) is gone -- the pattern background is now one
+     shared mount living directly inside .stack itself (see js/main.js),
+     not inside .stack__group at all, so this targets the first panel
+     directly instead. */
+  .stack__group > .stack__panel:first-child { margin-top: var(--mobile-hero-top-pad); }
   .stack__panel:last-child { margin-bottom: 48px; }
   .stack__page-bg {
     display: block;
@@ -2279,11 +2284,6 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    directly (an actual sampled colour, not a variable/class -- endless
    possible photos, not a fixed palette) via inline style, so it's the one
    thing intentionally left off this transition-eligible list below. */
-/* The same circle pattern as every page-hero now runs behind the footer
-   too (site-wide, including the homepage and category/project pages that
-   still have real photos elsewhere) -- position:relative + overflow so
-   its own .site-pattern-bg (position:absolute;inset:0) is contained to
-   just the footer's own height, not the whole page. */
 footer { border-top: 1px solid var(--color-line); padding: 30px 0; transition: border-color 0.4s ease; }
 .footer__inner {
   display: flex;
@@ -2301,12 +2301,15 @@ footer { border-top: 1px solid var(--color-line); padding: 30px 0; transition: b
 /* Category/project pages keep the plain footer above -- only the 6
    utility pages that already show the pattern as their own hero
    background (Impressum/Datenschutz/Service/Contact/About/News) also
-   carry it through into the footer, via this modifier. */
+   carry it through into the footer, via this modifier. The pattern
+   itself is one single mount shared with the hero/stack section above
+   (see .page-pattern-wrap/.stack--pattern-dark), sitting behind both as
+   one continuous element -- this footer has to stay transparent (no
+   background of its own) so that shared mount shows through underneath
+   it instead of being painted over right at the footer's own edge. */
 footer.footer--pattern {
   position: relative;
-  overflow: hidden;
   border-top: none;
-  background: #fff;
 }
 footer.footer--pattern .footer__inner {
   position: relative;
@@ -2352,25 +2355,6 @@ footer.footer--pattern .footer__inner > span:first-child {
 footer.footer--tinted { border-top-color: transparent; }
 footer.footer--tinted-dark .footer__inner { color: rgba(250,248,245,0.75); }
 footer.footer--tinted-dark .footer__social a:hover { color: #fff; }
-
-/* ---------- Title hover glow (About/Awards/Service/Contact titles) ----------
-   Replaces an earlier per-letter bounce+colour-flash (asked for something
-   dezenter -- "completely different", not a variation on the same idea):
-   no movement and no colour change of the glyphs themselves now, just a
-   soft blue glow fading in behind the whole title as one calm block. Pure
-   CSS -- the old version's per-character DOM splitting (one span per
-   letter, purely to animate them individually) is gone with it, so this
-   also stops fragmenting each title's text for screen readers. */
-.hover-letters {
-  transition: text-shadow 0.45s ease;
-  text-shadow: 0 0 0 rgba(159, 216, 255, 0);
-}
-.hover-letters:hover {
-  text-shadow: 0 0 22px rgba(159, 216, 255, 0.55), 0 0 5px rgba(159, 216, 255, 0.35);
-}
-@media (prefers-reduced-motion: reduce) {
-  .hover-letters { transition: none; }
-}
 
 /* ---------- Lightbox (project photo zoom) ---------- */
 
@@ -2691,6 +2675,20 @@ body.lightbox-open { overflow: hidden; }
    (computed per the poster's own aspect ratio), so this can just be
    inset:0 without the circles themselves warping into ovals the way a
    naive percentage-of-this-arbitrary-height would. */
+/* Shared ancestor for the hero/stack section(s) *and* the footer below
+   them, on the pages that show this pattern -- one single mount
+   (.site-pattern-bg, placed directly inside this wrapper) spans the
+   wrapper's whole auto height (hero + footer stacked in normal flow) and
+   sits behind both, instead of each section/the footer mounting its own,
+   separately-animated copy. Per an explicit request after the previous
+   per-section approach (synced timing between separate mounts) still
+   read as "another background scrolling separately": there is now
+   genuinely only ever one pattern element per page, so nothing can ever
+   visibly fall out of sync with anything else. .page-hero and footer are
+   already position:relative in their own right (see their own rules), so
+   they paint above this absolutely-positioned sibling by DOM order alone
+   -- no z-index needed. */
+.page-pattern-wrap { position: relative; }
 .site-pattern-bg {
   position: absolute;
   inset: 0;
@@ -2703,14 +2701,6 @@ body.lightbox-open { overflow: hidden; }
      cursor is relative to a dot. */
   pointer-events: none;
 }
-/* .page-hero__bg itself defaults to opacity:0 + a blur, only cleared once
-   main.js's attachPhotoReveal() sees an <img data-photo> inside it finish
-   loading (the blur-in reveal every real hero photo gets) -- there's no
-   img here at all, nothing would ever trigger that reveal, so it would
-   otherwise stay invisible forever. The pattern is drawn by CSS, not a
-   photo loading over the network, so there's nothing to blur in from --
-   it should just always be there. */
-.page-hero--pattern .page-hero__bg { opacity: 1; filter: none; }
 .site-pattern-bg .dot { position: absolute; color: #0a0a0c; }
 .site-pattern-bg .dot.is-accent { color: #4ca1e0; }
 .site-pattern-bg .dot svg { width: 100%; height: 100%; display: block; }
@@ -2789,7 +2779,6 @@ body.lightbox-open { overflow: hidden; }
    sitting over a light dot were unreadable). Needs the same *opaque*
    treatment as .page-hero--pattern's card, just dark-toned to match this
    section's white text instead of overriding it to dark. */
-.page-hero--pattern-dark .page-hero__bg { opacity: 1; filter: none; }
 .page-hero--pattern-dark .hero-glass-card {
   position: relative;
   z-index: 1;
@@ -2816,8 +2805,14 @@ body.lightbox-open { overflow: hidden; }
    .stack__card div (title + body, added in the markup) gets the card
    styling instead, .stack__content stays a plain, unstyled layout
    wrapper exactly as it already was. */
-.stack--pattern-dark .stack__bg,
-.stack--pattern-dark .stack__page-bg { opacity: 1; filter: none; }
+/* .stack__panel's own base background (var(--color-bg-alt), an opaque
+   grey) would otherwise paint right over the one shared pattern mount
+   that now sits behind every panel of this .stack (see the new .stack >
+   .site-pattern-bg mount and its js/main.js sizing, replacing the old
+   one-mount-per-panel setup) -- transparent here so that single
+   background actually shows through both panels instead of being
+   covered up at each one's own edge. */
+.stack--pattern-dark .stack__panel { background: transparent; }
 /* .stack__content also gets its own "liquid glass" tint on mobile only
    (further up this file) -- that's the card treatment for a *real photo*
    underneath, and with .stack__card now doing that job instead, having
