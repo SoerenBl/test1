@@ -2622,10 +2622,11 @@ body.lightbox-open { overflow: hidden; }
    Rücksprung. linear statt ease-in-out: eine Easing-Funktion bremst am
    Zyklusende ab und beschleunigt am Zyklusanfang neu -- bei einer endlosen
    Schleife wiederholt sich das an jedem Übergang als Ruckler, obwohl die
-   Position selbst nahtlos ist. Welche der 4 Original-Spalten auf welche der
-   4 Positionen läuft, wird von js/main.js beim Seitenaufruf als zufällige
-   Permutation bestimmt (nicht 4x unabhängig gewürfelt) -- so taucht der
-   blaue Akzent-Punkt garantiert irgendwo auf, nie ganz. */
+   Position selbst nahtlos ist. Jede der 4 Spalten zeigt wieder genau ihre
+   eigene echte Original-Spalte an ihrer echten Position (keine zufällige
+   Zuordnung mehr) -- der blaue Akzent-Punkt sitzt damit fest in der
+   rechten Spalte, nie in der linken (dort steht das Logo, ein
+   durchlaufender blauer Punkt dahinter machte es unlesbar). */
 /* Spans the whole (very tall, text-heavy) section, not just one screen --
    js/main.js tiles each column's content in actual pixels to match
    (computed per the poster's own aspect ratio), so this can just be
@@ -2744,13 +2745,17 @@ body.lightbox-open { overflow: hidden; }
    panel's photo is replaced by the pattern via .stack--pattern-dark. */
 .stack--pattern-dark .stack__bg,
 .stack--pattern-dark .stack__page-bg { opacity: 1; filter: none; }
+/* No extra margin here, unlike a first attempt -- .stack__content is
+   already itself .wrap (the site's shared gutter), the same box
+   .hero-glass-card's *parent* .wrap provides for Service/Contact. Adding
+   margin on top of that shrank and shifted this card relative to those,
+   which is what read as "different size, not lined up". */
 .stack--pattern-dark .stack__content {
   background: rgba(14,13,17,0.84);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   border-radius: 20px;
   box-shadow: 0 10px 34px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-  margin: clamp(16px, 4vw, 32px) clamp(8px, 2vw, 16px);
   padding-bottom: clamp(28px, 6vw, 48px);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
