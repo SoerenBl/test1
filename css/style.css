@@ -924,6 +924,11 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
   object-fit: cover;
   display: block;
 }
+/* Anchored to the top of the source photo, not the centred default --
+   centring crops evenly off both top and bottom on a photo much taller
+   than this box, which can push a subject's head (near the top of the
+   source) out of frame. */
+.hero-tile > img { object-position: top; }
 
 /* Homepage category tiles: hover reveals one colour per category */
 #categories .tile:nth-of-type(1) { --tile-hover: var(--cat-1); }
@@ -2269,20 +2274,55 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    directly (an actual sampled colour, not a variable/class -- endless
    possible photos, not a fixed palette) via inline style, so it's the one
    thing intentionally left off this transition-eligible list below. */
-footer { border-top: 1px solid var(--color-line); padding: 30px 0; transition: border-color 0.4s ease; }
+/* The same circle pattern as every page-hero now runs behind the footer
+   too (site-wide, including the homepage and category/project pages that
+   still have real photos elsewhere) -- position:relative + overflow so
+   its own .site-pattern-bg (position:absolute;inset:0) is contained to
+   just the footer's own height, not the whole page. */
+footer {
+  position: relative;
+  overflow: hidden;
+  border-top: none;
+  padding: 30px 0;
+  background: #fff;
+}
 .footer__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   font-size: 0.85rem;
-  color: var(--color-text-muted);
-  transition: color 0.4s ease;
+  color: var(--color-text);
 }
-.footer__social { display: flex; gap: 18px; }
-.footer__social a { transition: color 0.2s ease; }
-.footer__social a:hover { color: var(--color-panel-hover); }
+.footer__social { display: flex; gap: 10px; flex-wrap: wrap; }
+/* Same floating pill look as .menu-btn -- a solid chip so the link stays
+   legible regardless of which part of the moving pattern sits behind it,
+   rather than plain text with no backdrop of its own. */
+.footer__social a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: #17161a;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+  transition: opacity 0.2s ease;
+}
+.footer__social a:hover { opacity: 0.7; }
+/* Same floating-chip treatment for the copyright line -- plain text here
+   would randomly land on a dark circle or a light gap depending on where
+   the pattern happens to be, legible on one, not the other. */
+.footer__inner > span:first-child {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+}
 /* Whatever colour the last bit of this page's own background photo
    happens to end on (sampled from its very bottom edge), continued
    straight through as the footer's own background instead of the page

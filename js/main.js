@@ -2570,7 +2570,15 @@ function main() {
         var track = document.createElement('div');
         track.className = 'col-track ' + (slot % 2 === 0 ? 'dir-up' : 'dir-down');
         track.style.height = (laps * 2 * unitPx) + 'px';
-        track.style.setProperty('--tdur', ((MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)) * durMultiplier).toFixed(1) + 's');
+        var dur = (MIN_DUR_S + Math.random() * (MAX_DUR_S - MIN_DUR_S)) * durMultiplier;
+        track.style.setProperty('--tdur', dur.toFixed(1) + 's');
+        // A negative delay starts the animation partway through its own
+        // loop instead of at frame zero -- without it, repeated desktop
+        // blocks showing the *same* source column (srcIdx cycles 0-3 per
+        // block) all began the identical animation at the identical
+        // moment on page load, reading as an obvious copy running in
+        // lockstep rather than an independent column.
+        track.style.animationDelay = '-' + (Math.random() * dur).toFixed(1) + 's';
         var content = narrow ? thinForNarrow(COLUMN_CONTENT[srcIdx]) : COLUMN_CONTENT[srcIdx];
         for (var copy = 0; copy < laps * 2; copy++) {
           (function (copy) {
