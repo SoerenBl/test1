@@ -66,10 +66,10 @@
   /* Tracks the nav's own actual rendered height (26px padding top/bottom
      + its tallest child) -- everything below that reserves clearance
      under the nav, or centres text against it on the photo-hero pages,
-     reads off this one value. Logo height doubled to 68px, so the nav
-     itself is now taller than the 36px menu button and this grew with
-     it: 26+26+68=120. */
-  --nav-h: 120px;
+     reads off this one value. Logo shrunk back down to 44px (68px read
+     as oversized next to the menu/language controls, and threw off the
+     docked-title size match on project/category pages): 26+26+44=96. */
+  --nav-h: 96px;
   /* Shared mobile title offset for Service/About/Awards/Contact/
      Impressum/Datenschutz -- "as close under the status bar as About's
      already was" was the ask, but About's own old value (a flat
@@ -290,8 +290,13 @@ body.is-menu-open .nav__mark {
    was in flight. A static src has nothing to swap and nothing to flash. */
 .nav__mark-logo {
   display: block;
-  height: 68px;
+  height: 44px;
   width: auto;
+}
+/* Shrinks further on mobile -- at the desktop size it read as oversized
+   next to the menu/language controls there too. */
+@media (max-width: 760px), (max-height: 600px) and (orientation: landscape) {
+  .nav__mark-logo { height: 32px; }
 }
 
 /* ---------- Project/category page hero title ----------
@@ -2279,29 +2284,43 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
    still have real photos elsewhere) -- position:relative + overflow so
    its own .site-pattern-bg (position:absolute;inset:0) is contained to
    just the footer's own height, not the whole page. */
-footer {
-  position: relative;
-  overflow: hidden;
-  border-top: none;
-  padding: 30px 0;
-  background: #fff;
-}
+footer { border-top: 1px solid var(--color-line); padding: 30px 0; transition: border-color 0.4s ease; }
 .footer__inner {
-  position: relative;
-  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   font-size: 0.85rem;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+  transition: color 0.4s ease;
 }
-.footer__social { display: flex; gap: 10px; flex-wrap: wrap; }
+.footer__social { display: flex; gap: 18px; }
+.footer__social a { transition: color 0.2s ease; }
+.footer__social a:hover { color: var(--color-panel-hover); }
+/* Category/project pages keep the plain footer above -- only the 6
+   utility pages that already show the pattern as their own hero
+   background (Impressum/Datenschutz/Service/Contact/About/News) also
+   carry it through into the footer, via this modifier. */
+footer.footer--pattern {
+  position: relative;
+  overflow: hidden;
+  border-top: none;
+  background: #fff;
+}
+footer.footer--pattern .footer__inner {
+  position: relative;
+  z-index: 1;
+  color: var(--color-text);
+  transition: none;
+}
+footer.footer--pattern .footer__social { gap: 10px; flex-wrap: wrap; }
 /* Same floating pill look as .menu-btn -- a solid chip so the link stays
    legible regardless of which part of the moving pattern sits behind it,
-   rather than plain text with no backdrop of its own. */
-.footer__social a {
+   rather than plain text with no backdrop of its own. Pointer events on
+   the pattern itself are disabled (see .site-pattern-bg below) so hover
+   reaches these immediately instead of sometimes hitting a dot div first. */
+footer.footer--pattern .footer__social a {
   display: inline-flex;
   align-items: center;
   padding: 8px 16px;
@@ -2312,11 +2331,11 @@ footer {
   box-shadow: 0 2px 10px rgba(0,0,0,0.14);
   transition: opacity 0.2s ease;
 }
-.footer__social a:hover { opacity: 0.7; }
+footer.footer--pattern .footer__social a:hover { opacity: 0.7; color: #17161a; }
 /* Same floating-chip treatment for the copyright line -- plain text here
    would randomly land on a dark circle or a light gap depending on where
    the pattern happens to be, legible on one, not the other. */
-.footer__inner > span:first-child {
+footer.footer--pattern .footer__inner > span:first-child {
   display: inline-block;
   padding: 8px 16px;
   border-radius: 999px;
@@ -2677,6 +2696,12 @@ body.lightbox-open { overflow: hidden; }
   inset: 0;
   overflow: hidden;
   background: #fff;
+  /* Purely decorative -- without this, the stack of absolutely positioned
+     .dot divs can win hit-testing over whatever sits behind/around them
+     (the footer's pill buttons in particular), making hover/click feel
+     like it's landing late or not at all depending on exactly where the
+     cursor is relative to a dot. */
+  pointer-events: none;
 }
 /* .page-hero__bg itself defaults to opacity:0 + a blur, only cleared once
    main.js's attachPhotoReveal() sees an <img data-photo> inside it finish
