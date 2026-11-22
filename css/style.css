@@ -1613,7 +1613,13 @@ section { padding: clamp(50px, 9vh, 100px) 0; }
        the panel's edges without getting cut off. */
     overflow: visible;
     display: block;
-    padding: 0 16px;
+    /* The old photo this inset by 16px for is gone -- .stack__content.wrap
+       (further down) already provides that exact same 16px edge gutter on
+       its own, same as .page-hero .wrap does for Service/Contact's
+       .hero-glass-card. Left in at 16px here too, this was stacking a
+       second 16px on top of that one (confirmed: .stack__card sat 32px
+       from the screen edge, double every other page's 16px), the "wider
+       here, narrower there" the glass cards were never meant to have. */
     margin: 0 0 28px;
     scroll-snap-align: none;
     scroll-snap-stop: normal;
@@ -2895,6 +2901,11 @@ body.lightbox-open { overflow: hidden; }
 .stack--pattern-dark .stack__content::before { content: none; }
 .stack--pattern-dark .stack__card {
   position: relative;
+  /* .hero-glass-card (Service/Contact) already clips this way -- missing
+     here, an 18px blur right at a rounded corner showed as a soft grey
+     smudge bleeding past the curve (confirmed: removing just this fixed
+     it, box-shadow and background were both already fine on their own). */
+  overflow: hidden;
   background: rgba(14,13,17,0.84);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
