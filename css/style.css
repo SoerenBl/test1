@@ -2737,29 +2737,45 @@ body.lightbox-open { overflow: hidden; }
   .page-hero--pattern-dark .hero-glass-card { background: #121117; }
 }
 
-/* Same idea again for About/Awards/News (.stack): .stack__content is
-   already both the text wrapper *and* (on mobile only, see its own
-   further down) a tinted glass card over its panel's real photo -- here
-   it becomes an always-opaque dark card directly (no extra wrapper div
-   needed, unlike Service/Contact's separate .hero-glass-card) once that
-   panel's photo is replaced by the pattern via .stack--pattern-dark. */
+/* Same idea again for About/Awards/News (.stack). First attempt put the
+   card background directly on .stack__content -- but .stack__content is
+   also the element carrying this panel's own nav-clearance padding-top,
+   so its box starts at the very top of the panel (confirmed via
+   getBoundingClientRect: top:0, under the nav) with the title sitting
+   some way down *inside* it. A background there paints that entire gap
+   too, instead of a tidy card starting at the title the way Service's
+   separate .hero-glass-card div does. Same fix: a separate inner
+   .stack__card div (title + body, added in the markup) gets the card
+   styling instead, .stack__content stays a plain, unstyled layout
+   wrapper exactly as it already was. */
 .stack--pattern-dark .stack__bg,
 .stack--pattern-dark .stack__page-bg { opacity: 1; filter: none; }
-/* No extra margin here, unlike a first attempt -- .stack__content is
-   already itself .wrap (the site's shared gutter), the same box
-   .hero-glass-card's *parent* .wrap provides for Service/Contact. Adding
-   margin on top of that shrank and shifted this card relative to those,
-   which is what read as "different size, not lined up". */
+/* .stack__content also gets its own "liquid glass" tint on mobile only
+   (further up this file) -- that's the card treatment for a *real photo*
+   underneath, and with .stack__card now doing that job instead, having
+   both nested would double up padding/blur/shadow into a card-within-a-
+   card. Neutralised here (higher specificity wins regardless of source
+   order), .stack__content's own padding is left alone -- still needed for
+   nav clearance. */
 .stack--pattern-dark .stack__content {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+}
+.stack--pattern-dark .stack__content::before { content: none; }
+.stack--pattern-dark .stack__card {
+  position: relative;
   background: rgba(14,13,17,0.84);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   border-radius: 20px;
   box-shadow: 0 10px 34px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-  padding-bottom: clamp(28px, 6vw, 48px);
+  padding: clamp(28px, 5vw, 48px) clamp(20px, 5.5vw, 44px);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .stack--pattern-dark .stack__content { background: #121117; }
+  .stack--pattern-dark .stack__card { background: #121117; }
 }
 
 /* ---------- i18n ---------- */
