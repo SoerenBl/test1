@@ -199,7 +199,7 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
 
 <header class="nav">
   <div class="nav__inner">
-    <a href="../../../index.html" class="nav__mark"><img class="nav__mark-logo" src="../../../logo.png" alt="Sören Bläcker"></a>
+    <a href="../../../index.html" class="nav__mark"><img class="nav__mark-logo" src="../../../logo.svg" alt="Sören Bläcker"></a>
     <div class="nav__right">
       <div class="lang-toggle">
         <span class="lang-toggle__thumb" aria-hidden="true">
@@ -230,6 +230,7 @@ function renderProjectHtml(data, categoryLabelDe, categoryLabelEn, assetVersion)
     <a href="../../../index.html#categories"><span data-lang="de">Arbeiten</span><span data-lang="en">Work</span></a>
     <a href="../../../services/"><span data-lang="de">Service</span><span data-lang="en">Services</span></a>
     <a href="../../../about.html"><span data-lang="de">Über mich</span><span data-lang="en">About Me</span></a>
+    <a href="../../../news/">News</a>
     <a href="../../../contact.html"><span data-lang="de">Kontakt</span><span data-lang="en">Contact</span></a>
   </nav>
   <div class="menu-panel__foot">

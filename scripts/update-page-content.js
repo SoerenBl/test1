@@ -244,10 +244,12 @@ function updateAbout(html, data) {
   // The About panel's title is content.txt-driven (unlike Awards' own
   // title just below, still fixed), so unlike every other field here it
   // can't be anchored on its own *previous* fixed literal text -- anchored
-  // on its photo path instead (data-photo="about/about", never itself
-  // edited), which stays a valid anchor no matter what the title says.
+  // on the fixed wrapper markup around it instead (the pattern-background
+  // mount that used to carry a data-photo img here is gone; this panel's
+  // own .stack__content/.stack__card nesting is what's never itself
+  // edited now), which stays a valid anchor no matter what the title says.
   html = patchBilingual(html,
-    '<img data-photo="about/about" alt="\0">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '<div class="stack__content wrap">\n      <div class="stack__card">\n      <h1 class="stack__title hover-letters">',
     '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
     data.de.Titel, data.en.Titel, 'Titel (About)');
 
@@ -312,7 +314,7 @@ const NEWS_LIST_KEYS = ['Eintraege'];
 // pulsing arrow chevrons appended. No link just renders a plain row.
 function updateNews(html, data) {
   html = patchBilingual(html,
-    '<img data-photo="\0" alt="\0">\n      <div class="stack__scrim"></div>\n    </div>\n    <div class="stack__content wrap">\n      <h1 class="stack__title hover-letters">',
+    '<div class="stack__content wrap">\n      <div class="stack__card">\n      <h1 class="stack__title hover-letters">',
     '</h1>\n      <div class="about-grid stack__body">\n        <div>\n          <p>\n            ',
     data.de.Titel, data.en.Titel, 'Titel (News)');
 
